@@ -44,6 +44,8 @@ MainWindow::~MainWindow()
 {
     delete ui;
     delete ScaTool::qlistwidget;
+    delete ScaTool::synchrodialog;
+
 }
 
 MainWindow * MainWindow::getInstance()
@@ -69,11 +71,15 @@ void MainWindow::on_open_pressed()
 
         Curve *curve = new Curve(idx);
         curve->fn = fn;
-        ScaTool::curves->append(curve);
+        // check if curves already inserted
+        if (ScaTool::getCurveByName(fn) == 0)
+        {
+            ScaTool::curves->append(curve);
 
-        QListWidgetItem *item = new QListWidgetItem(curve->fn);
-        ScaTool::qlistwidget->addItem(item);
-        ScaTool::synchrodialog->addRefItem(curve->fn);
+            QListWidgetItem *item = new QListWidgetItem(curve->fn);
+            ScaTool::qlistwidget->addItem(item);
+            ScaTool::synchrodialog->addRefItem(curve->fn);
+        }
     }
 
     ScaTool::show_file_window();
