@@ -37,7 +37,7 @@ int Synchro::min_dist_curve()
     for (int s = leftwindow; s < rightwindow; s++)
     {
         dist = 0;
-        for (int p = leftpattern ; p < rightpattern; p ++)
+        for (int p = leftpattern ; p < rightpattern; p += precision)
         {
             dist += qAbs(cur_ref->series->at(p).y() - curve->series->at(p+s).y());
         }

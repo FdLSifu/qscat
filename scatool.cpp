@@ -65,7 +65,7 @@ Curve * ScaTool::getCurveByName(QString name)
     return 0;
 }
 
-void ScaTool::sync_sod(QList<Curve *> * lcurves, Curve *ref_curve, int lwin, int rwin, int lpattern, int rpattern)
+void ScaTool::sync_sod(QList<Curve *> * lcurves, Curve *ref_curve, int lwin, int rwin, int lpattern, int rpattern, int precision)
 {
     int idx_ref = lcurves->indexOf(ref_curve);
 
@@ -83,6 +83,7 @@ void ScaTool::sync_sod(QList<Curve *> * lcurves, Curve *ref_curve, int lwin, int
             sync->rightwindow = rwin;
             sync->leftpattern = lpattern;
             sync->rightpattern = rpattern;
+            sync->precision = precision;
             //QObject::connect(c,SIGNAL(Synchro::finish()),MainWindow::getInstance(),SLOT(MainWindow::updateStatusBar()));
             //QObject::connect(sync,&Synchro::finish,c,&Curve::curve_clicked);
             QThreadPool::globalInstance()->start(sync);
