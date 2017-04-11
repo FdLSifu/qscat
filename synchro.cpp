@@ -25,21 +25,21 @@ Synchro::~Synchro()
 
 void Synchro::run()
 {
-    min_dist_curve(this->curve,this->cur_ref,this->leftwindow,this->rightwindow,this->leftpattern,this->rightpattern);
+    min_dist_curve();
 }
 
-int Synchro::min_dist_curve(Curve *c, Curve *ref_curve, int lwin, int rwin, int lpattern, int rpattern)
+int Synchro::min_dist_curve()
 {
     qreal dist = 0;
     qreal distmin = std::numeric_limits<qreal>::max();
     int offset;
 
-    for (int s = lwin; s < rwin; s++)
+    for (int s = leftwindow; s < rightwindow; s++)
     {
         dist = 0;
-        for (int p = lpattern ; p < rpattern; p ++)
+        for (int p = leftpattern ; p < rightpattern; p ++)
         {
-            dist += qAbs(ref_curve->series->at(p).y() - c->series->at(p+s).y());
+            dist += qAbs(cur_ref->series->at(p).y() - curve->series->at(p+s).y());
         }
         distmin = std::min(dist,distmin);
         if (distmin == dist)
@@ -48,7 +48,7 @@ int Synchro::min_dist_curve(Curve *c, Curve *ref_curve, int lwin, int rwin, int 
         }
     }
     emit this->finish();
-    c->shift(offset);
+    curve->shift(offset);
     return distmin;
 
 }

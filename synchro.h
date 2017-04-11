@@ -23,7 +23,8 @@ public:
     Synchro(int idx);
     ~Synchro();
     void run();
-    int min_dist_curve(Curve *c, Curve *ref_curve, int lwin, int rwin, int lpattern, int rpattern);
+    //int min_dist_curve(Curve *c, Curve *ref_curve, int lwin, int rwin, int lpattern, int rpattern);
+    int min_dist_curve();
 
 signals:
     void finish();
