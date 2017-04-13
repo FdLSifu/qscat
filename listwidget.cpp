@@ -2,7 +2,7 @@
 #include "scatool.h"
 #include <QtCharts/QLineSeries>
 #include <QAreaSeries>
-ListWidget::ListWidget()
+ListWidget::ListWidget(QWidget *parent) : QListWidget(parent)
 {
     connect(this, &ListWidget::itemDoubleClicked,this,&ListWidget::toogle_item);
     firstDisplayed = true;

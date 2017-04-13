@@ -12,6 +12,7 @@
 QColor ScaTool::Colors[7]  = {Qt::red,Qt::blue, Qt::green, Qt::black, Qt::darkRed, Qt::darkBlue, Qt::darkGreen};
 
 QList<Curve*> * ScaTool::curves = 0;
+QDockWidget *ScaTool::dockcurves = 0;
 ListWidget *ScaTool::qlistwidget = 0;
 SynchroDialog *ScaTool::synchrodialog = 0;
 ChartView *ScaTool::main_plot = 0;
@@ -84,8 +85,7 @@ void ScaTool::sync_sod(QList<Curve *> * lcurves, Curve *ref_curve, int lwin, int
             sync->leftpattern = lpattern;
             sync->rightpattern = rpattern;
             sync->precision = precision;
-            //QObject::connect(c,SIGNAL(Synchro::finish()),MainWindow::getInstance(),SLOT(MainWindow::updateStatusBar()));
-            //QObject::connect(sync,&Synchro::finish,c,&Curve::curve_clicked);
+
             QThreadPool::globalInstance()->start(sync);
         }
     }

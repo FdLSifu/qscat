@@ -12,6 +12,15 @@ Curve::Curve(int id) :
     this->series = 0;
 }
 
+Curve::~Curve()
+{
+    if (this->series != 0)
+    {
+        this->series->clear();
+        delete this->series;
+    }
+}
+
 QColor Curve::getColor()
 {
     if (this->series)

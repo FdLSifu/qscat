@@ -10,7 +10,7 @@ class ListWidget : public QListWidget
 {
 public:
     bool firstDisplayed;
-    ListWidget();
+    ListWidget(QWidget *parent);
     QListWidgetItem * getItemByName(QString name);
     QStringList * getListName();
 public slots:

@@ -34,11 +34,16 @@ private slots:
 
     void on_synchro_pressed();
 
+    void on_refresh_pressed();
+
 public slots:
     void updateStatusBar();
 
 private:
     Ui::MainWindow *ui;
+protected:
+    void closeEvent(QCloseEvent *event);
+
 };
 
 #endif // MAINWINDOW_H

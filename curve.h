@@ -16,7 +16,7 @@ public:
     int xoffset = 0;
     int yoffset = 0;
     int xsync = 0;
-
+    ~Curve();
     Curve(int id);
     QtCharts::QLineSeries* getSeries();
     void shift(int offset);

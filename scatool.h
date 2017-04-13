@@ -8,6 +8,7 @@
 #include <QColor>
 #include <QStatusBar>
 #include <QThreadPool>
+#include <QDockWidget>
 #include "curve.h"
 #include "listwidget.h"
 #include "chartview.h"
@@ -20,6 +21,7 @@ public:
     static QList<Curve*> *curves;
     static ChartView *main_plot;
     static QtCharts::QChartView *down_plot;
+    static QDockWidget *dockcurves;
     static ListWidget *qlistwidget;
     static SynchroDialog *synchrodialog;
     static QStatusBar * statusbar;

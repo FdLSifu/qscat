@@ -10,6 +10,8 @@
 #include <QLabel>
 #include <QValueAxis>
 #include <QAreaSeries>
+#include <QApplication>
+#include <QDockWidget>
 
 MainWindow * MainWindow::instance = 0;
 
@@ -19,14 +21,18 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
     ui->setupUi(this);
+    this->showMaximized();
     ui->downplot->hide();
 
-    instance = this;
-    ScaTool::curves = new QList<Curve*>();
-    ScaTool::qlistwidget = new ListWidget();
-    ScaTool::qlistwidget->setWindowTitle("Working files");
+    MainWindow::instance = this;
 
-    ScaTool::synchrodialog = new SynchroDialog();
+    ScaTool::curves = new QList<Curve*>();
+    ScaTool::dockcurves = new QDockWidget(tr("Working curves"),this);
+    ScaTool::qlistwidget = new ListWidget(ScaTool::dockcurves);
+    ScaTool::dockcurves->setWidget(ScaTool::qlistwidget);
+    addDockWidget(Qt::RightDockWidgetArea, ScaTool::dockcurves);
+
+    ScaTool::synchrodialog = new SynchroDialog(this);
     ScaTool::main_plot = ui->mainplot;
     ScaTool::statusbar = ui->statusbar;
 
@@ -139,16 +145,16 @@ void MainWindow::on_rright_pressed()
 
 void MainWindow::on_settings_pressed()
 {
-    if (ScaTool::qlistwidget->isHidden())
+    if (ScaTool::dockcurves->isHidden())
     {
-        ScaTool::qlistwidget->show();
-        ScaTool::qlistwidget->activateWindow();
-        ScaTool::qlistwidget->raise();
+        ScaTool::dockcurves->show();
+        ScaTool::dockcurves->activateWindow();
+        ScaTool::dockcurves->raise();
 
 
     }
     else
-        ScaTool::qlistwidget->hide();
+        ScaTool::dockcurves->hide();
 }
 
 void MainWindow::on_synchro_pressed()
@@ -160,4 +166,23 @@ void MainWindow::updateStatusBar()
 {
 
     ScaTool::statusbar->showMessage(QString::number(QThreadPool::globalInstance()->activeThreadCount()));
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    return on_refresh_pressed();
+    QApplication::closeAllWindows();
+    QApplication::quit();
+}
+
+void MainWindow::on_refresh_pressed()
+{
+
+    qDeleteAll(ScaTool::synchrodialog->synchropasses->begin(),ScaTool::synchrodialog->synchropasses->end());
+    ScaTool::qlistwidget->clear();
+    if (ScaTool::curves->length() > 0)
+    {
+        qDeleteAll(ScaTool::curves->begin(),ScaTool::curves->end());
+        ScaTool::curves->clear();
+    }
 }

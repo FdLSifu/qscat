@@ -1,25 +1,15 @@
 #include "synchro.h"
 #include "mainwindow.h"
 
-/*Synchro::Synchro(QObject *parent)
-{
-    //QObject(parent);
-    //Synchro(0);
-}*/
 
-Synchro::Synchro(int num)
+Synchro::Synchro(int num):
+      QObject()
 {
     this->numpass = num;
     this->method = SYNCHRO_METHOD_SOD;
     this->precision = 1;
-
-    //QObject::connect(this,&Synchro::finish,MainWindow::getInstance(),&MainWindow::updateStatusBar);
+    QObject::connect(this,&Synchro::finish,ScaTool::synchrodialog,&SynchroDialog::update_progressdialog);
     //connect(this,SIGNAL(finish()), MainWindow::getInstance(),SLOT(updateStatusBar()));
-
-}
-
-Synchro::~Synchro()
-{
 
 }
 
@@ -47,13 +37,12 @@ int Synchro::min_dist_curve()
             offset = -s;
         }
     }
+
     emit this->finish();
     curve->shift(offset);
     return distmin;
-
 }
 
-void Synchro::finish()
+void finish()
 {
-
 }

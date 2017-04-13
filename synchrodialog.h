@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QRubberBand>
+#include <QProgressBar>
 #include "synchro.h"
 
 namespace Ui {
@@ -17,7 +18,8 @@ public:
     QRubberBand *rubpattern;
     QRubberBand *rubsearch;
     QList<Synchro *> *synchropasses;
-    explicit SynchroDialog(QWidget *parent = 0);
+    static QProgressBar* qprogressbar;
+    explicit SynchroDialog(QWidget *parent);
     void addRefItem(QString name);
     ~SynchroDialog();
 
@@ -27,7 +29,12 @@ public slots:
     void on_runpreview_pressed();
     
     void on_runsynchro_pressed();
+
+    void update_progressdialog();
     
+private slots:
+    void on_addstep_pressed();
+
 private:
     Ui::SynchroDialog *ui;
 };
