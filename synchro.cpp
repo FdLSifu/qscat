@@ -24,6 +24,7 @@ int Synchro::min_dist_curve()
     qreal distmin = std::numeric_limits<qreal>::max();
     int offset;
 
+    curve->getSeries();
     for (int s = leftwindow; s < rightwindow; s++)
     {
         dist = 0;
@@ -39,7 +40,7 @@ int Synchro::min_dist_curve()
     }
 
     emit this->finish();
-    curve->shift(offset);
+    curve->shift(offset-curve->xoffset);
     return distmin;
 }
 

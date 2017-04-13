@@ -73,7 +73,6 @@ void ScaTool::sync_sod(QList<Curve *> * lcurves, Curve *ref_curve, int lwin, int
     for(int i = 0; i < lcurves->length(); i++)
     {
         Curve *c = lcurves->at(i);
-        c->shift(-c->xoffset);
 
         if (idx_ref != i)
         {

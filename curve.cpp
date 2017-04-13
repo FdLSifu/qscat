@@ -59,7 +59,7 @@ QtCharts::QLineSeries* Curve::getSeries()
         fclose(file);
 
         QtCharts::QLineSeries* series = new QtCharts::QLineSeries();
-/*        int width = ScaTool::main_plot->chart()->windowFrameRect().width();
+        /*int width = ScaTool::main_plot->chart()->windowFrameRect().width();
         printf("width %d\n",width);
         float dmin = data[0];
         float dmax = data[0];
