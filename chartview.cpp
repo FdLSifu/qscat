@@ -35,9 +35,10 @@ bool ChartView::viewportEvent(QEvent *event)
 
         // Turn off animations when handling gestures they
         // will only slow us down.
-        chart()->setAnimationOptions(QChart::NoAnimation);
+        //chart()->setAnimationOptions(QChart::NoAnimation);
     }
-    return QChartView::viewportEvent(event);
+
+    return QGraphicsView::viewportEvent(event);
 }
 
 void ChartView::mousePressEvent(QMouseEvent *event)
@@ -77,6 +78,7 @@ void ChartView::keyPressEvent(QKeyEvent *event)
         chart()->zoomOut();
         break;
 //![1]
+
     case Qt::Key_Left:
         chart()->scroll(-10, 0);
         break;
@@ -90,7 +92,7 @@ void ChartView::keyPressEvent(QKeyEvent *event)
         chart()->scroll(0, -10);
         break;
     default:
-        QGraphicsView::keyPressEvent(event);
+        QChartView::keyPressEvent(event);
         break;
     }
 }

@@ -39,7 +39,6 @@ bool Chart::gestureEvent(QGestureEvent *event)
         if (pinch->changeFlags() & QPinchGesture::ScaleFactorChanged)
             QChart::zoom(pinch->scaleFactor());
     }
-
     return true;
 }
 //![1]

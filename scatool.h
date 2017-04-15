@@ -1,8 +1,9 @@
 #ifndef SCATOOL_H
 #define SCATOOL_H
 
+#include "chart.h"
+#include "chartview.h"
 #include <QListWidgetItem>
-#include <QtCharts/QChart>
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QColor>

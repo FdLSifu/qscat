@@ -80,13 +80,6 @@ QtCharts::QLineSeries* Curve::getFullSeries()
 
         free(data);
 
-        // Customize fullseries
-        fullseries->setUseOpenGL(true);
-        fullseries->setPointsVisible();
-
-        // handler
-        QObject::connect(fullseries,&QLineSeries::clicked,this,&Curve::curve_clicked);
-        QObject::connect(fullseries,&QLineSeries::hovered,this,&Curve::curve_clicked);
         this->fullseries = fullseries;
         return fullseries;
     }
@@ -102,34 +95,38 @@ void Curve::updateDisplaySeries(int width, float zoomfactor, int xmin, int xmax)
     int nbpoints = ftell(file)>>2;
     std::fseek(file,0,0);
 
-    float *data;
-    // allocate data memory
-    data = (float *)malloc(nbpoints<<2);
-    // read data
-    std::fread(data,sizeof(float),nbpoints,file);
-    fclose(file);
-
-
     int factor = (nbpoints/width)/zoomfactor;
-    if (factor < 1)
+    // factor less than 3 no need to downsample
+    if (factor < 3)
         factor = 1;
 
-    this->displayseries->hide();
     this->displayseries->clear();
 
     int absmin = std::max(0,xmin-10);
     int absmax = std::min(nbpoints,xmax+10);
+    int abswidth = absmax-absmin;
+    float *data;
+    // allocate data memory
+    data = (float *)malloc(abswidth*sizeof(float));
+    // read data
+    std::fseek(file,absmin*sizeof(float),SEEK_SET);
+    std::fread(data,sizeof(float),abswidth,file);
+    fclose(file);
 
-    float dmin = data[absmin];
-    float dmax = data[absmin];
-    for (int i = absmin; i < absmax; i ++)
+
+    QList<QPointF> points_list;
+
+    float dmin = data[0];
+    float dmax = data[0];
+    for (int i = 0; i < abswidth; i ++)
     {
         if (factor > 1)
         {
             if (i%factor == 0)
             {
-                this->displayseries->append(i,dmin);
-                this->displayseries->append(i,dmax);
+                points_list.append(QPointF(absmin+i,dmin));
+                points_list.append(QPointF(absmin+i,dmax));
+
                 dmin = std::numeric_limits<float>::max();
                 dmax = std::numeric_limits<float>::min();
                 continue;
@@ -139,11 +136,11 @@ void Curve::updateDisplaySeries(int width, float zoomfactor, int xmin, int xmax)
         }
         else
         {
-            this->displayseries->append(i,data[i]);
+            points_list.append(QPointF(absmin+i,data[i]));
         }
 
     }
-    this->displayseries->show();
+    this->displayseries->replace(points_list);
 
     free(data);
 }
@@ -159,7 +156,7 @@ QtCharts::QLineSeries* Curve::getDisplaySeries()
 
         // Customize displayseries
         this->displayseries->setUseOpenGL(true);
-        this->displayseries->setPointsVisible();
+        //this->displayseries->setPointsVisible();
 
         // handler
         QObject::connect(this->displayseries,&QLineSeries::clicked,this,&Curve::curve_clicked);

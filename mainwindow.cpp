@@ -36,10 +36,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ScaTool::main_plot = ui->mainplot;
     ScaTool::statusbar = ui->statusbar;
 
-    QtCharts::QChart *chart = new QtCharts::QChart();
+    Chart *chart = new Chart();
     chart->legend()->hide();
     chart->setMargins(QMargins(0,0,0,0));
-    chart->createDefaultAxes();
     chart->setAcceptHoverEvents(true);
 
     ui->mainplot->setChart(chart);
