@@ -28,7 +28,7 @@ void ScaTool::show_file_window()
 
         QListWidgetItem *item = qlistwidget->getItemByName(curve->fn);
         if (curve->displayed)
-            item->setTextColor(curve->series->color());
+            item->setTextColor(curve->displayseries->color());
         else
             item->setTextColor(Qt::gray);
     }
@@ -58,6 +58,21 @@ Curve * ScaTool::getCurveByName(QString name)
         Curve *curve = *it;
 
         if (curve->fn == name)
+        {
+            return curve;
+
+        }
+    }
+    return 0;
+}
+Curve* ScaTool::getCurveFromDisplaySerie(QLineSeries * serie)
+{
+    for (QList<Curve*>::iterator it = ScaTool::curves->begin();
+         it != ScaTool::curves->end(); ++it) {
+
+        Curve *curve = *it;
+
+        if (curve->displayseries == serie)
         {
             return curve;
 

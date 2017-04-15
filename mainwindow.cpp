@@ -170,7 +170,8 @@ void MainWindow::updateStatusBar()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    return on_refresh_pressed();
+    event->accept();
+    on_refresh_pressed();
     QApplication::closeAllWindows();
     QApplication::quit();
 }

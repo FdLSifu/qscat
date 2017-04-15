@@ -1,7 +1,10 @@
 #include "listwidget.h"
 #include "scatool.h"
+#include "chart.h"
 #include <QtCharts/QLineSeries>
 #include <QAreaSeries>
+#include <QValueAxis>
+
 ListWidget::ListWidget(QWidget *parent) : QListWidget(parent)
 {
     connect(this, &ListWidget::itemDoubleClicked,this,&ListWidget::toogle_item);
@@ -18,22 +21,24 @@ void ListWidget::toogle_item(QListWidgetItem * item)
         // remove from chart
         item->setTextColor(Qt::gray);
         curve->displayed = false;
-        curve->getSeries()->hide();
+        curve->getDisplaySeries()->hide();
     }
     else
     {
         curve->displayed = true;
         // Check if series is already present
-        if (ScaTool::main_plot->chart()->series().indexOf(curve->getSeries()) >= 0)
-            curve->getSeries()->show();
+        if (ScaTool::main_plot->chart()->series().indexOf(curve->getDisplaySeries()) >= 0)
+            curve->getDisplaySeries()->show();
         else
         {
-            QtCharts::QLineSeries * curseries = curve->getSeries();
+            QtCharts::QLineSeries * curseries = curve->getDisplaySeries();
             if (firstDisplayed)
             {
 
                 ScaTool::main_plot->chart()->addSeries(curseries);
                 ScaTool::main_plot->chart()->createDefaultAxes();
+                ScaTool::main_plot->chart()->orig_width = curve->length();
+                connect(static_cast<QValueAxis *>(ScaTool::main_plot->chart()->axisX()), &QValueAxis::rangeChanged,ScaTool::main_plot->chart(), &Chart::on_rangeChanged);
                 firstDisplayed = false;
             }
             else

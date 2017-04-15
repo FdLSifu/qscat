@@ -1,5 +1,7 @@
 #include "chartview.h"
+#include "scatool.h"
 #include <QtGui/QMouseEvent>
+#include <QDebug>
 
 ChartView::ChartView(QChart *chart, QWidget *parent) :
     QChartView(chart, parent),
@@ -15,6 +17,11 @@ ChartView::ChartView(QWidget *parent) :
     setMouseTracking(true);
     setInteractive(true);
     setRubberBand(QChartView::HorizontalRubberBand);
+}
+
+Chart *ChartView::chart()
+{
+    return static_cast<Chart *>(QChartView::chart());
 }
 
 bool ChartView::viewportEvent(QEvent *event)

@@ -1,6 +1,7 @@
 #ifndef CHARTVIEW_H
 #define CHARTVIEW_H
 
+#include "chart.h"
 #include <QtCharts/QChartView>
 #include <QtWidgets/QRubberBand>
 
@@ -13,7 +14,7 @@ class ChartView : public QChartView
 public:
     ChartView(QChart *chart, QWidget *parent = 0);
     ChartView(QWidget *parent = 0);
-
+    Chart *chart();
 //![2]
 protected:
     bool viewportEvent(QEvent *event);

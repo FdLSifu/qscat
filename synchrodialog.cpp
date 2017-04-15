@@ -31,12 +31,6 @@ SynchroDialog::~SynchroDialog()
     delete ui;
 }
 
-void SynchroDialog::on_leftpattern_valueChanged(int arg1)
-{
-    // Get pass by ui->stepcombo->itemText()
-    //QPointF pt = ScaTool::main_plot->chart()->mapToValue();
-}
-
 void SynchroDialog::on_runpreview_pressed()
 {
     QList<Curve *> *curve_displayed = new QList<Curve *>();

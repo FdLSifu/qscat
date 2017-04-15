@@ -24,13 +24,13 @@ int Synchro::min_dist_curve()
     qreal distmin = std::numeric_limits<qreal>::max();
     int offset;
 
-    curve->getSeries();
+    curve->getFullSeries();
     for (int s = leftwindow; s < rightwindow; s++)
     {
         dist = 0;
         for (int p = leftpattern ; p < rightpattern; p += precision)
         {
-            dist += qAbs(cur_ref->series->at(p).y() - curve->series->at(p+s).y());
+            dist += qAbs(cur_ref->fullseries->at(p).y() - curve->fullseries->at(p+s).y());
         }
         distmin = std::min(dist,distmin);
         if (distmin == dist)

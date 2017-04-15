@@ -24,8 +24,6 @@ public:
     ~SynchroDialog();
 
 public slots:
-    void on_leftpattern_valueChanged(int arg1);
-
     void on_runpreview_pressed();
     
     void on_runsynchro_pressed();

@@ -28,6 +28,7 @@ public:
     static void show_file_window();
     static void sync_sod(QList<Curve *> * lcurves, Curve *ref_curve, int lwin, int rwin, int lpattern, int rpattern, int precision);
     static Curve* getSelectedCurve();
+    static Curve* getCurveFromDisplaySerie(QLineSeries * serie);
     static Curve * getCurveByName(QString name);
 };
 
