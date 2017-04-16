@@ -14,8 +14,9 @@ class Chart : public QChart
 //![1]
 {
 public:
-    int orig_width = 0;
-    explicit Chart(QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
+    int xaxis_width = 0;
+    //explicit Chart(QGraphicsItem *parent = 0, Qt::WindowFlags wFlags = 0);
+    Chart();
     ~Chart();
 
 protected:

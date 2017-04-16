@@ -11,15 +11,19 @@ class Synchro : public QObject, public QRunnable
 {
    Q_OBJECT
 public:
-    int numpass;
-    int method;
+    // Fields
     Curve * curve;
     Curve * cur_ref;
+    int numpass;
+    int method;
     int leftpattern,rightpattern;
     int leftwindow,rightwindow;
     int precision;
+
+    // Constructor
     Synchro(int num);
-    //int min_dist_curve(Curve *c, Curve *ref_curve, int lwin, int rwin, int lpattern, int rpattern);
+
+    // Function
     int min_dist_curve();
 private:
     void run();

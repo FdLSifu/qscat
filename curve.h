@@ -9,7 +9,10 @@
 class Curve : public QObject
 {
 public:
+
+    // Fields
     QString fn;
+    QString cname;
     bool displayed;
     QtCharts::QLineSeries* fullseries;
     QtCharts::QLineSeries* displayseries;
@@ -17,17 +20,28 @@ public:
     int idx;
     int xoffset = 0;
     int yoffset = 0;
-    int xsync = 0;
-    ~Curve();
+
+    // Constructor
     Curve(int id);
-    int length();
-    void resetFullSeries();
-    void resetDisplaySeries();
+
+    // Destructor
+    ~Curve();
+
+    // Function
     QtCharts::QLineSeries* getFullSeries();
     QtCharts::QLineSeries* getDisplaySeries();
+
+    QList<QPointF> downsample_minmax(float *data,int factor, int absmin, int absmax);
+
+    QColor getColor();
+
+    int length();
+
+    void resetFullSeries();
+    void resetDisplaySeries();
     void updateDisplaySeries(int width, float zoomfactor, int xmin, int xmax);
     void shift(int offset);
-    QColor getColor();
+
 public slots:
     void curve_clicked(QPointF pt);
 

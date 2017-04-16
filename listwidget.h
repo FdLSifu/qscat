@@ -15,6 +15,9 @@ public:
     QStringList * getListName();
 public slots:
     void toogle_item(QListWidgetItem *);
+
+protected:
+    void contextMenuEvent(QContextMenuEvent *event);
 };
 
 #endif // LISTWIDGET_H

@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QChart>
+#include <QFile>
 #include <QFileDialog>
 #include <QString>
 #include <QLabel>
@@ -37,10 +38,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ScaTool::statusbar = ui->statusbar;
 
     Chart *chart = new Chart();
-    chart->legend()->hide();
-    chart->setMargins(QMargins(0,0,0,0));
-    chart->setAcceptHoverEvents(true);
-
     ui->mainplot->setChart(chart);
     ui->mainplot->setRenderHint(QPainter::Antialiasing);
 }
@@ -76,14 +73,19 @@ void MainWindow::on_open_pressed()
 
         Curve *curve = new Curve(idx);
         curve->fn = fn;
+
+        QFileInfo fileInfo(fn);
+        QString cname(fileInfo.fileName());
+        curve->cname = cname;
+
         // check if curves already inserted
-        if (ScaTool::getCurveByName(fn) == 0)
+        if (ScaTool::getCurveByName(cname) == 0)
         {
             ScaTool::curves->append(curve);
 
-            QListWidgetItem *item = new QListWidgetItem(curve->fn);
+            QListWidgetItem *item = new QListWidgetItem(curve->cname);
             ScaTool::qlistwidget->addItem(item);
-            ScaTool::synchrodialog->addRefItem(curve->fn);
+            ScaTool::synchrodialog->addRefItem(curve->cname);
         }
     }
 

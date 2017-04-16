@@ -4,6 +4,7 @@
 #include <QtCharts/QLineSeries>
 #include <QAreaSeries>
 #include <QValueAxis>
+#include <QMenu>
 
 ListWidget::ListWidget(QWidget *parent) : QListWidget(parent)
 {
@@ -13,8 +14,8 @@ ListWidget::ListWidget(QWidget *parent) : QListWidget(parent)
 
 void ListWidget::toogle_item(QListWidgetItem * item)
 {
-    QString selected_fn = item->text();
-    Curve * curve = ScaTool::getCurveByName(selected_fn);
+    QString selected_cname = item->text();
+    Curve * curve = ScaTool::getCurveByName(selected_cname);
 
     if (curve->displayed)
     {
@@ -37,7 +38,7 @@ void ListWidget::toogle_item(QListWidgetItem * item)
 
                 ScaTool::main_plot->chart()->addSeries(curseries);
                 ScaTool::main_plot->chart()->createDefaultAxes();
-                ScaTool::main_plot->chart()->orig_width = curve->length();
+                ScaTool::main_plot->chart()->xaxis_width = curve->length();
                 connect(static_cast<QValueAxis *>(ScaTool::main_plot->chart()->axisX()), &QValueAxis::rangeChanged,ScaTool::main_plot->chart(), &Chart::on_rangeChanged);
                 firstDisplayed = false;
             }
@@ -77,3 +78,12 @@ QStringList * ListWidget::getListName()
     return strlist;
 }
 
+void ListWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+    QMenu menu(this);
+    menu.addAction("test");
+    menu.actions().at(0)->setCheckable(true);
+    menu.addAction("test2");
+    menu.addAction("test3");
+    menu.exec(event->globalPos());
+}

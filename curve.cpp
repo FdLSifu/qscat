@@ -7,6 +7,7 @@ Curve::Curve(int id) :
     QObject()
 {
     this->fn = "";
+    this->cname = "";
     this->displayed = false;
     this->idx = id;
     this->fullseries = 0;
@@ -36,12 +37,14 @@ QColor Curve::getColor()
 
 void Curve::resetFullSeries()
 {
+    this->fullseries->clear();
     delete this->fullseries;
     this->fullseries = 0;
 }
 
 void Curve::resetDisplaySeries()
 {
+    this->displayseries->clear();
     delete this->displayseries;
     this->displayseries = 0;
 }
@@ -95,13 +98,6 @@ void Curve::updateDisplaySeries(int width, float zoomfactor, int xmin, int xmax)
     int nbpoints = ftell(file)>>2;
     std::fseek(file,0,0);
 
-    int factor = (nbpoints/width)/zoomfactor;
-    // factor less than 3 no need to downsample
-    if (factor < 3)
-        factor = 1;
-
-    this->displayseries->clear();
-
     int absmin = std::max(0,xmin-10);
     int absmax = std::min(nbpoints,xmax+10);
     int abswidth = absmax-absmin;
@@ -113,17 +109,34 @@ void Curve::updateDisplaySeries(int width, float zoomfactor, int xmin, int xmax)
     std::fread(data,sizeof(float),abswidth,file);
     fclose(file);
 
+    int factor = (nbpoints/width)/zoomfactor;
+    // factor less than 3 no need to downsample
+    if (factor < 3)
+        factor = 1;
 
+    this->displayseries->clear();
+
+    QList<QPointF> points_list = downsample_minmax(data,factor,absmin,absmax);
+
+    this->displayseries->replace(points_list);
+
+    free(data);
+}
+
+QList<QPointF> Curve::downsample_minmax(float *data,int factor, int absmin, int absmax)
+{
     QList<QPointF> points_list;
-
-    float dmin = data[0];
-    float dmax = data[0];
+    int abswidth = absmax-absmin;
+    float dmin = std::numeric_limits<float>::max();
+    float dmax = std::numeric_limits<float>::min();
     for (int i = 0; i < abswidth; i ++)
     {
         if (factor > 1)
         {
             if (i%factor == 0)
             {
+                dmin = std::min(data[i],dmin);
+                dmax = std::max(data[i],dmax);
                 points_list.append(QPointF(absmin+i,dmin));
                 points_list.append(QPointF(absmin+i,dmax));
 
@@ -140,11 +153,8 @@ void Curve::updateDisplaySeries(int width, float zoomfactor, int xmin, int xmax)
         }
 
     }
-    this->displayseries->replace(points_list);
-
-    free(data);
+    return points_list;
 }
-
 QtCharts::QLineSeries* Curve::getDisplaySeries()
 {
     if (!this->displayseries)

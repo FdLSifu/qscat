@@ -26,7 +26,7 @@ void ScaTool::show_file_window()
          it != ScaTool::curves->end(); ++it) {
         Curve *curve = *it;
 
-        QListWidgetItem *item = qlistwidget->getItemByName(curve->fn);
+        QListWidgetItem *item = qlistwidget->getItemByName(curve->cname);
         if (curve->displayed)
             item->setTextColor(curve->displayseries->color());
         else
@@ -57,7 +57,7 @@ Curve * ScaTool::getCurveByName(QString name)
 
         Curve *curve = *it;
 
-        if (curve->fn == name)
+        if (curve->cname == name)
         {
             return curve;
 

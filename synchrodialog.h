@@ -15,13 +15,19 @@ class SynchroDialog : public QDialog
     Q_OBJECT
 
 public:
+    // Fields
+    static QProgressBar* qprogressbar;
+
     QRubberBand *rubpattern;
     QRubberBand *rubsearch;
     QList<Synchro *> *synchropasses;
-    static QProgressBar* qprogressbar;
+
+    // Constructor
     explicit SynchroDialog(QWidget *parent);
-    void addRefItem(QString name);
     ~SynchroDialog();
+
+    // Functions
+    void addRefItem(QString name);
 
 public slots:
     void on_runpreview_pressed();

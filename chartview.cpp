@@ -62,12 +62,11 @@ void ChartView::mouseReleaseEvent(QMouseEvent *event)
 
     // Because we disabled animations when touch event was detected
     // we must put them back on.
-    //chart()->setAnimationOptions(QChart::SeriesAnimations);
 
     QChartView::mouseReleaseEvent(event);
 }
 
-//![1]
+
 void ChartView::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()) {
@@ -77,8 +76,6 @@ void ChartView::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Minus:
         chart()->zoomOut();
         break;
-//![1]
-
     case Qt::Key_Left:
         chart()->scroll(-10, 0);
         break;

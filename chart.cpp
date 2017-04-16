@@ -4,13 +4,19 @@
 #include <QtWidgets/QGraphicsScene>
 #include <QtWidgets/QGraphicsView>
 #include <QtCharts/QAbstractAxis>
-Chart::Chart(QGraphicsItem *parent, Qt::WindowFlags wFlags)
-    : QChart(QChart::ChartTypeCartesian, parent, wFlags)
+Chart::Chart()
+  : QChart(QChart::ChartTypeCartesian, 0, 0)
 {
     // Seems that QGraphicsView (QChartView) does not grab gestures.
     // They can only be grabbed here in the QGraphicsWidget (QChart).
+
+
+
     grabGesture(Qt::PanGesture);
     grabGesture(Qt::PinchGesture);
+    legend()->hide();
+    setMargins(QMargins(0,0,0,0));
+    setAcceptHoverEvents(true);
 
 }
 
@@ -19,7 +25,7 @@ Chart::~Chart()
 
 }
 
-//![1]
+
 bool Chart::sceneEvent(QEvent *event)
 {
     if (event->type() == QEvent::Gesture)
@@ -41,16 +47,16 @@ bool Chart::gestureEvent(QGestureEvent *event)
     }
     return true;
 }
-//![1]
+
 void Chart::on_rangeChanged(qreal xmin,qreal xmax)
 {
-    float factor = orig_width/(xmax - xmin);
+    float factor = xaxis_width/(xmax - xmin);
 
     for (int i = 0; i < ScaTool::curves->length(); i++)
     {
         Curve *c = ScaTool::curves->at(i);
         if (c->displayed)
-            c->updateDisplaySeries(ScaTool::main_plot->chart()->windowFrameRect().width(),factor,xmin,xmax);
+            c->updateDisplaySeries(this->windowFrameRect().width(),factor,xmin,xmax);
     }
 }
 
