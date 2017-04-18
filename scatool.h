@@ -11,9 +11,9 @@
 #include <QThreadPool>
 #include <QDockWidget>
 #include "curve.h"
-#include "listwidget.h"
 #include "chartview.h"
 #include "synchrodialog.h"
+#include "curvelistwidget.h"
 
 class ScaTool
 {
@@ -23,12 +23,11 @@ public:
     static ChartView *main_plot;
     static QtCharts::QChartView *down_plot;
     static QDockWidget *dockcurves;
-    static ListWidget *qlistwidget;
+    static CurveListWidget *curve_table;
     static SynchroDialog *synchrodialog;
     static QStatusBar * statusbar;
-    static void show_file_window();
+
     static void sync_sod(QList<Curve *> * lcurves, Curve *ref_curve, int lwin, int rwin, int lpattern, int rpattern, int precision);
-    static Curve* getSelectedCurve();
     static Curve* getCurveFromDisplaySerie(QLineSeries * serie);
     static Curve * getCurveByName(QString name);
 };

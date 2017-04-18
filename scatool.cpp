@@ -6,48 +6,17 @@
 #include <algorithm>
 #include <QThread>
 #include "mainwindow.h"
-#include "listwidget.h"
 #include "synchro.h"
 
 QColor ScaTool::Colors[7]  = {Qt::red,Qt::blue, Qt::green, Qt::black, Qt::darkRed, Qt::darkBlue, Qt::darkGreen};
 
 QList<Curve*> * ScaTool::curves = 0;
 QDockWidget *ScaTool::dockcurves = 0;
-ListWidget *ScaTool::qlistwidget = 0;
+CurveListWidget *ScaTool::curve_table = 0;
 SynchroDialog *ScaTool::synchrodialog = 0;
 ChartView *ScaTool::main_plot = 0;
 QtCharts::QChartView *ScaTool::down_plot = 0;
 QStatusBar * ScaTool::statusbar = 0;
-
-void ScaTool::show_file_window()
-{
-
-    for (QList<Curve*>::iterator it = ScaTool::curves->begin();
-         it != ScaTool::curves->end(); ++it) {
-        Curve *curve = *it;
-
-        QListWidgetItem *item = qlistwidget->getItemByName(curve->cname);
-        if (curve->displayed)
-            item->setTextColor(curve->displayseries->color());
-        else
-            item->setTextColor(Qt::gray);
-    }
-
-    if (!ScaTool::qlistwidget->isVisible())
-        ScaTool::qlistwidget->show();
-}
-
-Curve * ScaTool::getSelectedCurve()
-{
-
-    QList<QListWidgetItem *> itemlist = ScaTool::qlistwidget->selectedItems();
-
-    if ((!ScaTool::qlistwidget->isVisible()) or (itemlist.length() != 1))
-        return 0;
-    else
-        return getCurveByName(itemlist.first()->text());
-
-}
 
 Curve * ScaTool::getCurveByName(QString name)
 {

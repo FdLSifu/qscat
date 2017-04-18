@@ -9,9 +9,8 @@ QT_END_NAMESPACE
 
 QT_CHARTS_USE_NAMESPACE
 
-//![1]
+
 class Chart : public QChart
-//![1]
 {
 public:
     int xaxis_width = 0;

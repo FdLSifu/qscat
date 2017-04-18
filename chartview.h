@@ -16,6 +16,7 @@ public:
 
 protected:
     bool viewportEvent(QEvent *event);
+    void wheelEvent(QWheelEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);

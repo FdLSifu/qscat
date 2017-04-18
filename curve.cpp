@@ -12,6 +12,7 @@ Curve::Curve(int id) :
     this->idx = id;
     this->fullseries = 0;
     this->displayseries = 0;
+    this->color = QColor(Qt::white);
 }
 
 Curve::~Curve()
@@ -24,14 +25,15 @@ Curve::~Curve()
 
 QColor Curve::getColor()
 {
+    return this->color;
+}
+
+void Curve::setColor(QColor c)
+{
+    this->color = c;
     if (this->displayseries)
     {
-        return this->displayseries->color();
-    }
-    else
-    {
-        QColor *gray = new QColor(Qt::gray);
-        return *gray;
+        this->displayseries->setColor(c);
     }
 }
 
@@ -47,6 +49,41 @@ void Curve::resetDisplaySeries()
     this->displayseries->clear();
     delete this->displayseries;
     this->displayseries = 0;
+}
+
+QtCharts::QLineSeries* Curve::getSubSeries(int xmin, int xmax)
+{
+    // get size
+    FILE *file = fopen(fn.toLatin1().data(),"rb");
+    assert(file);
+
+    std::fseek(file,0,SEEK_END);
+    int nbpoints = ftell(file)>>2;
+    std::fseek(file,0,0);
+
+    int xwidth = xmax-xmin;
+    xmax = std::min(nbpoints,xmax);
+
+    assert(xwidth > 0);
+
+    float *data;
+    // allocate data memory
+    data = (float *)malloc(xwidth*sizeof(float));
+    // read data
+    std::fseek(file,xmin*sizeof(float),SEEK_SET);
+    std::fread(data,sizeof(float),xwidth,file);
+    fclose(file);
+
+    QtCharts::QLineSeries* subseries = new QtCharts::QLineSeries();
+
+    for (int i = 0; i < xwidth; i ++)
+    {
+        subseries->append(i+xmin,data[i]);
+    }
+
+    free(data);
+
+    return subseries;
 }
 
 QtCharts::QLineSeries* Curve::getFullSeries()
@@ -98,8 +135,8 @@ void Curve::updateDisplaySeries(int width, float zoomfactor, int xmin, int xmax)
     int nbpoints = ftell(file)>>2;
     std::fseek(file,0,0);
 
-    int absmin = std::max(0,xmin-10);
-    int absmax = std::min(nbpoints,xmax+10);
+    int absmin = std::max(0,xmin - 10);
+    int absmax = std::min(nbpoints,xmax + 10) ;
     int abswidth = absmax-absmin;
     float *data;
     // allocate data memory
@@ -123,13 +160,22 @@ void Curve::updateDisplaySeries(int width, float zoomfactor, int xmin, int xmax)
     free(data);
 }
 
+void Curve::updateDisplaySeries()
+{
+    int width = ScaTool::main_plot->chart()->windowFrameRect().width();
+
+    // This call will reload points without zoom
+    // zoomfactor = 1, xmin = 0, xmax = number of points
+    updateDisplaySeries(width,1,0,this->length());
+}
+
 QList<QPointF> Curve::downsample_minmax(float *data,int factor, int absmin, int absmax)
 {
     QList<QPointF> points_list;
     int abswidth = absmax-absmin;
     float dmin = std::numeric_limits<float>::max();
     float dmax = std::numeric_limits<float>::min();
-    for (int i = 0; i < abswidth; i ++)
+    for (int i = 0; i < abswidth ; i ++)
     {
         if (factor > 1)
         {
@@ -137,8 +183,8 @@ QList<QPointF> Curve::downsample_minmax(float *data,int factor, int absmin, int 
             {
                 dmin = std::min(data[i],dmin);
                 dmax = std::max(data[i],dmax);
-                points_list.append(QPointF(absmin+i,dmin));
-                points_list.append(QPointF(absmin+i,dmax));
+                points_list.append(QPointF(absmin+i+xoffset,dmin));
+                points_list.append(QPointF(absmin+i+xoffset,dmax));
 
                 dmin = std::numeric_limits<float>::max();
                 dmax = std::numeric_limits<float>::min();
@@ -149,7 +195,7 @@ QList<QPointF> Curve::downsample_minmax(float *data,int factor, int absmin, int 
         }
         else
         {
-            points_list.append(QPointF(absmin+i,data[i]));
+            points_list.append(QPointF(absmin+i+xoffset,data[i]));
         }
 
     }
@@ -157,22 +203,35 @@ QList<QPointF> Curve::downsample_minmax(float *data,int factor, int absmin, int 
 }
 QtCharts::QLineSeries* Curve::getDisplaySeries()
 {
+    // Create displayseries if not yet done
     if (!this->displayseries)
     {
         this->displayseries = new QtCharts::QLineSeries();
-        int width = ScaTool::main_plot->chart()->windowFrameRect().width();
 
-        updateDisplaySeries(width,1,0,this->length());
+
+        this->updateDisplaySeries();
 
         // Customize displayseries
         this->displayseries->setUseOpenGL(true);
-        //this->displayseries->setPointsVisible();
+        // Check if color has been customized
+        if (this->color != Qt::white)
+            // If curve has a custom color apply it
+            this->displayseries->setColor(this->color);
 
-        // handler
-        QObject::connect(this->displayseries,&QLineSeries::clicked,this,&Curve::curve_clicked);
+        // handler of displayed curve
+        QObject::connect(this->displayseries,&QLineSeries::pressed,this,&Curve::curve_clicked);
         QObject::connect(this->displayseries,&QLineSeries::hovered,this,&Curve::curve_clicked);
     }
     return this->displayseries;
+}
+
+bool Curve::isLoaded()
+{
+    // Check if curve is loaded
+    if (!this->displayseries)
+        return false;
+    else
+        return true;
 }
 
 int Curve::length()
@@ -197,16 +256,9 @@ void Curve::shift(int offset)
 {
     this->xoffset += offset;
 
-    QLineSeries * cseries = getFullSeries();
-
-    QList<QPointF> *ptlist = new QList<QPointF>;
-
-    for (int i = 0 ; i < cseries->count(); i ++)
+    if (this->displayed)
     {
-        QPointF pt = cseries->at(i);
-        pt.rx() += offset;
-        ptlist->append(pt);
+        updateDisplaySeries();
     }
-    cseries->replace(*ptlist);
 }
 

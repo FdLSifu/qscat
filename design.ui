@@ -75,13 +75,12 @@
      </widget>
     </item>
     <item row="0" column="9">
-     <widget class="QToolButton" name="settings">
+     <widget class="QToolButton" name="curves">
       <property name="text">
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset theme="emblem-system">
-        <normaloff>.</normaloff>.</iconset>
+       <iconset theme="x-office-spreadsheet"/>
       </property>
      </widget>
     </item>

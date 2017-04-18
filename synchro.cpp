@@ -9,8 +9,6 @@ Synchro::Synchro(int num):
     this->method = SYNCHRO_METHOD_SOD;
     this->precision = 1;
     QObject::connect(this,&Synchro::finish,ScaTool::synchrodialog,&SynchroDialog::update_progressdialog);
-    //connect(this,SIGNAL(finish()), MainWindow::getInstance(),SLOT(updateStatusBar()));
-
 }
 
 void Synchro::run()
@@ -24,14 +22,16 @@ int Synchro::min_dist_curve()
     qreal distmin = std::numeric_limits<qreal>::max();
     int offset;
 
-    curve->getFullSeries();
+    QLineSeries * ref_subseries = cur_ref->getSubSeries(leftpattern,rightpattern);
+    QLineSeries * work_subseries = curve->getSubSeries(leftpattern+leftwindow, rightpattern+rightwindow);
+
     for (int s = leftwindow; s < rightwindow; s++)
     {
         dist = 0;
+
         for (int p = leftpattern ; p < rightpattern; p += precision)
-        {
-            dist += qAbs(cur_ref->fullseries->at(p).y() - curve->fullseries->at(p+s).y());
-        }
+            dist += qAbs(ref_subseries->at(p-leftpattern).y() - work_subseries->at(p+s-leftpattern-leftwindow).y());
+
         distmin = std::min(dist,distmin);
         if (distmin == dist)
         {
@@ -39,8 +39,11 @@ int Synchro::min_dist_curve()
         }
     }
 
-    emit this->finish();
     curve->shift(offset-curve->xoffset);
+
+    delete ref_subseries;
+    delete work_subseries;
+    emit this->finish();
     return distmin;
 }
 

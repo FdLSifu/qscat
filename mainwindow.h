@@ -30,11 +30,11 @@ private slots:
 
     void on_rright_pressed();
 
-    void on_settings_pressed();
-
     void on_synchro_pressed();
 
     void on_refresh_pressed();
+
+    void on_curves_pressed();
 
 public slots:
     void updateStatusBar();

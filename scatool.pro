@@ -27,23 +27,21 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     scatool.cpp \
     curve.cpp \
-    listwidget.cpp \
     chartview.cpp \
     chart.cpp \
     synchrodialog.cpp \
-    curvedialog.cpp \
-    synchro.cpp
+    synchro.cpp \
+    curvelistwidget.cpp
 
 HEADERS  += mainwindow.h \
     scatool.h \
     curve.h \
-    listwidget.h \
     chartview.h \
     chart.h \
     synchrodialog.h \
-    curvedialog.h \
-    synchro.h
+    synchro.h \
+    curvelistwidget.h
 
 FORMS    += design.ui \
     synchrodialog.ui \
-    curvedialog.ui
+    curvelistwidget.ui

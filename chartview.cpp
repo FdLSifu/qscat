@@ -1,7 +1,7 @@
 #include "chartview.h"
 #include "scatool.h"
 #include <QtGui/QMouseEvent>
-#include <QDebug>
+#include <QValueAxis>
 
 ChartView::ChartView(QChart *chart, QWidget *parent) :
     QChartView(chart, parent),
@@ -46,6 +46,30 @@ void ChartView::mousePressEvent(QMouseEvent *event)
     if (m_isTouching)
         return;
     QChartView::mousePressEvent(event);
+}
+
+void ChartView::wheelEvent(QWheelEvent *event)
+{
+    if (chart()->axes().length() > 0)
+    {
+        qreal min = qobject_cast<QValueAxis *>(chart()->axisY())->min();
+        qreal max = qobject_cast<QValueAxis *>(chart()->axisY())->max();
+
+        qreal numdegree = event->delta()/8;
+        qreal numSteps = ((max-min)/50);
+
+        // Wheel forward
+        if (numdegree > 0)
+        {
+            chart()->axisY()->setRange(QVariant(min+numSteps),QVariant(max-numSteps));
+        }
+        // Wheel backward
+        else if (numdegree < 0)
+        {
+            chart()->axisY()->setRange(QVariant(min-numSteps),QVariant(max+numSteps));
+        }
+    }
+
 }
 
 void ChartView::mouseMoveEvent(QMouseEvent *event)

@@ -33,39 +33,24 @@ SynchroDialog::~SynchroDialog()
 
 void SynchroDialog::on_runpreview_pressed()
 {
-    QList<Curve *> *curve_displayed = new QList<Curve *>();
-
+    QList<Curve *> curve_displayed  = QList<Curve *>();
     for (int i = 0; i < ScaTool::curves->length(); i++)
     {
         if (ScaTool::curves->at(i)->displayed == true)
-            curve_displayed->append(ScaTool::curves->at(i));
+            curve_displayed.append(ScaTool::curves->at(i));
     }
 
     Curve *ref_curve = ScaTool::getCurveByName(ui->refcombo->currentText());
-    if (curve_displayed->indexOf(ref_curve) == -1)
+    if (curve_displayed.indexOf(ref_curve) == -1)
     {
         printf("Error reference curve not displayed\n");
         return;
     }
     else
     {
-        ScaTool::sync_sod(curve_displayed, ref_curve, ui->leftwindow->text().toInt(), ui->rightwindow->text().toInt(), ui->leftpattern->text().toInt(), ui->rightpattern->text().toInt(),ui->precision->text().toInt());
+        ScaTool::sync_sod(&curve_displayed, ref_curve, ui->leftwindow->text().toInt(), ui->rightwindow->text().toInt(), ui->leftpattern->text().toInt(), ui->rightpattern->text().toInt(),ui->precision->text().toInt());
     }
 
-}
-
-void SynchroDialog::update_progressdialog()
-{
-    if (SynchroDialog::qprogressbar)
-    {
-        SynchroDialog::qprogressbar->setValue(SynchroDialog::qprogressbar->value()+1);
-        if(SynchroDialog::qprogressbar->value() == (SynchroDialog::qprogressbar->maximum() - 1))
-        {
-            ScaTool::statusbar->removeWidget(SynchroDialog::qprogressbar);
-            delete SynchroDialog::qprogressbar;
-            SynchroDialog::qprogressbar = 0;
-        }
-    }
 }
 
 void SynchroDialog::on_runsynchro_pressed()
@@ -84,6 +69,21 @@ void SynchroDialog::on_runsynchro_pressed()
         ScaTool::statusbar->addPermanentWidget(SynchroDialog::qprogressbar);
         SynchroDialog::qprogressbar->show();
         ScaTool::sync_sod(ScaTool::curves, ScaTool::getCurveByName(ui->refcombo->currentText()), ui->leftwindow->text().toInt(), ui->rightwindow->text().toInt(), ui->leftpattern->text().toInt(), ui->rightpattern->text().toInt(),ui->precision->text().toInt());
+    }
+}
+
+
+void SynchroDialog::update_progressdialog()
+{
+    if (SynchroDialog::qprogressbar)
+    {
+        SynchroDialog::qprogressbar->setValue(SynchroDialog::qprogressbar->value()+1);
+        if(SynchroDialog::qprogressbar->value() == (SynchroDialog::qprogressbar->maximum() - 1))
+        {
+            ScaTool::statusbar->removeWidget(SynchroDialog::qprogressbar);
+            delete SynchroDialog::qprogressbar;
+            SynchroDialog::qprogressbar = 0;
+        }
     }
 }
 
