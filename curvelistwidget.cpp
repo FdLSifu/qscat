@@ -14,6 +14,7 @@ CurveListWidget::CurveListWidget(QWidget *parent) :
 
     this->list_checkbox = new QList<QCheckBox*>();
     this->list_colors = new QList<QPushButton*>();
+    this->list_cmbbox = new QList<QComboBox*>();
 }
 
 CurveListWidget::~CurveListWidget()
@@ -52,8 +53,16 @@ void CurveListWidget::addCurve(Curve *curve)
 
     //Type
     colidx++;
-    ui->table_curve->setItem(rowidx,colidx,new QTableWidgetItem(QString("float32")));
-    ui->table_curve->item(rowidx,colidx)->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
+    QComboBox *cmbbox = new QComboBox(this);
+    cmbbox->addItem("float32");
+    cmbbox->addItem("uint32");
+    cmbbox->addItem("int32");
+    cmbbox->addItem("uint16");
+    cmbbox->addItem("int16");
+    cmbbox->addItem("uint8");
+    cmbbox->addItem("int8");
+    this->list_cmbbox->append(cmbbox);
+    ui->table_curve->setCellWidget(rowidx,colidx,cmbbox);
 
     //Offset
     colidx++;
@@ -69,6 +78,7 @@ void CurveListWidget::addCurve(Curve *curve)
     // Handler
     connect(colorbtn,&QPushButton::pressed,this,&CurveListWidget::colorbtn_pressed);
     connect(chkbox,&QCheckBox::toggled,this,&CurveListWidget::chkbox_toggled);
+    connect(cmbbox,&QComboBox::currentTextChanged,this,&CurveListWidget::curve_type_changed);
 }
 
 Curve * CurveListWidget::getSelectedCurve()
@@ -85,6 +95,19 @@ Curve * CurveListWidget::getSelectedCurve()
     }
 }
 
+QList<Curve *> CurveListWidget::getSelectedCurves()
+{
+
+    QList<QTableWidgetItem *> itemlist = ui->table_curve->selectedItems();
+
+    QList<Curve*> clist = QList<Curve*>();
+    for (int i = 0 ; i < itemlist.length() ; i ++)
+    {
+        int rowidx = itemlist.at(i)->row();
+        clist.append(ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text()));
+    }
+    return clist;
+}
 
 void CurveListWidget::chkbox_toggled(bool state)
 {
@@ -169,4 +192,16 @@ void CurveListWidget::colorbtn_pressed()
         curve->getDisplaySeries()->setColor(curve->color);
     }
 
+}
+
+void CurveListWidget::curve_type_changed(QString type)
+{
+    int rowidx = this->list_cmbbox->indexOf((QComboBox*)sender());
+    Curve * curve = ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text());
+
+    if (curve == 0)
+            return;
+    curve->type = type;
+
+    curve->updateDisplaySeries();
 }

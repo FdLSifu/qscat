@@ -2,12 +2,15 @@
 #include "scatool.h"
 #include <assert.h>
 #include <QLineSeries>
+#include <QValueAxis>
+#include <QtGlobal>
 
 Curve::Curve(int id) :
     QObject()
 {
     this->fn = "";
     this->cname = "";
+    this->type = "float32";
     this->displayed = false;
     this->idx = id;
     this->fullseries = 0;
@@ -53,32 +56,22 @@ void Curve::resetDisplaySeries()
 
 QtCharts::QLineSeries* Curve::getSubSeries(int xmin, int xmax)
 {
-    // get size
-    FILE *file = fopen(fn.toLatin1().data(),"rb");
-    assert(file);
+    float *data = 0;
+    int nbpoints = 0;
 
-    std::fseek(file,0,SEEK_END);
-    int nbpoints = ftell(file)>>2;
-    std::fseek(file,0,0);
+    data = getrawdata(&nbpoints);
+    assert(data);
 
-    int xwidth = xmax-xmin;
+    xmin = std::max(0,xmin);
     xmax = std::min(nbpoints,xmax);
 
-    assert(xwidth > 0);
-
-    float *data;
-    // allocate data memory
-    data = (float *)malloc(xwidth*sizeof(float));
-    // read data
-    std::fseek(file,xmin*sizeof(float),SEEK_SET);
-    std::fread(data,sizeof(float),xwidth,file);
-    fclose(file);
+    assert(xmax > xmin);
 
     QtCharts::QLineSeries* subseries = new QtCharts::QLineSeries();
 
-    for (int i = 0; i < xwidth; i ++)
+    for (int i = xmin; i < xmax; i ++)
     {
-        subseries->append(i+xmin,data[i]);
+        subseries->append(i,data[i]);
     }
 
     free(data);
@@ -94,21 +87,12 @@ QtCharts::QLineSeries* Curve::getFullSeries()
     }
     else
     {
-        // get size
-        FILE *file = fopen(fn.toLatin1().data(),"rb");
-        assert(file);
+        float *data = 0;
+        int nbpoints = 0;
 
-        std::fseek(file,0,SEEK_END);
-        int nbpoints = ftell(file)>>2;
-        std::fseek(file,0,0);
+        data = getrawdata(&nbpoints);
 
-        float *data;
-        // allocate data memory
-        data = (float *)malloc(nbpoints<<2);
-        // read data
-        std::fread(data,sizeof(float),nbpoints,file);
-
-        fclose(file);
+        assert(data);
 
         QtCharts::QLineSeries* fullseries = new QtCharts::QLineSeries();
 
@@ -125,26 +109,17 @@ QtCharts::QLineSeries* Curve::getFullSeries()
     }
 }
 
-void Curve::updateDisplaySeries(int width, float zoomfactor, int xmin, int xmax)
+void Curve::updateDisplaySeries(int width, float zoomfactor)
 {
-    // get size
-    FILE *file = fopen(fn.toLatin1().data(),"rb");
-    assert(file);
+    float *data = 0;
+    int nbpoints = 0;
 
-    std::fseek(file,0,SEEK_END);
-    int nbpoints = ftell(file)>>2;
-    std::fseek(file,0,0);
+    if (this->displayseries == 0)
+        return;
 
-    int absmin = std::max(0,xmin - 10);
-    int absmax = std::min(nbpoints,xmax + 10) ;
-    int abswidth = absmax-absmin;
-    float *data;
-    // allocate data memory
-    data = (float *)malloc(abswidth*sizeof(float));
-    // read data
-    std::fseek(file,absmin*sizeof(float),SEEK_SET);
-    std::fread(data,sizeof(float),abswidth,file);
-    fclose(file);
+    data = getrawdata(&nbpoints);
+
+    assert(data);
 
     int factor = (nbpoints/width)/zoomfactor;
     // factor less than 3 no need to downsample
@@ -153,7 +128,7 @@ void Curve::updateDisplaySeries(int width, float zoomfactor, int xmin, int xmax)
 
     this->displayseries->clear();
 
-    QList<QPointF> points_list = downsample_minmax(data,factor,absmin,absmax);
+    QList<QPointF> points_list = downsample_minmax(data,factor,nbpoints);
 
     this->displayseries->replace(points_list);
 
@@ -162,20 +137,32 @@ void Curve::updateDisplaySeries(int width, float zoomfactor, int xmin, int xmax)
 
 void Curve::updateDisplaySeries()
 {
+    qreal xmin,xmax;
+
     int width = ScaTool::main_plot->chart()->windowFrameRect().width();
 
-    // This call will reload points without zoom
-    // zoomfactor = 1, xmin = 0, xmax = number of points
-    updateDisplaySeries(width,1,0,this->length());
+    if (ScaTool::main_plot->chart()->axes().length() > 0)
+    {
+        xmax = qobject_cast<QValueAxis *>(ScaTool::main_plot->chart()->axisX())->max();
+        xmin = qobject_cast<QValueAxis *>(ScaTool::main_plot->chart()->axisX())->min();
+    }
+    else
+    {
+        xmin = 0;
+        xmax = this->length();
+    }
+
+    float zoomfactor = ScaTool::main_plot->chart()->xaxis_width/(xmax-xmin);
+
+    updateDisplaySeries(width,zoomfactor);
 }
 
-QList<QPointF> Curve::downsample_minmax(float *data,int factor, int absmin, int absmax)
+QList<QPointF> Curve::downsample_minmax(float *data,int factor, int nbpoints)
 {
     QList<QPointF> points_list;
-    int abswidth = absmax-absmin;
     float dmin = std::numeric_limits<float>::max();
     float dmax = std::numeric_limits<float>::min();
-    for (int i = 0; i < abswidth ; i ++)
+    for (int i = 0; i < nbpoints ; i ++)
     {
         if (factor > 1)
         {
@@ -183,8 +170,8 @@ QList<QPointF> Curve::downsample_minmax(float *data,int factor, int absmin, int 
             {
                 dmin = std::min(data[i],dmin);
                 dmax = std::max(data[i],dmax);
-                points_list.append(QPointF(absmin+i+xoffset,dmin));
-                points_list.append(QPointF(absmin+i+xoffset,dmax));
+                points_list.append(QPointF(i+xoffset,dmin));
+                points_list.append(QPointF(i+xoffset,dmax));
 
                 dmin = std::numeric_limits<float>::max();
                 dmax = std::numeric_limits<float>::min();
@@ -195,7 +182,7 @@ QList<QPointF> Curve::downsample_minmax(float *data,int factor, int absmin, int 
         }
         else
         {
-            points_list.append(QPointF(absmin+i+xoffset,data[i]));
+            points_list.append(QPointF(i+xoffset,data[i]));
         }
 
     }
@@ -236,15 +223,40 @@ bool Curve::isLoaded()
 
 int Curve::length()
 {
+    int nbpoints;
     // get size
     FILE *file = fopen(fn.toLatin1().data(),"rb");
     assert(file);
 
     std::fseek(file,0,SEEK_END);
-    int nbpoints = ftell(file)>>2;
+
+    int shift = 2;
+
+    nbpoints = ftell(file)>>shift;
     fclose(file);
 
     return nbpoints;
+}
+
+// data must be freed by the caller
+float * Curve::getrawdata(int *length)
+{
+    float *data;
+    FILE *file = fopen(fn.toLatin1().data(),"rb");
+    assert(file);
+
+    std::fseek(file,0,SEEK_END);
+
+    *length  = ftell(file)>>2;
+    std::fseek(file,0,0);
+
+    // allocate data memory
+    data = (float *)malloc((*length)*sizeof(float));
+    // read full data // Can be optimize to read only display data
+    std::fread(data,sizeof(float),*length,file);
+    fclose(file);
+
+    return data;
 }
 
 void Curve::curve_clicked(QPointF pt)

@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QComboBox>
 
 namespace Ui {
 class CurveListWidget;
@@ -18,6 +19,7 @@ public:
     bool firstDisplayed;
     QList<QPushButton*> *list_colors;
     QList<QCheckBox*> *list_checkbox;
+    QList<QComboBox*> *list_cmbbox;
     explicit CurveListWidget(QWidget *parent = 0);
     ~CurveListWidget();
 
@@ -25,10 +27,12 @@ public:
     void    clear();
     void    addCurve(Curve *curve);
     Curve * getSelectedCurve();
+    QList<Curve *> getSelectedCurves();
 
 private slots:
     void chkbox_toggled(bool state);
     void colorbtn_pressed();
+    void curve_type_changed(QString type);
 
 private:
     Ui::CurveListWidget *ui;

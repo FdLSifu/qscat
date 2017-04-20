@@ -98,54 +98,42 @@ void MainWindow::on_open_pressed()
 
 void MainWindow::on_left_pressed()
 {
-    Curve * c = ScaTool::curve_table->getSelectedCurve();
+    QList<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
 
-    if (c == 0)
-        return;
-
-    c->shift(-1);
-
+    for (int i = 0; i < clist.length() ; i++)
+        clist.at(i)->shift(-1);
 }
 
 void MainWindow::on_lleft_pressed()
 {
-    Curve * c = ScaTool::curve_table->getSelectedCurve();
+    QList<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
 
-    if (c == 0)
-        return;
-
-    c->shift(-10);
-
+    for (int i = 0; i < clist.length() ; i++)
+        clist.at(i)->shift(-10);
 }
 
 void MainWindow::on_zero_pressed()
 {
-    Curve * c = ScaTool::curve_table->getSelectedCurve();
+    QList<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
 
-    if (c == 0)
-        return;
-
-    c->shift(-c->xoffset);
+    for (int i = 0; i < clist.length() ; i++)
+        clist.at(i)->shift(-clist.at(i)->xoffset);
 }
 
 void MainWindow::on_right_pressed()
 {
-    Curve * c = ScaTool::curve_table->getSelectedCurve();
+    QList<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
 
-    if (c == 0)
-        return;
-
-    c->shift(1);
+    for (int i = 0; i < clist.length() ; i++)
+        clist.at(i)->shift(1);
 }
 
 void MainWindow::on_rright_pressed()
 {
-    Curve * c = ScaTool::curve_table->getSelectedCurve();
+    QList<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
 
-    if (c == 0)
-        return;
-
-    c->shift(10);
+    for (int i = 0; i < clist.length() ; i++)
+        clist.at(i)->shift(10);
 }
 
 void MainWindow::on_synchro_pressed()

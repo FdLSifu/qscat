@@ -15,6 +15,7 @@ public:
     // Fields
     QString fn;
     QString cname;
+    QString type;
     QColor color;
     bool displayed;
     QtCharts::QLineSeries* fullseries;
@@ -34,7 +35,7 @@ public:
     QtCharts::QLineSeries*  getFullSeries();
     QtCharts::QLineSeries*  getDisplaySeries();
     QtCharts::QLineSeries*  getSubSeries(int xmin, int xmax);
-    QList<QPointF> downsample_minmax(float *data,int factor, int absmin, int absmax);
+    QList<QPointF> downsample_minmax(float *data, int factor, int nbpoints);
 
     QColor getColor();
 
@@ -46,10 +47,12 @@ public:
 
     void resetFullSeries();
     void resetDisplaySeries();
-    void updateDisplaySeries(int width, float zoomfactor, int xmin, int xmax);
+    void updateDisplaySeries(int width, float zoomfactor);
     void updateDisplaySeries();
     void shift(int offset);
 
+private:
+    float *getrawdata(int *length);
 public slots:
     void curve_clicked(QPointF pt);
 

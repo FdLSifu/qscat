@@ -50,13 +50,19 @@ bool Chart::gestureEvent(QGestureEvent *event)
 
 void Chart::on_rangeChanged(qreal xmin,qreal xmax)
 {
+
     float factor = xaxis_width/(xmax - xmin);
+    // On scroll no update
+    if (this->factor == factor)
+        return;
+
+    this->factor = factor;
 
     for (int i = 0; i < ScaTool::curves->length(); i++)
     {
         Curve *c = ScaTool::curves->at(i);
         if (c->displayed)
-            c->updateDisplaySeries(this->windowFrameRect().width(),factor,xmin,xmax);
+            c->updateDisplaySeries(this->windowFrameRect().width(),factor);
     }
 }
 
