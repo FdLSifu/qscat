@@ -10,12 +10,24 @@
 
 class Curve : public QObject
 {
+
+    enum CurveType
+    {
+        FLOAT32 =0,
+        UINT32  =1,
+        INT32   =2,
+        UINT16  =3,
+        INT16   =4,
+        UINT8   =5,
+        INT8    =6
+    };
+
 public:
 
     // Fields
     QString fn;
     QString cname;
-    QString type;
+    int type;
     QColor color;
     bool displayed;
     QtCharts::QLineSeries* fullseries;
@@ -53,6 +65,7 @@ public:
 
 private:
     float *getrawdata(int *length);
+
 public slots:
     void curve_clicked(QPointF pt);
 

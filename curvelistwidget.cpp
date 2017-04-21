@@ -78,7 +78,7 @@ void CurveListWidget::addCurve(Curve *curve)
     // Handler
     connect(colorbtn,&QPushButton::pressed,this,&CurveListWidget::colorbtn_pressed);
     connect(chkbox,&QCheckBox::toggled,this,&CurveListWidget::chkbox_toggled);
-    connect(cmbbox,&QComboBox::currentTextChanged,this,&CurveListWidget::curve_type_changed);
+    connect(cmbbox,SIGNAL(currentIndexChanged(int)),this,SLOT(curve_type_changed(int)));
 }
 
 Curve * CurveListWidget::getSelectedCurve()
@@ -194,7 +194,7 @@ void CurveListWidget::colorbtn_pressed()
 
 }
 
-void CurveListWidget::curve_type_changed(QString type)
+void CurveListWidget::curve_type_changed(int type)
 {
     int rowidx = this->list_cmbbox->indexOf((QComboBox*)sender());
     Curve * curve = ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text());

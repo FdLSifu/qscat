@@ -10,7 +10,7 @@ Curve::Curve(int id) :
 {
     this->fn = "";
     this->cname = "";
-    this->type = "float32";
+    this->type = Curve::CurveType(FLOAT32);
     this->displayed = false;
     this->idx = id;
     this->fullseries = 0;
@@ -241,19 +241,96 @@ int Curve::length()
 // data must be freed by the caller
 float * Curve::getrawdata(int *length)
 {
-    float *data;
+    float *data = 0;
+    uint32_t *bufferui32;
+    int32_t *bufferi32;
+    uint16_t *bufferui16;
+    int16_t *bufferi16;
+    uint8_t *bufferui8;
+    int8_t *bufferi8;
+
     FILE *file = fopen(fn.toLatin1().data(),"rb");
     assert(file);
 
     std::fseek(file,0,SEEK_END);
 
-    *length  = ftell(file)>>2;
-    std::fseek(file,0,0);
 
-    // allocate data memory
-    data = (float *)malloc((*length)*sizeof(float));
-    // read full data // Can be optimize to read only display data
-    std::fread(data,sizeof(float),*length,file);
+
+    switch (this->type)
+    {
+        case Curve::CurveType(FLOAT32):
+            *length  = ftell(file)>>2;
+            std::fseek(file,0,0);
+            // allocate data memory
+            data = (float *)malloc((*length)*sizeof(float));
+            // read full data // Can be optimize to read only display data
+            std::fread(data,sizeof(float),*length,file);
+            break;
+        case Curve::CurveType(UINT32):
+            *length  = ftell(file)>>2;
+            std::fseek(file,0,0);
+            bufferui32 = (uint32_t*)malloc((*length)*sizeof(uint32_t));
+            data = (float *)malloc((*length)*sizeof(float));
+            std::fread(bufferui32,sizeof(uint32_t),*length,file);
+            for(int i = 0; i < *length; i++)
+                data[i] =(float)(bufferui32[i]);
+            free(bufferui32);
+            break;
+        case Curve::CurveType(INT32):
+            *length  = ftell(file)>>2;
+            std::fseek(file,0,0);
+            bufferi32 = (int32_t*)malloc((*length)*sizeof(int32_t));
+            data = (float *)malloc((*length)*sizeof(float));
+            std::fread(bufferi32,sizeof(int32_t),*length,file);
+            for(int i = 0; i < *length; i++)
+                data[i] =(float)(bufferi32[i]);
+            free(bufferi32);
+            break;
+        case Curve::CurveType(UINT16):
+            *length  = ftell(file)>>1;
+            std::fseek(file,0,0);
+            bufferui16 = (uint16_t*)malloc((*length)*sizeof(uint16_t));
+            data = (float *)malloc((*length)*sizeof(float));
+            std::fread(bufferui16,sizeof(uint16_t),*length,file);
+            for(int i = 0; i < *length; i++)
+                data[i] =(float)(bufferui16[i]);
+            free(bufferui16);
+            break;
+        case Curve::CurveType(INT16):
+            *length  = ftell(file)>>1;
+            std::fseek(file,0,0);
+            bufferi16 = (int16_t*)malloc((*length)*sizeof(int16_t));
+            data = (float *)malloc((*length)*sizeof(float));
+            std::fread(bufferi16,sizeof(int16_t),*length,file);
+            for(int i = 0; i < *length; i++)
+                data[i] =(float)(bufferi16[i]);
+            free(bufferi16);
+            break;
+        case Curve::CurveType(UINT8):
+            *length  = ftell(file);
+            std::fseek(file,0,0);
+            bufferui8 = (uint8_t*)malloc((*length)*sizeof(uint8_t));
+            data = (float *)malloc((*length)*sizeof(float));
+            std::fread(bufferui8,sizeof(uint8_t),*length,file);
+            for(int i = 0; i < *length; i++)
+                data[i] =(float)(bufferui8[i]);
+            free(bufferui8);
+            break;
+        case Curve::CurveType(INT8):
+            *length  = ftell(file);
+            std::fseek(file,0,0);
+            bufferi8 = (int8_t*)malloc((*length)*sizeof(int8_t));
+            data = (float *)malloc((*length)*sizeof(float));
+            std::fread(bufferi8,sizeof(int8_t),*length,file);
+            for(int i = 0; i < *length; i++)
+                data[i] =(float)(bufferi8[i]);
+            free(bufferi8);
+            break;
+        default:
+            assert(0);
+            break;
+    }
+
     fclose(file);
 
     return data;

@@ -32,7 +32,7 @@ public:
 private slots:
     void chkbox_toggled(bool state);
     void colorbtn_pressed();
-    void curve_type_changed(QString type);
+    void curve_type_changed(int type);
 
 private:
     Ui::CurveListWidget *ui;
