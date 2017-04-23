@@ -34,6 +34,14 @@ private slots:
     void colorbtn_pressed();
     void curve_type_changed(int type);
 
+    void on_clearall_pressed();
+
+    void on_displayall_pressed();
+
+    void on_displayoff_pressed();
+
+    void on_delete_2_pressed();
+
 private:
     Ui::CurveListWidget *ui;
 };

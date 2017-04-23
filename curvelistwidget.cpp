@@ -24,7 +24,17 @@ CurveListWidget::~CurveListWidget()
 
 void CurveListWidget::clear()
 {
-    ui->table_curve->clear();
+    for(int i = 0; i < this->list_checkbox->length(); i++)
+    {
+        delete this->list_checkbox->at(i);
+        delete this->list_cmbbox->at(i);
+        delete this->list_colors->at(i);
+        ui->table_curve->removeRow(i);
+    }
+    ui->table_curve->setRowCount(0);
+    this->list_checkbox->clear();
+    this->list_cmbbox->clear();
+    this->list_colors->clear();
 }
 
 void CurveListWidget::addCurve(Curve *curve)
@@ -204,4 +214,37 @@ void CurveListWidget::curve_type_changed(int type)
     curve->type = type;
 
     curve->updateDisplaySeries();
+}
+
+void CurveListWidget::on_clearall_pressed()
+{
+    this->clear();
+}
+
+void CurveListWidget::on_displayall_pressed()
+{
+    for(int i = 0; i < this->list_checkbox->length() ; i++)
+        this->list_checkbox->at(i)->setChecked(true);
+}
+
+void CurveListWidget::on_displayoff_pressed()
+{
+    for(int i = 0; i < this->list_checkbox->length() ; i++)
+        this->list_checkbox->at(i)->setChecked(false);
+}
+
+void CurveListWidget::on_delete_2_pressed()
+{
+    int rowidx;
+    QList<QTableWidgetItem *> itemlist = ui->table_curve->selectedItems();
+
+    for(int i = 0 ; i < itemlist.length(); i++)
+    {
+        rowidx = itemlist.at(i)->row();
+        ui->table_curve->removeRow(rowidx);
+        this->list_checkbox->removeAt(rowidx);
+        this->list_cmbbox->removeAt(rowidx);
+        this->list_colors->removeAt(rowidx);
+    }
+
 }
