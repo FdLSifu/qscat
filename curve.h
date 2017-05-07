@@ -7,10 +7,13 @@
 #include <QtCharts/QChart>
 #include <QtCharts/QLineSeries>
 #include <QColor>
+#include <QPushButton>
+#include <QCheckBox>
+#include <QComboBox>
 
 class Curve : public QObject
 {
-
+    Q_OBJECT
     enum CurveType
     {
         FLOAT32 =0,
@@ -29,6 +32,9 @@ public:
     QString cname;
     int type;
     QColor color;
+    QPushButton* color_btn = 0;
+    QCheckBox* chkbox = 0;
+    QComboBox* type_cmbbox = 0;
     bool displayed;
     QtCharts::QLineSeries* fullseries;
     QtCharts::QLineSeries* displayseries;
@@ -63,11 +69,20 @@ public:
     void updateDisplaySeries();
     void shift(int offset);
 
+    void setcolorbtn(QPushButton *colorbtn);
+    void setchkbox(QCheckBox * chkbox);
+    void settypecmbbox(QComboBox * typecmbbox);
+
 private:
     float *getrawdata(int *length);
 
 public slots:
     void curve_clicked(QPointF pt);
+    void chkbox_toggled(bool state);
+    void colorbtn_pressed();
+    void curve_type_changed(int type);
+signals:
+    void shifted();
 
 };
 

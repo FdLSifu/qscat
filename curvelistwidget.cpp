@@ -12,11 +12,16 @@ CurveListWidget::CurveListWidget(QWidget *parent) :
     ui->setupUi(this);
     this->firstDisplayed = true;
 
-    this->list_checkbox = new QList<QCheckBox*>();
-    this->list_colors = new QList<QPushButton*>();
-    this->list_cmbbox = new QList<QComboBox*>();
-}
+    ui->type_box->addItem("float32");
+    ui->type_box->addItem("uint32");
+    ui->type_box->addItem("int32");
+    ui->type_box->addItem("uint16");
+    ui->type_box->addItem("int16");
+    ui->type_box->addItem("uint8");
+    ui->type_box->addItem("int8");
+    connect(ui->type_box,SIGNAL(currentIndexChanged(int)),this,SLOT(global_type_changed(int)));
 
+}
 CurveListWidget::~CurveListWidget()
 {
     delete ui;
@@ -24,17 +29,12 @@ CurveListWidget::~CurveListWidget()
 
 void CurveListWidget::clear()
 {
-    for(int i = 0; i < this->list_checkbox->length(); i++)
+    int rowCount = ui->table_curve->rowCount();
+    for(int i = 0; i < rowCount; i++)
     {
-        delete this->list_checkbox->at(i);
-        delete this->list_cmbbox->at(i);
-        delete this->list_colors->at(i);
         ui->table_curve->removeRow(i);
     }
     ui->table_curve->setRowCount(0);
-    this->list_checkbox->clear();
-    this->list_cmbbox->clear();
-    this->list_colors->clear();
 }
 
 void CurveListWidget::addCurve(Curve *curve)
@@ -50,8 +50,7 @@ void CurveListWidget::addCurve(Curve *curve)
     //Color
     colidx ++;
     QPushButton *colorbtn = new QPushButton(this);
-    this->list_colors->append(colorbtn);
-    colorbtn->setPalette(QPalette(curve->getColor()));
+    curve->setcolorbtn(colorbtn);
     ui->table_curve->setCellWidget(rowidx,colidx,colorbtn);
 
 
@@ -71,7 +70,7 @@ void CurveListWidget::addCurve(Curve *curve)
     cmbbox->addItem("int16");
     cmbbox->addItem("uint8");
     cmbbox->addItem("int8");
-    this->list_cmbbox->append(cmbbox);
+    curve->settypecmbbox(cmbbox);
     ui->table_curve->setCellWidget(rowidx,colidx,cmbbox);
 
     //Offset
@@ -82,13 +81,15 @@ void CurveListWidget::addCurve(Curve *curve)
     //Displayed
     colidx++;
     QCheckBox *chkbox = new QCheckBox(this);
-    this->list_checkbox->append(chkbox);
+    curve->setchkbox(chkbox);
     ui->table_curve->setCellWidget(rowidx,colidx,chkbox);
 
     // Handler
-    connect(colorbtn,&QPushButton::pressed,this,&CurveListWidget::colorbtn_pressed);
-    connect(chkbox,&QCheckBox::toggled,this,&CurveListWidget::chkbox_toggled);
-    connect(cmbbox,SIGNAL(currentIndexChanged(int)),this,SLOT(curve_type_changed(int)));
+    connect(colorbtn,&QPushButton::pressed,curve,&Curve::colorbtn_pressed);
+    connect(chkbox,&QCheckBox::toggled,curve,&Curve::chkbox_toggled);
+    connect(cmbbox,SIGNAL(currentIndexChanged(int)),curve,SLOT(curve_type_changed(int)));
+    connect(curve,&Curve::shifted,this,&CurveListWidget::updateshiftvalue);
+    connect(ui->table_curve,&QTableWidget::cellPressed,this,&CurveListWidget::rowselected);
 }
 
 Curve * CurveListWidget::getSelectedCurve()
@@ -119,118 +120,62 @@ QList<Curve *> CurveListWidget::getSelectedCurves()
     return clist;
 }
 
-void CurveListWidget::chkbox_toggled(bool state)
+void CurveListWidget::global_type_changed(int type)
 {
-    int rowidx = this->list_checkbox->indexOf((QCheckBox*)sender());
-    Curve * curve = ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text());
-
-    // Check if curve already displayed
-    if (curve->displayed)
+    Curve * curve;
+    for(int rowidx = 0; rowidx < ui->table_curve->rowCount(); rowidx++)
     {
-        // set ui color button to default color
-        this->list_colors->at(rowidx)->setPalette(QPalette(Qt::white));
-        // Set displayed to false (state is false here)
-        curve->displayed = state;
-        // Hide the curve from display
-        curve->getDisplaySeries()->hide();
-    }
-    else
-    {
-        // set displayed to true (state is true here)
-        curve->displayed = state;
-
-        // Check if series is already present
-        if (curve->isLoaded())
-        {
-            // Display it
-            curve->getDisplaySeries()->show();
-        }
-        else
-        {
-            // Curve doesn't exist yet, we need to create it
-            QtCharts::QLineSeries * curseries = curve->getDisplaySeries();
-            ScaTool::main_plot->chart()->addSeries(curseries);
-            if (firstDisplayed)
-            {
-                // We create axis realted to added series
-                ScaTool::main_plot->chart()->createDefaultAxes();
-                // Set original width to ease zoom work
-                ScaTool::main_plot->chart()->xaxis_width = curve->length();
-
-                // handler
-                connect(qobject_cast<QValueAxis *>(ScaTool::main_plot->chart()->axisX()), &QValueAxis::rangeChanged,ScaTool::main_plot->chart(), &Chart::on_rangeChanged);
-
-                // no more firstdisplayed
-                firstDisplayed = false;
-            }
-            else
-            {
-                // reuse existed axis
-                curseries->attachAxis(ScaTool::main_plot->chart()->axisX());
-                curseries->attachAxis(ScaTool::main_plot->chart()->axisY());
-            }
-        }
-        // Update color button from color curve
-        this->list_colors->at(rowidx)->setPalette(QPalette( curve->getDisplaySeries()->color()));
-    }
-}
-
-
-void CurveListWidget::colorbtn_pressed()
-{
-    int rowidx = this->list_colors->indexOf((QPushButton*)sender());
-    Curve * curve = ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text());
-
-    QColor color = QColorDialog::getColor(curve->getColor());
-
-    // Update curve color
-    curve->setColor(color);
-
-    // Update curve color on list
-    if (curve->displayed)
-    {
-        this->list_colors->at(rowidx)->setPalette(QPalette(color));
-        curve->displayseries->setColor(color);
-
-        // Trick to redraw
-        emit curve->displayseries->pointsReplaced();
-    }
-
-    // Update if curve is loaded but not displayed
-    if (curve->isLoaded())
-    {
-        curve->getDisplaySeries()->setColor(curve->color);
-    }
-
-}
-
-void CurveListWidget::curve_type_changed(int type)
-{
-    int rowidx = this->list_cmbbox->indexOf((QComboBox*)sender());
-    Curve * curve = ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text());
-
-    if (curve == 0)
+        curve = ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text());
+        if (curve == 0)
             return;
-    curve->type = type;
+        curve->type = type;
 
-    curve->updateDisplaySeries();
+        curve->type_cmbbox->setCurrentIndex(type);
+
+        curve->updateDisplaySeries();
+    }
 }
 
 void CurveListWidget::on_clearall_pressed()
 {
+
+    qDeleteAll(ScaTool::synchrodialog->synchropasses.begin(),ScaTool::synchrodialog->synchropasses.end());
+
     this->clear();
+
+    if (ScaTool::curves->length() > 0)
+    {
+        qDeleteAll(ScaTool::curves->begin(),ScaTool::curves->end());
+        ScaTool::curves->clear();
+    }
+    if (ScaTool::dockcurves->isHidden())
+        ScaTool::dockcurves->show();
+    for (int i = 0 ; i < ScaTool::main_plot->chart()->axes(Qt::Horizontal).length(); i ++)
+        ScaTool::main_plot->chart()->removeAxis(ScaTool::main_plot->chart()->axes().at(i));
+    for (int i = 0 ; i < ScaTool::main_plot->chart()->axes(Qt::Vertical).length(); i ++)
+        ScaTool::main_plot->chart()->removeAxis(ScaTool::main_plot->chart()->axes().at(i));
+    ScaTool::curve_table->firstDisplayed = true;
+
 }
 
 void CurveListWidget::on_displayall_pressed()
 {
-    for(int i = 0; i < this->list_checkbox->length() ; i++)
-        this->list_checkbox->at(i)->setChecked(true);
+    Curve *curve;
+    for(int i = 0; i < ui->table_curve->rowCount() ; i++)
+    {
+        curve = ScaTool::getCurveByName(ui->table_curve->item(i,2)->text());
+        curve->chkbox->setChecked(true);
+    }
 }
 
 void CurveListWidget::on_displayoff_pressed()
 {
-    for(int i = 0; i < this->list_checkbox->length() ; i++)
-        this->list_checkbox->at(i)->setChecked(false);
+    Curve *curve;
+    for(int i = 0; i < ui->table_curve->rowCount() ; i++)
+    {
+        curve = ScaTool::getCurveByName(ui->table_curve->item(i,2)->text());
+        curve->chkbox->setChecked(false);
+    }
 }
 
 void CurveListWidget::on_delete_2_pressed()
@@ -241,10 +186,36 @@ void CurveListWidget::on_delete_2_pressed()
     for(int i = 0 ; i < itemlist.length(); i++)
     {
         rowidx = itemlist.at(i)->row();
+        Curve *c = ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text());
+        if (c->displayed)
+        {
+            c->chkbox->setChecked(false);
+            ScaTool::main_plot->chart()->removeSeries(c->getDisplaySeries());
+        }
         ui->table_curve->removeRow(rowidx);
-        this->list_checkbox->removeAt(rowidx);
-        this->list_cmbbox->removeAt(rowidx);
-        this->list_colors->removeAt(rowidx);
+
+        Q_ASSERT(ScaTool::curves->removeOne(c));
+
+        delete c;
+    }
+}
+
+void CurveListWidget::updateshiftvalue()
+{
+    Curve *c = (Curve*)sender();
+    for (int i = 0; i < ui->table_curve->rowCount() ; i++)
+    {
+        if (ui->table_curve->item(i,2)->text() == c->cname)
+        {
+            ui->table_curve->item(i,4)->setText(QString::number(c->xoffset));
+        }
     }
 
+}
+
+void CurveListWidget::rowselected(int row, int column)
+{
+    /*Curve *c = ScaTool::getCurveByName(ui->table_curve->item(row,2)->text());
+    if (c->displayed)
+        printf("TODO : to bring front");*/
 }

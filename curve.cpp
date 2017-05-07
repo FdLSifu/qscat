@@ -4,6 +4,7 @@
 #include <QLineSeries>
 #include <QValueAxis>
 #include <QtGlobal>
+#include <QColorDialog>
 
 Curve::Curve(int id) :
     QObject()
@@ -24,6 +25,12 @@ Curve::~Curve()
         resetFullSeries();
     if (this->displayseries != 0)
         resetDisplaySeries();
+    if (this->chkbox != 0)
+        delete this->chkbox;
+    if (this->color_btn != 0)
+        delete this->color_btn;
+    if (this->type_cmbbox != 0)
+        delete this->type_cmbbox;
 }
 
 QColor Curve::getColor()
@@ -65,7 +72,7 @@ QtCharts::QLineSeries* Curve::getSubSeries(int xmin, int xmax)
     xmin = std::max(0,xmin);
     xmax = std::min(nbpoints,xmax);
 
-    assert(xmax > xmin);
+    assert(xmax >= xmin);
 
     QtCharts::QLineSeries* subseries = new QtCharts::QLineSeries();
 
@@ -349,5 +356,124 @@ void Curve::shift(int offset)
     {
         updateDisplaySeries();
     }
+    emit this->shifted();
+}
+
+void Curve::setcolorbtn(QPushButton *colorbtn)
+{
+    if (this->color_btn != 0)
+        delete this->color_btn;
+
+    this->color_btn = colorbtn;
+    colorbtn->setPalette(QPalette(this->getColor()));
+}
+
+void Curve::setchkbox(QCheckBox * chkbox)
+{
+    if (this->chkbox != 0)
+        delete this->chkbox;
+    this->chkbox = chkbox;
+}
+
+void Curve::settypecmbbox(QComboBox * typecmbbox)
+{
+    if (this->type_cmbbox != 0)
+        delete this->type_cmbbox;
+    this->type_cmbbox = typecmbbox;
+}
+
+void Curve::chkbox_toggled(bool state)
+{
+    Curve * curve = this;
+
+    // Check if curve already displayed
+    if (curve->displayed)
+    {
+        // set ui color button to default color
+        curve->color_btn->setPalette(QPalette(Qt::white));
+        // Set displayed to false (state is false here)
+        curve->displayed = state;
+        // Hide the curve from display
+        curve->getDisplaySeries()->hide();
+    }
+    else
+    {
+        // set displayed to true (state is true here)
+        curve->displayed = state;
+
+        // Check if series is already present
+        if (curve->isLoaded())
+        {
+            // Display it
+            curve->getDisplaySeries()->show();
+        }
+        else
+        {
+            // Curve doesn't exist yet, we need to create it
+            QtCharts::QLineSeries * curseries = curve->getDisplaySeries();
+            ScaTool::main_plot->chart()->addSeries(curseries);
+            if (ScaTool::curve_table->firstDisplayed)
+            {
+                // We create axis realted to added series
+                ScaTool::main_plot->chart()->createDefaultAxes();
+                // Set original width to ease zoom work
+                ScaTool::main_plot->chart()->xaxis_width = curve->length();
+
+                // handler
+                connect(qobject_cast<QValueAxis *>(ScaTool::main_plot->chart()->axisX()), &QValueAxis::rangeChanged,ScaTool::main_plot->chart(), &Chart::on_rangeChanged);
+
+                // no more firstdisplayed
+                ScaTool::curve_table->firstDisplayed = false;
+            }
+            else
+            {
+                // reuse existed axis
+                curseries->attachAxis(ScaTool::main_plot->chart()->axisX());
+                curseries->attachAxis(ScaTool::main_plot->chart()->axisY());
+            }
+        }
+        // Update color button from color curve
+        curve->color_btn->setPalette(QPalette( curve->getDisplaySeries()->color()));
+    }
+}
+
+
+void Curve::colorbtn_pressed()
+{
+    QPushButton * colorbtn = (QPushButton*)sender();
+    Curve * curve = this;
+    QColor color = QColorDialog::getColor(curve->getColor());
+
+    // Update curve color
+    curve->setColor(color);
+
+    // Update curve color on list
+    if (curve->displayed)
+    {
+        colorbtn->setPalette(QPalette(color));
+        curve->displayseries->setColor(color);
+
+        // Trick to redraw
+        emit curve->displayseries->pointsReplaced();
+    }
+
+    // Update if curve is loaded but not displayed
+    if (curve->isLoaded())
+    {
+        curve->getDisplaySeries()->setColor(curve->color);
+    }
+
+}
+
+void Curve::curve_type_changed(int type)
+{
+    QComboBox * typecmbbox = (QComboBox*)sender();
+    Curve * curve = (Curve*)typecmbbox->parent();
+
+    if (curve == 0)
+            return;
+    curve->type = type;
+
+    curve->updateDisplaySeries();
 }
 

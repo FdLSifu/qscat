@@ -18,7 +18,6 @@
 class ScaTool
 {
 public:
-    static QColor Colors[7];
     static QList<Curve*> *curves;
     static ChartView *main_plot;
     static QtCharts::QChartView *down_plot;

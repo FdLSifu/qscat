@@ -6,6 +6,7 @@
 #include "scatool.h"
 
 QProgressBar *  SynchroDialog::qprogressbar = 0;
+QLineSeries *   SynchroDialog::dn = 0;
 
 SynchroDialog::SynchroDialog(QWidget *parent) :
     QDialog(parent),
@@ -15,10 +16,15 @@ SynchroDialog::SynchroDialog(QWidget *parent) :
 
     ui->methodcombo->addItem("Sum Of Differences");
 
-    this->synchropasses = new QList<Synchro *>();
+    this->synchropasses = QList<Synchro *>();
 
     this->rubpattern = new QRubberBand(QRubberBand::Line,ScaTool::main_plot);
     this->rubsearch = new QRubberBand(QRubberBand::Line,ScaTool::main_plot);
+
+    connect(ui->leftpattern,&QSpinBox::editingFinished,this,&SynchroDialog::pattern_value_changed);
+    connect(ui->rightpattern,&QSpinBox::editingFinished,this,&SynchroDialog::pattern_value_changed);
+    connect(ui->leftwindow,&QSpinBox::editingFinished,this,&SynchroDialog::window_value_changed);
+    connect(ui->rightwindow,&QSpinBox::editingFinished,this,&SynchroDialog::window_value_changed);
 }
 
 void SynchroDialog::addRefItem(QString name)
@@ -29,6 +35,7 @@ void SynchroDialog::addRefItem(QString name)
 SynchroDialog::~SynchroDialog()
 {
     delete ui;
+    qDeleteAll(synchropasses);
 }
 
 void SynchroDialog::on_runpreview_pressed()
@@ -91,7 +98,52 @@ void SynchroDialog::on_addstep_pressed()
 {
 
     Synchro *sync = new Synchro(0);
-    synchropasses->append(sync);
+    synchropasses.append(sync);
 
-    ui->stepcombo->addItem("Pass "+QString::number(synchropasses->length()));
+    ui->stepcombo->addItem("Pass "+QString::number(synchropasses.length()));
 }
+
+
+
+void SynchroDialog::pattern_value_changed()
+{
+    qreal l = ui->leftpattern->text().toDouble();
+    qreal r = ui->rightpattern->text().toDouble();
+    qreal w = r-l;
+
+
+
+    /*QLineSeries *up = new QLineSeries();
+    up->append(l,-0.4);
+    up->append(r,-0.4);
+    up->attachAxis(ScaTool::main_plot->chart()->axisX());
+    up->attachAxis(ScaTool::main_plot->chart()->axisY());
+*/
+    if (flag)
+    {
+        flag = false;
+        dn = new QLineSeries();
+        ScaTool::main_plot->chart()->addSeries(dn);
+    }
+    dn->clear();
+    dn->append(l,-0.4);
+    dn->append(r,-0.4);
+    dn->attachAxis(ScaTool::main_plot->chart()->axisX());
+    dn->attachAxis(ScaTool::main_plot->chart()->axisY());
+
+
+/*    ScaTool::main_plot->chart()->removeSeries(pol);
+    delete pol;
+    pol = new QAreaSeries();
+    pol->setLowerSeries(dn);
+    pol->attachAxis(ScaTool::main_plot->chart()->axisX());
+    pol->attachAxis(ScaTool::main_plot->chart()->axisY());
+    ScaTool::main_plot->chart()->addSeries(pol);
+    */
+}
+
+void SynchroDialog::window_value_changed()
+{
+
+}
+

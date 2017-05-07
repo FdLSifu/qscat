@@ -17,9 +17,6 @@ class CurveListWidget : public QWidget
 
 public:
     bool firstDisplayed;
-    QList<QPushButton*> *list_colors;
-    QList<QCheckBox*> *list_checkbox;
-    QList<QComboBox*> *list_cmbbox;
     explicit CurveListWidget(QWidget *parent = 0);
     ~CurveListWidget();
 
@@ -30,10 +27,8 @@ public:
     QList<Curve *> getSelectedCurves();
 
 private slots:
-    void chkbox_toggled(bool state);
-    void colorbtn_pressed();
-    void curve_type_changed(int type);
-
+    void global_type_changed(int type);
+    void rowselected(int row, int column);
     void on_clearall_pressed();
 
     void on_displayall_pressed();
@@ -42,6 +37,7 @@ private slots:
 
     void on_delete_2_pressed();
 
+    void updateshiftvalue();
 private:
     Ui::CurveListWidget *ui;
 };

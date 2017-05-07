@@ -13,14 +13,14 @@ Synchro::Synchro(int num):
 
 void Synchro::run()
 {
-    min_dist_curve();
+    Synchro::min_dist_curve();
 }
 
 int Synchro::min_dist_curve()
 {
     qreal dist = 0;
     qreal distmin = std::numeric_limits<qreal>::max();
-    int offset;
+    int offset = 0;
 
     QLineSeries * ref_subseries = cur_ref->getSubSeries(leftpattern,rightpattern);
     QLineSeries * work_subseries = curve->getSubSeries(leftpattern+leftwindow, rightpattern+rightwindow);
@@ -39,7 +39,7 @@ int Synchro::min_dist_curve()
         }
     }
 
-    curve->shift(offset-curve->xoffset);
+    curve->shift(offset - curve->xoffset);
 
     delete ref_subseries;
     delete work_subseries;

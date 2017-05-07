@@ -27,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     MainWindow::instance = this;
 
+    // Dark gray
+    //this->setPalette(QPalette(QColor(30,30,30)));
     ScaTool::curves = new QList<Curve*>();
     ScaTool::dockcurves = new QDockWidget(this);
     ScaTool::curve_table = new CurveListWidget(ScaTool::dockcurves);
@@ -41,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     Chart *chart = new Chart();
     ui->mainplot->setChart(chart);
     ui->mainplot->setRenderHint(QPainter::Antialiasing);
+    //chart->setTheme(QChart::ChartThemeDark);
 }
 
 MainWindow::~MainWindow()
@@ -86,7 +89,7 @@ void MainWindow::on_open_pressed()
             ScaTool::curves->append(curve);
             // Add curve to curve table display
             ScaTool::curve_table->addCurve(curve);
-            // ADd curve to synchro table display
+            // Add curve to synchro table display
             ScaTool::synchrodialog->addRefItem(curve->cname);
         }
     }
@@ -158,13 +161,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::on_refresh_pressed()
 {
 
-    qDeleteAll(ScaTool::synchrodialog->synchropasses->begin(),ScaTool::synchrodialog->synchropasses->end());
-    ScaTool::curve_table->clear();
+    qDeleteAll(ScaTool::synchrodialog->synchropasses.begin(),ScaTool::synchrodialog->synchropasses.end());
     if (ScaTool::curves->length() > 0)
     {
         qDeleteAll(ScaTool::curves->begin(),ScaTool::curves->end());
-        ScaTool::curves->clear();
     }
+    ScaTool::curves->clear();
+    ScaTool::curve_table->clear();
     if (ScaTool::dockcurves->isHidden())
         ScaTool::dockcurves->show();
     for (int i = 0 ; i < ScaTool::main_plot->chart()->axes(Qt::Horizontal).length(); i ++)

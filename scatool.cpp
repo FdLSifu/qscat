@@ -8,8 +8,6 @@
 #include "mainwindow.h"
 #include "synchro.h"
 
-QColor ScaTool::Colors[7]  = {Qt::red,Qt::blue, Qt::green, Qt::black, Qt::darkRed, Qt::darkBlue, Qt::darkGreen};
-
 QList<Curve*> * ScaTool::curves = 0;
 QDockWidget *ScaTool::dockcurves = 0;
 CurveListWidget *ScaTool::curve_table = 0;

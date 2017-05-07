@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QRubberBand>
 #include <QProgressBar>
+#include <QAreaSeries>
 #include "synchro.h"
 
 namespace Ui {
@@ -16,11 +17,13 @@ class SynchroDialog : public QDialog
 
 public:
     // Fields
+    static QLineSeries *dn;
     static QProgressBar* qprogressbar;
 
+    bool flag = true;
     QRubberBand *rubpattern;
     QRubberBand *rubsearch;
-    QList<Synchro *> *synchropasses;
+    QList<Synchro *> synchropasses;
 
     // Constructor
     explicit SynchroDialog(QWidget *parent);
@@ -38,6 +41,8 @@ public slots:
     
 private slots:
     void on_addstep_pressed();
+    void pattern_value_changed();
+    void window_value_changed();
 
 private:
     Ui::SynchroDialog *ui;
