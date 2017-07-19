@@ -3,10 +3,10 @@
 #include <QComboBox>
 #include <QSpinBox>
 #include <QErrorMessage>
+#include <QValueAxis>
 #include "scatool.h"
 
 QProgressBar *  SynchroDialog::qprogressbar = 0;
-QLineSeries *   SynchroDialog::dn = 0;
 
 SynchroDialog::SynchroDialog(QWidget *parent) :
     QDialog(parent),
@@ -18,13 +18,21 @@ SynchroDialog::SynchroDialog(QWidget *parent) :
 
     this->synchropasses = QList<Synchro *>();
 
-    this->rubpattern = new QRubberBand(QRubberBand::Line,ScaTool::main_plot);
-    this->rubsearch = new QRubberBand(QRubberBand::Line,ScaTool::main_plot);
+    this->pattern_bar = new QLineSeries();
+    this->window_bar = new QLineSeries();
 
+    connect(this,&SynchroDialog::rejected,this,&SynchroDialog::closed);
     connect(ui->leftpattern,&QSpinBox::editingFinished,this,&SynchroDialog::pattern_value_changed);
     connect(ui->rightpattern,&QSpinBox::editingFinished,this,&SynchroDialog::pattern_value_changed);
-    connect(ui->leftwindow,&QSpinBox::editingFinished,this,&SynchroDialog::window_value_changed);
-    connect(ui->rightwindow,&QSpinBox::editingFinished,this,&SynchroDialog::window_value_changed);
+    connect(ui->leftwindow,&QSpinBox::editingFinished,this,&SynchroDialog::pattern_value_changed);
+    connect(ui->rightwindow,&QSpinBox::editingFinished,this,&SynchroDialog::pattern_value_changed);
+}
+
+void SynchroDialog::show()
+{
+    this->window_bar->show();
+    this->pattern_bar->show();
+    qobject_cast<QDialog*>(this)->show();
 }
 
 void SynchroDialog::addRefItem(QString name)
@@ -107,43 +115,68 @@ void SynchroDialog::on_addstep_pressed()
 
 void SynchroDialog::pattern_value_changed()
 {
-    qreal l = ui->leftpattern->text().toDouble();
-    qreal r = ui->rightpattern->text().toDouble();
-    qreal w = r-l;
+    qreal lw = ui->leftwindow->text().toDouble();
+    qreal rw = ui->rightwindow->text().toDouble();
+    qreal lp = ui->leftpattern->text().toDouble();
+    qreal rp = ui->rightpattern->text().toDouble();
 
-
-
-    /*QLineSeries *up = new QLineSeries();
-    up->append(l,-0.4);
-    up->append(r,-0.4);
-    up->attachAxis(ScaTool::main_plot->chart()->axisX());
-    up->attachAxis(ScaTool::main_plot->chart()->axisY());
-*/
-    if (flag)
+    if ((ScaTool::main_plot->chart()->series().indexOf(this->pattern_bar) < 0) && (ScaTool::main_plot->chart()->series().indexOf(this->window_bar) < 0))
     {
-        flag = false;
-        dn = new QLineSeries();
-        ScaTool::main_plot->chart()->addSeries(dn);
+        ScaTool::main_plot->chart()->addSeries(this->pattern_bar);
+        ScaTool::main_plot->chart()->addSeries(this->window_bar);
     }
-    dn->clear();
-    dn->append(l,-0.4);
-    dn->append(r,-0.4);
-    dn->attachAxis(ScaTool::main_plot->chart()->axisX());
-    dn->attachAxis(ScaTool::main_plot->chart()->axisY());
+    if (ScaTool::main_plot->chart()->axes().length() != 0)
+    {
+        qreal ymin = qobject_cast<QValueAxis *>(ScaTool::main_plot->chart()->axisY())->min();
+        qreal ymax = qobject_cast<QValueAxis *>(ScaTool::main_plot->chart()->axisY())->max();
+        qreal pos = ymin + (5*(ymax-ymin)/100);
 
+        QPen pp;
+        pp.setWidth(10);
+        pp.setCapStyle(Qt::RoundCap);
+        this->pattern_bar->setPen(pp);
+        this->pattern_bar->clear();
 
-/*    ScaTool::main_plot->chart()->removeSeries(pol);
-    delete pol;
-    pol = new QAreaSeries();
-    pol->setLowerSeries(dn);
-    pol->attachAxis(ScaTool::main_plot->chart()->axisX());
-    pol->attachAxis(ScaTool::main_plot->chart()->axisY());
-    ScaTool::main_plot->chart()->addSeries(pol);
-    */
+        QPen pw;
+        pw.setWidth(10);
+        pw.setBrush(Qt::Dense5Pattern);
+        pw.setCapStyle(Qt::RoundCap);
+        this->window_bar->setPen(pw);
+        this->window_bar->clear();
+
+        if (lp <= rp)
+        {
+            this->pattern_bar->append(lp,pos);
+            this->pattern_bar->append(rp,pos);
+            this->window_bar->append(lp+lw,pos);
+            this->window_bar->append(rp+rw,pos);
+        }
+        {
+            this->pattern_bar->append(lp,pos);
+            this->pattern_bar->append(lp,pos);
+            this->window_bar->append(lp,pos);
+            this->window_bar->append(lp,pos);
+        }
+
+        if (this->pattern_bar->attachedAxes().length() == 0)
+        {
+            this->pattern_bar->attachAxis(ScaTool::main_plot->chart()->axisX());
+            this->pattern_bar->attachAxis(ScaTool::main_plot->chart()->axisY());
+        }
+        if (this->window_bar->attachedAxes().length() == 0)
+        {
+            this->window_bar->attachAxis(ScaTool::main_plot->chart()->axisX());
+            this->window_bar->attachAxis(ScaTool::main_plot->chart()->axisY());
+        }
+    }
+
+    this->window_bar->show();
+    this->pattern_bar->show();
 }
 
-void SynchroDialog::window_value_changed()
+void SynchroDialog::closed()
 {
-
+    this->window_bar->hide();
+    this->pattern_bar->hide();
+//    e->accept();
 }
-

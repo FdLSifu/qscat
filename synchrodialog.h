@@ -17,12 +17,10 @@ class SynchroDialog : public QDialog
 
 public:
     // Fields
-    static QLineSeries *dn;
+    QLineSeries * pattern_bar;
+    QLineSeries * window_bar;
     static QProgressBar* qprogressbar;
 
-    bool flag = true;
-    QRubberBand *rubpattern;
-    QRubberBand *rubsearch;
     QList<Synchro *> synchropasses;
 
     // Constructor
@@ -31,6 +29,8 @@ public:
 
     // Functions
     void addRefItem(QString name);
+
+    void show();
 
 public slots:
     void on_runpreview_pressed();
@@ -42,7 +42,7 @@ public slots:
 private slots:
     void on_addstep_pressed();
     void pattern_value_changed();
-    void window_value_changed();
+    void closed();
 
 private:
     Ui::SynchroDialog *ui;
