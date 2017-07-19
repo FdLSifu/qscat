@@ -23,6 +23,6 @@ Thanks to QSCAT you can do:
 
 
 
-
+Full screen visualization: ![picture](https://i.imgur.com/pnDbuRP.png "Full screen visualization")
 Before synchronization: ![picture](https://i.imgur.com/DLZCLIq.png "Before synchronization")
 After synchronization: ![picture](https://i.imgur.com/hfLA8Pz.png "After synchronization")
