@@ -467,13 +467,7 @@ void Curve::colorbtn_pressed()
 
 void Curve::curve_type_changed(int type)
 {
-    QComboBox * typecmbbox = (QComboBox*)sender();
-    Curve * curve = (Curve*)typecmbbox->parent();
-
-    if (curve == 0)
-            return;
-    curve->type = type;
-
-    curve->updateDisplaySeries();
+    this->type = type;
+    this->updateDisplaySeries();
 }
 
