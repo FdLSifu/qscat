@@ -1,4 +1,4 @@
-# qscat
+# QSCAT
 Qt Side Channel Analysis Tool to handle signal traces and more 
 
 This tool aims to provide side channel analysis tool while keeping usage quite simple.
