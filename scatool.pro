@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     chart.cpp \
     synchrodialog.cpp \
     synchro.cpp \
-    curvelistwidget.cpp
+    curvelistwidget.cpp \
+    attackwindow.cpp
 
 HEADERS  += mainwindow.h \
     scatool.h \
@@ -40,8 +41,10 @@ HEADERS  += mainwindow.h \
     chart.h \
     synchrodialog.h \
     synchro.h \
-    curvelistwidget.h
+    curvelistwidget.h \
+    attackwindow.h
 
 FORMS    += design.ui \
     synchrodialog.ui \
-    curvelistwidget.ui
+    curvelistwidget.ui \
+    attackwindow.ui
