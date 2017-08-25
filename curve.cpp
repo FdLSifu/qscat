@@ -305,73 +305,198 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
 
             break;
-        /*case Curve::CurveType(UINT32):
-            *length  = ftell(file)>>2;
-            if (single_offset < 0)
-            std::fseek(file,single_offset>>2,0);
-
-            bufferui32 = (uint32_t*)malloc((*length)*sizeof(uint32_t));
+        case Curve::CurveType(UINT32):
+            *length  = file.size()/sizeof(uint32_t);
             data = (float *)malloc((*length)*sizeof(float));
-            std::fread(bufferui32,sizeof(uint32_t),*length,file);
-            for(int i = 0; i < *length; i++)
-                data[i] =(float)(bufferui32[i]);
-            free(bufferui32);
+            // read full data
+            if (single_offset > 0)
+            {
+
+                for(int i = 0; i < single_offset; i++)
+                    data[i] = 0;
+
+                bufferui32 = (uint32_t*)malloc((*length - single_offset)*sizeof(uint32_t));
+                file.read(reinterpret_cast<char*>(bufferui32),sizeof(uint32_t) * (*length - single_offset));
+                for(int i = 0; i < (*length - single_offset); i++)
+                    (data+single_offset)[i] = (float)(bufferui32[i]);
+                free(bufferui32);
+            }
+            else
+            {
+                file.seek(sizeof(uint32_t) * -single_offset);
+                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
+
+                bufferui32 = (uint32_t*)malloc((*length + single_offset)*sizeof(uint32_t));
+                file.read(reinterpret_cast<char*>(bufferui32),sizeof(uint32_t) * (*length + single_offset));
+                for(int i = 0; i < (*length + single_offset); i++)
+                    (data)[i] = (float)(bufferui32[i]);
+                free(bufferui32);
+
+                for(int i = *length + single_offset; i < *length ; i++)
+                    data[i] = 0;
+
+            }
             break;
         case Curve::CurveType(INT32):
-            *length  = ftell(file)>>2;
-            std::fseek(file,single_offset>>2,0);
-
-            bufferi32 = (int32_t*)malloc((*length)*sizeof(int32_t));
+            *length  = file.size()/sizeof(int32_t);
             data = (float *)malloc((*length)*sizeof(float));
-            std::fread(bufferi32,sizeof(int32_t),*length,file);
-            for(int i = 0; i < *length; i++)
-                data[i] =(float)(bufferi32[i]);
-            free(bufferi32);
+            // read full data
+            if (single_offset > 0)
+            {
+
+                for(int i = 0; i < single_offset; i++)
+                    data[i] = 0;
+
+                bufferi32 = (int32_t*)malloc((*length - single_offset)*sizeof(int32_t));
+                file.read(reinterpret_cast<char*>(bufferi32),sizeof(int32_t) * (*length - single_offset));
+                for(int i = 0; i < (*length - single_offset); i++)
+                    (data+single_offset)[i] = (float)(bufferi32[i]);
+                free(bufferi32);
+            }
+            else
+            {
+                file.seek(sizeof(int32_t) * -single_offset);
+                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
+
+                bufferi32 = (int32_t*)malloc((*length + single_offset)*sizeof(int32_t));
+                file.read(reinterpret_cast<char*>(bufferi32),sizeof(int32_t) * (*length + single_offset));
+                for(int i = 0; i < (*length + single_offset); i++)
+                    (data)[i] = (float)(bufferi32[i]);
+                free(bufferi32);
+
+                for(int i = *length + single_offset; i < *length ; i++)
+                    data[i] = 0;
+
+            }
             break;
         case Curve::CurveType(UINT16):
-            *length  = ftell(file)>>1;
-            std::fseek(file,single_offset>>1,0);
-
-            bufferui16 = (uint16_t*)malloc((*length)*sizeof(uint16_t));
+            *length  = file.size()/sizeof(uint16_t);
             data = (float *)malloc((*length)*sizeof(float));
-            std::fread(bufferui16,sizeof(uint16_t),*length,file);
-            for(int i = 0; i < *length; i++)
-                data[i] =(float)(bufferui16[i]);
-            free(bufferui16);
+            // read full data
+            if (single_offset > 0)
+            {
+
+                for(int i = 0; i < single_offset; i++)
+                    data[i] = 0;
+
+                bufferui16 = (uint16_t*)malloc((*length - single_offset)*sizeof(uint16_t));
+                file.read(reinterpret_cast<char*>(bufferui16),sizeof(uint16_t) * (*length - single_offset));
+                for(int i = 0; i < (*length - single_offset); i++)
+                    (data+single_offset)[i] = (float)(bufferui16[i]);
+                free(bufferui16);
+            }
+            else
+            {
+                file.seek(sizeof(uint16_t) * -single_offset);
+                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
+
+                bufferui16 = (uint16_t*)malloc((*length + single_offset)*sizeof(uint16_t));
+                file.read(reinterpret_cast<char*>(bufferui16),sizeof(uint16_t) * (*length + single_offset));
+                for(int i = 0; i < (*length + single_offset); i++)
+                    (data)[i] = (float)(bufferui16[i]);
+                free(bufferui16);
+
+                for(int i = *length + single_offset; i < *length ; i++)
+                    data[i] = 0;
+
+            }
             break;
         case Curve::CurveType(INT16):
-            *length  = ftell(file)>>1;
-            std::fseek(file,single_offset>>1,0);
-
-            bufferi16 = (int16_t*)malloc((*length)*sizeof(int16_t));
+            *length  = file.size()/sizeof(int16_t);
             data = (float *)malloc((*length)*sizeof(float));
-            std::fread(bufferi16,sizeof(int16_t),*length,file);
-            for(int i = 0; i < *length; i++)
-                data[i] =(float)(bufferi16[i]);
-            free(bufferi16);
+            // read full data
+            if (single_offset > 0)
+            {
+
+                for(int i = 0; i < single_offset; i++)
+                    data[i] = 0;
+
+                bufferi16 = (int16_t*)malloc((*length - single_offset)*sizeof(int16_t));
+                file.read(reinterpret_cast<char*>(bufferi16),sizeof(int16_t) * (*length - single_offset));
+                for(int i = 0; i < (*length - single_offset); i++)
+                    (data+single_offset)[i] = (float)(bufferi16[i]);
+                free(bufferi16);
+            }
+            else
+            {
+                file.seek(sizeof(int16_t) * -single_offset);
+                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
+
+                bufferi16 = (int16_t*)malloc((*length + single_offset)*sizeof(int16_t));
+                file.read(reinterpret_cast<char*>(bufferi16),sizeof(int16_t) * (*length + single_offset));
+                for(int i = 0; i < (*length + single_offset); i++)
+                    (data)[i] = (float)(bufferi16[i]);
+                free(bufferi16);
+
+                for(int i = *length + single_offset; i < *length ; i++)
+                    data[i] = 0;
+
+            }
             break;
         case Curve::CurveType(UINT8):
-            *length  = ftell(file);
-            std::fseek(file,single_offset,0);
-
-            bufferui8 = (uint8_t*)malloc((*length)*sizeof(uint8_t));
+            *length  = file.size()/sizeof(uint8_t);
             data = (float *)malloc((*length)*sizeof(float));
-            std::fread(bufferui8,sizeof(uint8_t),*length,file);
-            for(int i = 0; i < *length; i++)
-                data[i] =(float)(bufferui8[i]);
-            free(bufferui8);
+            // read full data
+            if (single_offset > 0)
+            {
+
+                for(int i = 0; i < single_offset; i++)
+                    data[i] = 0;
+
+                bufferui8 = (uint8_t*)malloc((*length - single_offset)*sizeof(uint8_t));
+                file.read(reinterpret_cast<char*>(bufferui8),sizeof(uint8_t) * (*length - single_offset));
+                for(int i = 0; i < (*length - single_offset); i++)
+                    (data+single_offset)[i] = (float)(bufferui8[i]);
+                free(bufferui8);
+            }
+            else
+            {
+                file.seek(sizeof(uint8_t) * -single_offset);
+                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
+
+                bufferui8 = (uint8_t*)malloc((*length + single_offset)*sizeof(uint8_t));
+                file.read(reinterpret_cast<char*>(bufferui8),sizeof(uint8_t) * (*length + single_offset));
+                for(int i = 0; i < (*length + single_offset); i++)
+                    (data)[i] = (float)(bufferui8[i]);
+                free(bufferui8);
+
+                for(int i = *length + single_offset; i < *length ; i++)
+                    data[i] = 0;
+
+            }
             break;
         case Curve::CurveType(INT8):
-            *length  = ftell(file);
-            std::fseek(file,single_offset,0);
-
-            bufferi8 = (int8_t*)malloc((*length)*sizeof(int8_t));
+            *length  = file.size()/sizeof(int8_t);
             data = (float *)malloc((*length)*sizeof(float));
-            std::fread(bufferi8,sizeof(int8_t),*length,file);
-            for(int i = 0; i < *length; i++)
-                data[i] =(float)(bufferi8[i]);
-            free(bufferi8);
-            break;*/
+            // read full data
+            if (single_offset > 0)
+            {
+
+                for(int i = 0; i < single_offset; i++)
+                    data[i] = 0;
+
+                bufferi8 = (int8_t*)malloc((*length - single_offset)*sizeof(int8_t));
+                file.read(reinterpret_cast<char*>(bufferi8),sizeof(int8_t) * (*length - single_offset));
+                for(int i = 0; i < (*length - single_offset); i++)
+                    (data+single_offset)[i] = (float)(bufferi8[i]);
+                free(bufferi8);
+            }
+            else
+            {
+                file.seek(sizeof(int8_t) * -single_offset);
+                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
+
+                bufferi8 = (int8_t*)malloc((*length + single_offset)*sizeof(int8_t));
+                file.read(reinterpret_cast<char*>(bufferi8),sizeof(int8_t) * (*length + single_offset));
+                for(int i = 0; i < (*length + single_offset); i++)
+                    (data)[i] = (float)(bufferi8[i]);
+                free(bufferi8);
+
+                for(int i = *length + single_offset; i < *length ; i++)
+                    data[i] = 0;
+
+            }
+            break;
         default:
             assert(0);
             break;
