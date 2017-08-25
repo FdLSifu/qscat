@@ -230,14 +230,31 @@ bool Curve::isLoaded()
 
 int Curve::length()
 {
-    int nbpoints;
+    int nbpoints,shift;
     // get size
     FILE *file = fopen(fn.toLatin1().data(),"rb");
     assert(file);
 
     std::fseek(file,0,SEEK_END);
 
-    int shift = 2;
+    switch (this->type) {
+    case Curve::CurveType(FLOAT32):
+    case Curve::CurveType(UINT32):
+    case Curve::CurveType(INT32):
+        shift = 2;
+        break;
+    case Curve::CurveType(UINT16):
+    case Curve::CurveType(INT16):
+        shift = 1;
+        break;
+    case Curve::CurveType(UINT8):
+    case Curve::CurveType(INT8):
+        shift = 0;
+        break;
+    default:
+        assert(0);
+        break;
+    }
 
     nbpoints = ftell(file)>>shift;
     fclose(file);
@@ -246,7 +263,7 @@ int Curve::length()
 }
 
 // data must be freed by the caller
-float * Curve::getrawdata(int *length)
+float * Curve::getrawdata(int *length, int single_offset)
 {
     float *data = 0;
     uint32_t *bufferui32;
@@ -256,26 +273,43 @@ float * Curve::getrawdata(int *length)
     uint8_t *bufferui8;
     int8_t *bufferi8;
 
-    FILE *file = fopen(fn.toLatin1().data(),"rb");
-    assert(file);
+    QFile file(fn);
 
-    std::fseek(file,0,SEEK_END);
+    assert(file.open(QIODevice::ReadOnly));
 
+    file.seek(0);
 
+    // Single offset cannot be negative
 
     switch (this->type)
     {
         case Curve::CurveType(FLOAT32):
-            *length  = ftell(file)>>2;
-            std::fseek(file,0,0);
+            *length  = file.size()/sizeof(float);
             // allocate data memory
             data = (float *)malloc((*length)*sizeof(float));
-            // read full data // Can be optimize to read only display data
-            std::fread(data,sizeof(float),*length,file);
+            // read full data
+            if (single_offset > 0)
+            {
+
+                for(int i = 0; i < single_offset; i++)
+                    data[i] = 0;
+                file.read(reinterpret_cast<char*>(data+single_offset), sizeof(float) * (*length - single_offset));
+            }
+            else
+            {
+                file.seek(sizeof(float) * -single_offset);
+                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
+                for(int i = *length + single_offset; i < *length ; i++)
+                    data[i] = 0;
+
+            }
+
             break;
-        case Curve::CurveType(UINT32):
+        /*case Curve::CurveType(UINT32):
             *length  = ftell(file)>>2;
-            std::fseek(file,0,0);
+            if (single_offset < 0)
+            std::fseek(file,single_offset>>2,0);
+
             bufferui32 = (uint32_t*)malloc((*length)*sizeof(uint32_t));
             data = (float *)malloc((*length)*sizeof(float));
             std::fread(bufferui32,sizeof(uint32_t),*length,file);
@@ -285,7 +319,8 @@ float * Curve::getrawdata(int *length)
             break;
         case Curve::CurveType(INT32):
             *length  = ftell(file)>>2;
-            std::fseek(file,0,0);
+            std::fseek(file,single_offset>>2,0);
+
             bufferi32 = (int32_t*)malloc((*length)*sizeof(int32_t));
             data = (float *)malloc((*length)*sizeof(float));
             std::fread(bufferi32,sizeof(int32_t),*length,file);
@@ -295,7 +330,8 @@ float * Curve::getrawdata(int *length)
             break;
         case Curve::CurveType(UINT16):
             *length  = ftell(file)>>1;
-            std::fseek(file,0,0);
+            std::fseek(file,single_offset>>1,0);
+
             bufferui16 = (uint16_t*)malloc((*length)*sizeof(uint16_t));
             data = (float *)malloc((*length)*sizeof(float));
             std::fread(bufferui16,sizeof(uint16_t),*length,file);
@@ -305,7 +341,8 @@ float * Curve::getrawdata(int *length)
             break;
         case Curve::CurveType(INT16):
             *length  = ftell(file)>>1;
-            std::fseek(file,0,0);
+            std::fseek(file,single_offset>>1,0);
+
             bufferi16 = (int16_t*)malloc((*length)*sizeof(int16_t));
             data = (float *)malloc((*length)*sizeof(float));
             std::fread(bufferi16,sizeof(int16_t),*length,file);
@@ -315,7 +352,8 @@ float * Curve::getrawdata(int *length)
             break;
         case Curve::CurveType(UINT8):
             *length  = ftell(file);
-            std::fseek(file,0,0);
+            std::fseek(file,single_offset,0);
+
             bufferui8 = (uint8_t*)malloc((*length)*sizeof(uint8_t));
             data = (float *)malloc((*length)*sizeof(float));
             std::fread(bufferui8,sizeof(uint8_t),*length,file);
@@ -325,20 +363,21 @@ float * Curve::getrawdata(int *length)
             break;
         case Curve::CurveType(INT8):
             *length  = ftell(file);
-            std::fseek(file,0,0);
+            std::fseek(file,single_offset,0);
+
             bufferi8 = (int8_t*)malloc((*length)*sizeof(int8_t));
             data = (float *)malloc((*length)*sizeof(float));
             std::fread(bufferi8,sizeof(int8_t),*length,file);
             for(int i = 0; i < *length; i++)
                 data[i] =(float)(bufferi8[i]);
             free(bufferi8);
-            break;
+            break;*/
         default:
             assert(0);
             break;
     }
 
-    fclose(file);
+    file.close();
 
     return data;
 }

@@ -13,6 +13,7 @@
 #include <QAreaSeries>
 #include <QApplication>
 #include <QDockWidget>
+#include <QToolButton>
 
 MainWindow * MainWindow::instance = 0;
 
@@ -37,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->addDockWidget(Qt::BottomDockWidgetArea, ScaTool::dockcurves);
 
     ScaTool::synchrodialog = new SynchroDialog(this);
+    ScaTool::attackdialog = new Attackwindow(this);
     ScaTool::main_plot = ui->mainplot;
     ScaTool::statusbar = ui->statusbar;
 
@@ -51,6 +53,7 @@ MainWindow::~MainWindow()
     delete ui;
     delete ScaTool::curve_table;
     delete ScaTool::synchrodialog;
+    delete ScaTool::attackdialog;
 
 }
 
@@ -58,6 +61,11 @@ MainWindow * MainWindow::getInstance()
 {
     return instance;
 }
+
+class QBinaryFileDialog : public QFileDialog
+{
+
+};
 
 void MainWindow::on_open_pressed()
 {
@@ -180,7 +188,42 @@ void MainWindow::on_refresh_pressed()
 void MainWindow::on_curves_pressed()
 {
     if (ScaTool::dockcurves->isHidden())
+    {
         ScaTool::dockcurves->show();
+        ui->curves->setIcon(QIcon(":images/arrow-down.png"));
+    }
     else
+    {
         ScaTool::dockcurves->hide();
+        ui->curves->setIcon(QIcon(":images/arrow-up.png"));
+    }
+}
+
+void MainWindow::on_attack_pressed()
+{
+    ScaTool::attackdialog->show();
+}
+
+void MainWindow::on_save_pressed()
+{
+    int curve_length = 0;
+    if (ScaTool::curves->length() == 0)
+        return;
+
+    // Create traces data file
+    QString fileName = QFileDialog::getSaveFileName(this,tr("Save File"),QDir::currentPath(),tr("Binary (*.bin)"));
+    QFile trace(fileName);
+    if (trace.open(QIODevice::WriteOnly) == 0)
+            return;
+
+    for (int i = 0; i < ScaTool::curves->length(); i++)
+    {
+        Curve* c = ScaTool::curves->at(i);
+        float * buf = c->getrawdata(&curve_length, c->xoffset);
+        trace.write(reinterpret_cast<const char*>(buf), curve_length<<2);
+        // free buf
+        free(buf);
+
+    }
+
 }

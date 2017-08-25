@@ -48,3 +48,8 @@ FORMS    += design.ui \
     synchrodialog.ui \
     curvelistwidget.ui \
     attackwindow.ui
+
+RESOURCES += \
+    scatool_resource.qrc
+
+DISTFILES +=

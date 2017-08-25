@@ -36,6 +36,10 @@ private slots:
 
     void on_curves_pressed();
 
+    void on_attack_pressed();
+
+    void on_save_pressed();
+
 public slots:
     void updateStatusBar();
 

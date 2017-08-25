@@ -12,6 +12,7 @@ QList<Curve*> * ScaTool::curves = 0;
 QDockWidget *ScaTool::dockcurves = 0;
 CurveListWidget *ScaTool::curve_table = 0;
 SynchroDialog *ScaTool::synchrodialog = 0;
+Attackwindow *ScaTool::attackdialog = 0;
 ChartView *ScaTool::main_plot = 0;
 QtCharts::QChartView *ScaTool::down_plot = 0;
 QStatusBar * ScaTool::statusbar = 0;

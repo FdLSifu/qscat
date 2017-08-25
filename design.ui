@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string notr="true">QSCAT (Qt Side Channel Analysis Tool)</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -76,22 +76,30 @@
     </item>
     <item row="0" column="9">
      <widget class="QToolButton" name="curves">
+      <property name="toolTip">
+       <string>Toggle list view</string>
+      </property>
       <property name="text">
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset theme="x-office-spreadsheet"/>
+       <iconset resource="scatool_resource.qrc">
+        <normaloff>:/images/arrow-down.png</normaloff>
+        <normalon>:/images/arrow-up.png</normalon>:/images/arrow-down.png</iconset>
       </property>
      </widget>
     </item>
     <item row="0" column="0">
      <widget class="QToolButton" name="open">
+      <property name="toolTip">
+       <string>Open curves</string>
+      </property>
       <property name="text">
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset theme="folder-open">
-        <normaloff>.</normaloff>.</iconset>
+       <iconset resource="scatool_resource.qrc">
+        <normaloff>:/images/fileopen.png</normaloff>:/images/fileopen.png</iconset>
       </property>
      </widget>
     </item>
@@ -111,12 +119,15 @@
     </item>
     <item row="0" column="8">
      <widget class="QToolButton" name="refresh">
+      <property name="toolTip">
+       <string>Clear curves</string>
+      </property>
       <property name="text">
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset theme="view-refresh">
-        <normaloff>.</normaloff>.</iconset>
+       <iconset resource="scatool_resource.qrc">
+        <normaloff>:/images/remove.png</normaloff>:/images/remove.png</iconset>
       </property>
      </widget>
     </item>
@@ -126,8 +137,8 @@
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset theme="document-save">
-        <normaloff>.</normaloff>.</iconset>
+       <iconset resource="scatool_resource.qrc">
+        <normaloff>:/images/filesave.png</normaloff>:/images/filesave.png</iconset>
       </property>
      </widget>
     </item>
@@ -175,6 +186,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="scatool_resource.qrc"/>
+ </resources>
  <connections/>
 </ui>

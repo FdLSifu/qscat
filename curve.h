@@ -73,8 +73,7 @@ public:
     void setchkbox(QCheckBox * chkbox);
     void settypecmbbox(QComboBox * typecmbbox);
 
-private:
-    float *getrawdata(int *length);
+    float *getrawdata(int *length, int single_offset = 0);
 
 public slots:
     void curve_clicked(QPointF pt);
