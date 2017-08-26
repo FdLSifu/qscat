@@ -5,6 +5,7 @@
 #include <QValueAxis>
 #include <QtGlobal>
 #include <QColorDialog>
+#include <stdint.h>
 
 Curve::Curve(int id) :
     QObject()
