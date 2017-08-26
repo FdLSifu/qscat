@@ -94,6 +94,9 @@ void ChartView::mouseReleaseEvent(QMouseEvent *event)
 void ChartView::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()) {
+    case Qt::Key_Escape:
+        chart()->zoomReset();
+        break;
     case Qt::Key_Plus:
         chart()->zoomIn();
         break;
