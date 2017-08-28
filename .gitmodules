@@ -1,0 +1,3 @@
+[submodule "daredevil"]
+	path = daredevil
+	url = https://github.com/SideChannelMarvels/Daredevil
