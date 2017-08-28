@@ -168,7 +168,7 @@ QList<QPointF> Curve::downsample_minmax(float *data,int factor, int nbpoints)
 {
     QList<QPointF> points_list;
     float dmin = std::numeric_limits<float>::max();
-    float dmax = std::numeric_limits<float>::min();
+    float dmax = -std::numeric_limits<float>::max();
     for (int i = 0; i < nbpoints ; i ++)
     {
         if (factor > 1)
@@ -181,7 +181,7 @@ QList<QPointF> Curve::downsample_minmax(float *data,int factor, int nbpoints)
                 points_list.append(QPointF(i+xoffset,dmax));
 
                 dmin = std::numeric_limits<float>::max();
-                dmax = std::numeric_limits<float>::min();
+                dmax = -std::numeric_limits<float>::max();
                 continue;
             }
             dmin = std::min(data[i],dmin);
