@@ -5,6 +5,7 @@
 #include <QValueAxis>
 #include <QtGlobal>
 #include <QColorDialog>
+#include <stdint.h>
 
 Curve::Curve(int id) :
     QObject()
@@ -272,11 +273,11 @@ float * Curve::getrawdata(int *length, int single_offset)
     int16_t *bufferi16;
     uint8_t *bufferui8;
     int8_t *bufferi8;
+    bool is_file_open;
 
     QFile file(fn);
-
-    assert(file.open(QIODevice::ReadOnly));
-
+    is_file_open = file.open(QIODevice::ReadOnly);
+    assert(is_file_open == true);
     file.seek(0);
 
     // Single offset cannot be negative
@@ -509,7 +510,13 @@ float * Curve::getrawdata(int *length, int single_offset)
 
 void Curve::curve_clicked(QPointF pt)
 {
-    ScaTool::statusbar->showMessage("Curve coordinate: (" + QString::number(pt.x()) + ", " + QString::number(pt.y()) + ")",0);
+    QString curve_name = "undef";
+    Curve* currCurv = ScaTool::getCurveFromDisplaySerie(this->displayseries);
+    if(currCurv != NULL)
+    {
+        curve_name = currCurv->cname;
+    }
+    ScaTool::statusbar->showMessage("Curve " + curve_name + " x=" + QString::number(pt.x()) + " y=" + QString::number(pt.y()), 0);
 }
 
 void Curve::shift(int offset)
