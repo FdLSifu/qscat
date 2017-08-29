@@ -14,6 +14,7 @@
 #include <QApplication>
 #include <QDockWidget>
 #include <QToolButton>
+#include <QErrorMessage>
 
 MainWindow * MainWindow::instance = 0;
 
@@ -201,7 +202,12 @@ void MainWindow::on_curves_pressed()
 
 void MainWindow::on_attack_pressed()
 {
-    ScaTool::attackdialog->show();
+    if (ScaTool::attackdialog->daredevil_path.length()) {
+        ScaTool::attackdialog->show();
+    } else {
+        QErrorMessage *error = new QErrorMessage(this);
+        error->showMessage("Daredevil binary not found in the project/global path");
+    }
 }
 
 void MainWindow::on_save_pressed()

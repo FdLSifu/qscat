@@ -17,6 +17,7 @@ class Attackwindow : public QDialog
 public:
     explicit Attackwindow(QWidget *parent = 0);
     ~Attackwindow();
+    QString daredevil_path;
 
 private slots:
     void on_DataButton_pressed();
@@ -32,6 +33,7 @@ private slots:
 private:
     Ui::Attackwindow *ui;
     QMap<QString, int> algo_map;
+    QString input_dataset;
 };
 
 #endif // ATTACKWINDOW_H
