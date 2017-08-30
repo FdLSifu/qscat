@@ -232,11 +232,6 @@ bool Curve::isLoaded()
 int Curve::length()
 {
     int nbpoints,shift;
-    // get size
-    FILE *file = fopen(fn.toLatin1().data(),"rb");
-    assert(file);
-
-    std::fseek(file,0,SEEK_END);
 
     switch (this->type) {
     case Curve::CurveType(FLOAT32):
@@ -256,10 +251,19 @@ int Curve::length()
         assert(0);
         break;
     }
+    if (ncol == 0)
+    {
+        FILE *file = fopen(fn.toLatin1().data(),"rb");
+        assert(file);
 
-    nbpoints = ftell(file)>>shift;
-    fclose(file);
-
+        std::fseek(file,0,SEEK_END);
+        nbpoints = ftell(file)>>shift;
+        fclose(file);
+    }
+    else
+    {
+        nbpoints = ncol>>shift;
+    }
     return nbpoints;
 }
 
@@ -273,19 +277,25 @@ float * Curve::getrawdata(int *length, int single_offset)
     int16_t *bufferi16;
     uint8_t *bufferui8;
     int8_t *bufferi8;
+    double *bufferd;
     bool is_file_open;
+    int tr_off = row*ncol;
+    int size = 0;
 
     QFile file(fn);
     is_file_open = file.open(QIODevice::ReadOnly);
     assert(is_file_open == true);
-    file.seek(0);
 
-    // Single offset cannot be negative
+    if (ncol)
+        size = ncol;
+    else
+        size = file.size();
 
+    file.seek(tr_off);
     switch (this->type)
     {
         case Curve::CurveType(FLOAT32):
-            *length  = file.size()/sizeof(float);
+            *length  = size/sizeof(float);
             // allocate data memory
             data = (float *)malloc((*length)*sizeof(float));
             // read full data
@@ -298,7 +308,7 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
             else
             {
-                file.seek(sizeof(float) * -single_offset);
+                file.seek(tr_off + (sizeof(float) * -single_offset));
                 file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
                 for(int i = *length + single_offset; i < *length ; i++)
                     data[i] = 0;
@@ -307,7 +317,7 @@ float * Curve::getrawdata(int *length, int single_offset)
 
             break;
         case Curve::CurveType(UINT32):
-            *length  = file.size()/sizeof(uint32_t);
+            *length  = size/sizeof(uint32_t);
             data = (float *)malloc((*length)*sizeof(float));
             // read full data
             if (single_offset > 0)
@@ -324,7 +334,7 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
             else
             {
-                file.seek(sizeof(uint32_t) * -single_offset);
+                file.seek(tr_off + (sizeof(uint32_t) * -single_offset));
                 file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferui32 = (uint32_t*)malloc((*length + single_offset)*sizeof(uint32_t));
@@ -339,7 +349,7 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
             break;
         case Curve::CurveType(INT32):
-            *length  = file.size()/sizeof(int32_t);
+            *length  = size/sizeof(int32_t);
             data = (float *)malloc((*length)*sizeof(float));
             // read full data
             if (single_offset > 0)
@@ -356,7 +366,7 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
             else
             {
-                file.seek(sizeof(int32_t) * -single_offset);
+                file.seek(tr_off + (sizeof(int32_t) * -single_offset));
                 file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferi32 = (int32_t*)malloc((*length + single_offset)*sizeof(int32_t));
@@ -371,7 +381,7 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
             break;
         case Curve::CurveType(UINT16):
-            *length  = file.size()/sizeof(uint16_t);
+            *length  = size/sizeof(uint16_t);
             data = (float *)malloc((*length)*sizeof(float));
             // read full data
             if (single_offset > 0)
@@ -388,7 +398,7 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
             else
             {
-                file.seek(sizeof(uint16_t) * -single_offset);
+                file.seek(tr_off + (sizeof(uint16_t) * -single_offset));
                 file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferui16 = (uint16_t*)malloc((*length + single_offset)*sizeof(uint16_t));
@@ -403,7 +413,7 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
             break;
         case Curve::CurveType(INT16):
-            *length  = file.size()/sizeof(int16_t);
+            *length  = size/sizeof(int16_t);
             data = (float *)malloc((*length)*sizeof(float));
             // read full data
             if (single_offset > 0)
@@ -420,7 +430,7 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
             else
             {
-                file.seek(sizeof(int16_t) * -single_offset);
+                file.seek(tr_off + (sizeof(int16_t) * -single_offset));
                 file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferi16 = (int16_t*)malloc((*length + single_offset)*sizeof(int16_t));
@@ -435,7 +445,7 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
             break;
         case Curve::CurveType(UINT8):
-            *length  = file.size()/sizeof(uint8_t);
+            *length  = size/sizeof(uint8_t);
             data = (float *)malloc((*length)*sizeof(float));
             // read full data
             if (single_offset > 0)
@@ -452,7 +462,7 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
             else
             {
-                file.seek(sizeof(uint8_t) * -single_offset);
+                file.seek(tr_off + (sizeof(uint8_t) * -single_offset));
                 file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferui8 = (uint8_t*)malloc((*length + single_offset)*sizeof(uint8_t));
@@ -467,7 +477,7 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
             break;
         case Curve::CurveType(INT8):
-            *length  = file.size()/sizeof(int8_t);
+            *length  = size/sizeof(int8_t);
             data = (float *)malloc((*length)*sizeof(float));
             // read full data
             if (single_offset > 0)
@@ -484,7 +494,7 @@ float * Curve::getrawdata(int *length, int single_offset)
             }
             else
             {
-                file.seek(sizeof(int8_t) * -single_offset);
+                file.seek(tr_off + (sizeof(int8_t) * -single_offset));
                 file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferi8 = (int8_t*)malloc((*length + single_offset)*sizeof(int8_t));
@@ -492,6 +502,38 @@ float * Curve::getrawdata(int *length, int single_offset)
                 for(int i = 0; i < (*length + single_offset); i++)
                     (data)[i] = (float)(bufferi8[i]);
                 free(bufferi8);
+
+                for(int i = *length + single_offset; i < *length ; i++)
+                    data[i] = 0;
+
+            }
+            break;
+        case Curve::CurveType(DOUBLE):
+            *length  = size/sizeof(double);
+            data = (float *)malloc((*length)*sizeof(float));
+            // read full data
+            if (single_offset > 0)
+            {
+
+                for(int i = 0; i < single_offset; i++)
+                    data[i] = 0;
+
+                bufferd = (double*)malloc((*length - single_offset)*sizeof(double));
+                file.read(reinterpret_cast<char*>(bufferd),sizeof(double) * (*length - single_offset));
+                for(int i = 0; i < (*length - single_offset); i++)
+                    (data+single_offset)[i] = (float)(bufferd[i]);
+                free(bufferd);
+            }
+            else
+            {
+                file.seek(tr_off + (sizeof(double) * -single_offset));
+                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
+
+                bufferd = (double*)malloc((*length + single_offset)*sizeof(double));
+                file.read(reinterpret_cast<char*>(bufferd),sizeof(double) * (*length + single_offset));
+                for(int i = 0; i < (*length + single_offset); i++)
+                    (data)[i] = (float)(bufferd[i]);
+                free(bufferd);
 
                 for(int i = *length + single_offset; i < *length ; i++)
                     data[i] = 0;
@@ -613,10 +655,16 @@ void Curve::colorbtn_pressed()
 {
     QPushButton * colorbtn = (QPushButton*)sender();
     Curve * curve = this;
-    QColor color = QColorDialog::getColor(curve->getColor());
+    QColorDialog qcd(0);
+    qcd.setWindowTitle("Pick a color");
+    qcd.exec();
+    QColor color = qcd.selectedColor();
 
-    // Update curve color
-    curve->setColor(color);
+    if (qcd.result())
+        // Update curve color
+        curve->setColor(color);
+    else
+        return;
 
     // Update curve color on list
     if (curve->displayed)

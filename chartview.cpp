@@ -99,21 +99,85 @@ void ChartView::keyPressEvent(QKeyEvent *event)
         break;
     case Qt::Key_Plus:
         chart()->zoomIn();
+        if(event->modifiers().testFlag(Qt::ShiftModifier))
+        {
+            chart()->zoomIn();
+        }
+        if(event->modifiers().testFlag(Qt::ControlModifier))
+        {
+            chart()->zoomIn();
+        }
         break;
     case Qt::Key_Minus:
         chart()->zoomOut();
+        if(event->modifiers().testFlag(Qt::ShiftModifier))
+        {
+            chart()->zoomOut();
+        }
+        if(event->modifiers().testFlag(Qt::ControlModifier))
+        {
+            chart()->zoomOut();
+        }
         break;
     case Qt::Key_Left:
-        chart()->scroll(-10, 0);
+        if(event->modifiers().testFlag(Qt::ShiftModifier))
+        {
+            if(event->modifiers().testFlag(Qt::ControlModifier))
+            {
+                chart()->scroll(-100, 0);
+            }else
+            {
+                chart()->scroll(-50, 0);
+            }
+        }else
+        {
+            chart()->scroll(-10, 0);
+        }
         break;
     case Qt::Key_Right:
-        chart()->scroll(10, 0);
+        if(event->modifiers().testFlag(Qt::ShiftModifier))
+        {
+            if(event->modifiers().testFlag(Qt::ControlModifier))
+            {
+                chart()->scroll(100, 0);
+            }else
+            {
+                chart()->scroll(50, 0);
+            }
+        }else
+        {
+            chart()->scroll(10, 0);
+        }
         break;
     case Qt::Key_Up:
-        chart()->scroll(0, 10);
+        if(event->modifiers().testFlag(Qt::ShiftModifier))
+        {
+            if(event->modifiers().testFlag(Qt::ControlModifier))
+            {
+                chart()->scroll(0, 100);
+            }else
+            {
+                chart()->scroll(0, 50);
+            }
+        }else
+        {
+            chart()->scroll(0, 10);
+        }
         break;
     case Qt::Key_Down:
-        chart()->scroll(0, -10);
+        if(event->modifiers().testFlag(Qt::ShiftModifier))
+        {
+            if(event->modifiers().testFlag(Qt::ControlModifier))
+            {
+                chart()->scroll(0, -100);
+            }else
+            {
+                chart()->scroll(0, -50);
+            }
+        }else
+        {
+            chart()->scroll(0, -10);
+        }
         break;
     default:
         QChartView::keyPressEvent(event);

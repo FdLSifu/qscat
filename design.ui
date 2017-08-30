@@ -10,8 +10,15 @@
     <height>564</height>
    </rect>
   </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string notr="true">QSCAT (Qt Side Channel Analysis Tool)</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="scatool_resource.qrc">
+    <normaloff>:/images/turkish-cat.png</normaloff>:/images/turkish-cat.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">

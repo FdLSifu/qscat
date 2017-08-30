@@ -22,7 +22,8 @@ class Curve : public QObject
         UINT16  =3,
         INT16   =4,
         UINT8   =5,
-        INT8    =6
+        INT8    =6,
+        DOUBLE  =7
     };
 
 public:
@@ -42,7 +43,9 @@ public:
     int idx;
     int xoffset = 0;
     int yoffset = 0;
-
+    bool onefile = false;
+    int row = 0;
+    int ncol = 0;
     // Constructor
     Curve(int id);
 
