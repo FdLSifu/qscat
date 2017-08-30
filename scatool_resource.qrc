@@ -5,6 +5,7 @@
         <file>images/remove.png</file>
         <file>images/arrow-up.png</file>
         <file>images/arrow-down.png</file>
+        <file>images/ajax-loader.gif</file>
         <file>images/turkish-cat.png</file>
     </qresource>
 </RCC>
