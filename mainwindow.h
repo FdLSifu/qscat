@@ -45,9 +45,14 @@ public slots:
 
 private:
     Ui::MainWindow *ui;
+    void load_files(QStringList files);
+
 protected:
     void closeEvent(QCloseEvent *event);
-
+    void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
+    void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
+    void dragLeaveEvent(QDragLeaveEvent *event) Q_DECL_OVERRIDE;
+    void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
 };
 
 #endif // MAINWINDOW_H

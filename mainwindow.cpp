@@ -16,6 +16,8 @@
 #include <QToolButton>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QDragEnterEvent>
+#include <QMimeData>
 
 MainWindow * MainWindow::instance = 0;
 
@@ -69,59 +71,119 @@ class QBinaryFileDialog : public QFileDialog
 
 };
 
-void MainWindow::on_open_pressed()
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-    QStringList fnames = QFileDialog::getOpenFileNames(this,QString("Select traces to open"));
-    // Open filename
-
-    if (fnames.length() == 1)
+    const QMimeData* mimeData = event->mimeData();
+    if (mimeData->hasUrls())
     {
-        QString fn = fnames.at(0);
+        QList<QUrl> urls = mimeData->urls();
+        if (urls.size() >= 1)
+        {
+            QUrl url = urls.at(0);
+            if (url.isValid() && (url.scheme().toLower() == "file") && mimeData->hasFormat("text/uri-list"))
+            {
+                event->acceptProposedAction();
+            }
+        }
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent *event)
+{
+    const QMimeData* mimeData = event->mimeData();
+    if (mimeData->hasUrls())
+    {
+        QStringList fnames;
+        QList<QUrl> urlList = mimeData->urls();
+        Q_FOREACH(QUrl url, urlList)
+        {
+            fnames.append(url.toLocalFile());
+        }
+        load_files(fnames);
+    }
+}
+
+void MainWindow::dragMoveEvent(QDragMoveEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+void MainWindow::dragLeaveEvent(QDragLeaveEvent *event)
+{
+    event->accept();
+}
+
+void MainWindow::load_files(QStringList files)
+{
+    if (files.length() == 1)
+    {
+        QString fn = files.at(0);
         QFile file(fn.toLatin1().data());
         int row = 0;
         int col = 0;
         int size = 1;
 
-        assert(file.open(QIODevice::ReadOnly));
+        assert(file.open(QIODevice::ReadOnly) == true);
         int file_len = file.size();
         bool bok,rok,cok,sok;
         QString rowcol;
-        do
+
+        QFileInfo fileinfo(file);
+        QStringList entry= fileinfo.fileName().split("x");
+        if(entry.length() >= 4)
         {
-            rowcol = QInputDialog::getText(this, tr("Please indicate your trace format"),
-                                                 tr("Enter your trace format ROWxCOL[xSIZE]"), QLineEdit::Normal,
-                                                 "1x"+QString::number(file_len), &bok);
-            // cancel
-            if (bok == false)
-                return;
-
-            QStringList entry= rowcol.split("x");
-            if (entry.length() >= 2)
-            {
-                row = entry.at(0).toInt(&rok,10);
-                col = entry.at(1).toInt(&cok,10);
-            }
-            if (entry.length() == 3)
-            {
-                size = entry.at(2).toInt(&sok,10);
-            }
-            else
-                sok = true;
-
-            if(!(rok & cok & sok & (size > 0) & (row*col*size == file_len)))
+            row = entry.at(1).toInt(&rok,10);
+            col = entry.at(2).toInt(&cok,10);
+            size = atoi(entry.at(3).toStdString().c_str());
+            if(!(rok & cok & (size > 0) & (row*col*size == file_len)))
             {
                 QMessageBox msgbox;
-                msgbox.critical(0,"Error","Input doesn't match with file size : "+QString::number(file_len));
+                msgbox.critical(0, "Error",
+                                "Filename params doesn't match with file size : "+
+                                QString::number(file_len)+
+                                "\nFilename format xROWxCOLxSIZE (example tracex10x32x4.bin)");
                 msgbox.show();
-                rowcol = "";
                 row = 0;
-                col = 0;
-                size = 1;
-                continue;
             }
 
         }
-        while(bok && rowcol.isEmpty());
+        if(row == 0)
+        {
+            do
+            {
+                 rowcol = QInputDialog::getText(this, tr("Please indicate your trace format"),
+                                                     tr("Enter your trace format ROWxCOL[xSIZE]"), QLineEdit::Normal,
+                                                     "1x"+QString::number(file_len), &bok);
+                // cancel
+                if (bok == false)
+                    return;
+
+                QStringList entry= rowcol.split("x");
+                if (entry.length() >= 2)
+                {
+                    row = entry.at(0).toInt(&rok,10);
+                    col = entry.at(1).toInt(&cok,10);
+                }
+                if (entry.length() == 3)
+                {
+                    size = entry.at(2).toInt(&sok,10);
+                }
+                else
+                    sok = true;
+
+                if(!(rok & cok & sok & (size > 0) & (row*col*size == file_len)))
+                {
+                    QMessageBox msgbox;
+                    msgbox.critical(0,"Error","Input doesn't match with file size : "+QString::number(file_len));
+                    msgbox.show();
+                    rowcol = "";
+                    row = 0;
+                    col = 0;
+                    size = 1;
+                    continue;
+                }
+            } while(bok && rowcol.isEmpty());
+        }
 
         for (int i = 0; i < row; i ++)
         {
@@ -150,8 +212,8 @@ void MainWindow::on_open_pressed()
     }
     else
     {
-        for (QStringList::iterator it = fnames.begin();
-             it != fnames.end(); ++it) {
+        for (QStringList::iterator it = files.begin();
+             it != files.end(); ++it) {
             QString fn = *it;
 
             // Check file exist
@@ -183,6 +245,13 @@ void MainWindow::on_open_pressed()
     // Ui effect to show curve list
     if (ScaTool::dockcurves->isHidden())
         ScaTool::dockcurves->show();
+}
+
+void MainWindow::on_open_pressed()
+{
+    QStringList fnames = QFileDialog::getOpenFileNames(this,QString("Select trace(s) to open"));
+    // Open/Load file(s)
+    load_files(fnames);
 }
 
 void MainWindow::on_left_pressed()
@@ -291,7 +360,7 @@ void MainWindow::on_save_pressed()
     // Create traces data file
     QString fileName = QFileDialog::getSaveFileName(this,tr("Save File"),QDir::currentPath(),tr("Binary (*.bin)"));
     QFile trace(fileName);
-    if (trace.open(QIODevice::WriteOnly) == 0)
+    if (trace.open(QIODevice::WriteOnly) == false)
             return;
 
     for (int i = 0; i < ScaTool::curves->length(); i++)
