@@ -16,6 +16,9 @@
     <verstretch>69</verstretch>
    </sizepolicy>
   </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>Side Channel Attack</string>
   </property>

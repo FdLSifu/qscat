@@ -30,6 +30,13 @@ private:
     Ui::Attackwindow *ui;
     QMap<QString, int> algo_map;
     QString input_dataset;
+    void load_dataSet(QString filepath_dataset);
+
+protected:
+    void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
+    void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
+    void dragLeaveEvent(QDragLeaveEvent *event) Q_DECL_OVERRIDE;
+    void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
 };
 
 #endif // ATTACKWINDOW_H

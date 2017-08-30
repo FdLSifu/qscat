@@ -17,6 +17,8 @@
 #include <QMovie>
 #include <QLabel>
 #include <QHeaderView>
+#include <QDragEnterEvent>
+#include <QMimeData>
 
 Attackwindow::Attackwindow(QWidget *parent) :
     QDialog(parent),
@@ -72,14 +74,48 @@ Attackwindow::~Attackwindow()
     delete ui;
 }
 
-void Attackwindow::on_DataButton_pressed()
+void Attackwindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    const QMimeData* mimeData = event->mimeData();
+    if (mimeData->hasUrls())
+    {
+        QList<QUrl> urls = mimeData->urls();
+        if (urls.size() == 1)
+        {
+            QUrl url = urls.at(0);
+            if (url.isValid() && (url.scheme().toLower() == "file") && mimeData->hasFormat("text/uri-list"))
+            {
+                event->acceptProposedAction();
+            }
+        }
+    }
+}
+
+void Attackwindow::dropEvent(QDropEvent *event)
+{
+    const QMimeData* mimeData = event->mimeData();
+    if (mimeData->hasUrls())
+    {
+        QList<QUrl> urlList = mimeData->urls();
+        load_dataSet(urlList.at(0).toLocalFile());
+    }
+}
+
+void Attackwindow::dragMoveEvent(QDragMoveEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+void Attackwindow::dragLeaveEvent(QDragLeaveEvent *event)
+{
+    event->accept();
+}
+
+void Attackwindow::load_dataSet(QString filepath_dataset)
 {
     int input_len;
-
-    this->input_dataset =
-            QFileDialog::getOpenFileName(this, QString("Select data set file"));
+    this->input_dataset = filepath_dataset;
     this->qf.setFileName(this->input_dataset);
-
     if (!this->qf.open(QIODevice::ReadOnly))
         return;
 
@@ -120,6 +156,13 @@ void Attackwindow::on_DataButton_pressed()
 
     ui->spinnb_traces->setMaximum(row_index);
     ui->spinnb_traces->setValue(row_index);
+}
+
+void Attackwindow::on_DataButton_pressed()
+{
+    QString filepath_dataset;
+    filepath_dataset = QFileDialog::getOpenFileName(this, QString("Select data set file"));
+    load_dataSet(filepath_dataset);
 }
 
 void Attackwindow::on_spinpts_start_valueChanged(int arg1)
