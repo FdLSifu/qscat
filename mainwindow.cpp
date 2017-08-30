@@ -14,6 +14,8 @@
 #include <QApplication>
 #include <QDockWidget>
 #include <QToolButton>
+#include <QMessageBox>
+#include <QInputDialog>
 
 MainWindow * MainWindow::instance = 0;
 
@@ -72,36 +74,110 @@ void MainWindow::on_open_pressed()
     QStringList fnames = QFileDialog::getOpenFileNames(this,QString("Select traces to open"));
     // Open filename
 
-    for (QStringList::iterator it = fnames.begin();
-         it != fnames.end(); ++it) {
-        QString fn = *it;
+    if (fnames.length() == 1)
+    {
+        QString fn = fnames.at(0);
+        QFile file(fn.toLatin1().data());
+        int row = 0;
+        int col = 0;
+        int size = 1;
 
-        // Check file exist
-        FILE *file = fopen(fn.toLatin1().data(),"rb");
-        assert(file);
-        fclose(file);
-
-        int idx = ScaTool::curves->length();
-
-        Curve *curve = new Curve(idx);
-        curve->fn = fn;
-
-        QFileInfo fileInfo(fn);
-        QString cname(fileInfo.fileName());
-        curve->cname = cname;
-
-        // check if curves already inserted
-        if (ScaTool::getCurveByName(cname) == 0)
+        assert(file.open(QIODevice::ReadOnly));
+        int file_len = file.size();
+        bool bok,rok,cok,sok;
+        QString rowcol;
+        do
         {
-            // Append curve to set of all managed curves
-            ScaTool::curves->append(curve);
-            // Add curve to curve table display
-            ScaTool::curve_table->addCurve(curve);
-            // Add curve to synchro table display
-            ScaTool::synchrodialog->addRefItem(curve->cname);
+            rowcol = QInputDialog::getText(this, tr("Please indicate your trace format"),
+                                                 tr("Enter your trace format ROWxCOL[xSIZE]"), QLineEdit::Normal,
+                                                 "1x"+QString::number(file_len), &bok);
+            // cancel
+            if (bok == false)
+                return;
+
+            QStringList entry= rowcol.split("x");
+            if (entry.length() >= 2)
+            {
+                row = entry.at(0).toInt(&rok,10);
+                col = entry.at(1).toInt(&cok,10);
+            }
+            if (entry.length() == 3)
+            {
+                size = entry.at(2).toInt(&sok,10);
+            }
+
+            if(!(rok & cok & sok & (size > 0) & (row*col*size == file_len)))
+            {
+                QMessageBox msgbox;
+                msgbox.critical(0,"Error","Input doesn't match with file size : "+QString::number(file_len));
+                msgbox.show();
+                rowcol = "";
+                row = 0;
+                col = 0;
+                size = 1;
+                continue;
+            }
+
+        }
+        while(bok && rowcol.isEmpty());
+
+        for (int i = 0; i < row; i ++)
+        {
+            int idx = ScaTool::curves->length();
+
+            Curve *curve = new Curve(idx);
+            curve->fn = fn;
+            curve->ncol = col*size;
+            curve->row = i;
+            curve->onefile = true;
+            QFileInfo fileInfo(fn);
+            QString cname(fileInfo.fileName());
+            curve->cname = cname+":"+QString::number(i);
+
+            // check if curves already inserted
+            if (ScaTool::getCurveByName(cname) == 0)
+            {
+                // Append curve to set of all managed curves
+                ScaTool::curves->append(curve);
+                // Add curve to curve table display
+                ScaTool::curve_table->addCurve(curve);
+                // Add curve to synchro table display
+                ScaTool::synchrodialog->addRefItem(curve->cname);
+            }
         }
     }
+    else
+    {
+        for (QStringList::iterator it = fnames.begin();
+             it != fnames.end(); ++it) {
+            QString fn = *it;
 
+            // Check file exist
+            FILE *file = fopen(fn.toLatin1().data(),"rb");
+            assert(file);
+            fclose(file);
+
+            int idx = ScaTool::curves->length();
+
+            Curve *curve = new Curve(idx);
+            curve->fn = fn;
+
+            QFileInfo fileInfo(fn);
+            QString cname(fileInfo.fileName());
+            curve->cname = cname;
+
+            // check if curves already inserted
+            if (ScaTool::getCurveByName(cname) == 0)
+            {
+                // Append curve to set of all managed curves
+                ScaTool::curves->append(curve);
+                // Add curve to curve table display
+                ScaTool::curve_table->addCurve(curve);
+                // Add curve to synchro table display
+                ScaTool::synchrodialog->addRefItem(curve->cname);
+            }
+        }
+    }
     // Ui effect to show curve list
     if (ScaTool::dockcurves->isHidden())
         ScaTool::dockcurves->show();

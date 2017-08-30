@@ -42,7 +42,9 @@ public:
     int idx;
     int xoffset = 0;
     int yoffset = 0;
-
+    bool onefile = false;
+    int row = 0;
+    int ncol = 0;
     // Constructor
     Curve(int id);
 
