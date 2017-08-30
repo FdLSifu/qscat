@@ -17,6 +17,10 @@ public:
     void showlog(QString stdout);
 
 private:
+    void fillSumMaxKey(QString txt);
+    void getSplitResult(QString txt, QString delim1, QString delim2,
+                        QStringList *list1, QStringList *list2);
+    void fillSumMaxCorr(QString txt);
     Ui::AttackLog *ui;
 };
 

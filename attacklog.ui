@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Gimme the k3y \o/</string>
   </property>
   <widget class="QTabWidget" name="tab1">
    <property name="geometry">
@@ -44,6 +44,13 @@
        <height>410</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <family>DejaVu Sans Mono</family>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
      <property name="columnCount">
       <number>1</number>
      </property>
@@ -53,6 +60,53 @@
      <attribute name="horizontalHeaderStretchLastSection">
       <bool>true</bool>
      </attribute>
+     <column/>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab">
+    <attribute name="title">
+     <string>corr sum(abs)</string>
+    </attribute>
+    <widget class="QTableWidget" name="list_corrsum">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>900</width>
+       <height>410</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>DejaVu Sans Mono</family>
+      </font>
+     </property>
+     <property name="rowCount">
+      <number>5</number>
+     </property>
+     <property name="columnCount">
+      <number>16</number>
+     </property>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
      <column/>
     </widget>
    </widget>
@@ -69,6 +123,13 @@
        <height>410</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <family>DejaVu Sans Mono</family>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
      <property name="columnCount">
       <number>1</number>
      </property>
@@ -81,9 +142,56 @@
      <column/>
     </widget>
    </widget>
+   <widget class="QWidget" name="tab_2">
+    <attribute name="title">
+     <string>corr max(abs)</string>
+    </attribute>
+    <widget class="QTableWidget" name="list_corrmax">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>900</width>
+       <height>410</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>DejaVu Sans Mono</family>
+      </font>
+     </property>
+     <property name="rowCount">
+      <number>5</number>
+     </property>
+     <property name="columnCount">
+      <number>16</number>
+     </property>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+    </widget>
+   </widget>
    <widget class="QWidget" name="tab_6">
     <attribute name="title">
-     <string>full log</string>
+     <string>Full Log</string>
     </attribute>
     <widget class="QPlainTextEdit" name="daredevil_log">
      <property name="geometry">

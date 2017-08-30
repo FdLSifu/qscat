@@ -32,10 +32,16 @@ Attackwindow::Attackwindow(QWidget *parent) :
     algo_map["DES"] = algo_idx++;
 
     ui->algoBox->clear();
-    ui->algoBox->addItems(QStringList()<<"Identity"<<"AES"<<"DES");
+    ui->algoBox->addItems(QStringList()
+                          <<"Identity"
+                          <<"AES"
+                          <<"DES");
 
     ui->functionBox->clear();
-    ui->functionBox->addItems(QStringList()<<"Input"<<"1st round output SBOX"<<"1st XOR");
+    ui->functionBox->addItems(QStringList()
+                              <<"Input"
+                              <<"1st round output SBOX"
+                              <<"1st XOR");
 
     ui->methodBox->clear();
     ui->methodBox->addItems(QStringList() << "CPA");
@@ -119,8 +125,7 @@ void Attackwindow::on_DataButton_pressed()
 void Attackwindow::on_spinpts_start_valueChanged(int arg1)
 {
     //Update value range
-    if (ScaTool::curves->length() > 0)
-    {
+    if (ScaTool::curves->length() > 0) {
         ui->spinpts_start->setRange(0,ScaTool::curves->first()->length());
         ui->spinpts_end->setRange(0,ScaTool::curves->first()->length());
     }
@@ -133,8 +138,7 @@ void Attackwindow::on_spinpts_start_valueChanged(int arg1)
 void Attackwindow::on_spinpts_end_valueChanged(int arg1)
 {
     //Update value range
-    if (ScaTool::curves->length() > 0)
-    {
+    if (ScaTool::curves->length() > 0) {
         ui->spinpts_start->setRange(0,ScaTool::curves->first()->length());
         ui->spinpts_end->setRange(0,ScaTool::curves->first()->length());
     }
@@ -188,7 +192,8 @@ void Attackwindow::on_attackButton_pressed()
     }
 
     QFile::copy(this->input_dataset, tdir.path() + "/input.bin");
-    QFile::copy(this->daredevil_path + "LUT/AES_AFTER_SBOX", tdir.path() + "/lut");
+    QFile::copy(this->daredevil_path + "LUT/AES_AFTER_SBOX",
+                tdir.path() + "/lut");
 
     // Create config file
     QFile config(tdir.path() + "/CONFIG");
@@ -198,24 +203,26 @@ void Attackwindow::on_attackButton_pressed()
     config.write("trace_type=f\n");
     config.write("transpose=false\n");
     config.write("index=0\n");
-    config.write("nsamples="+QString::number(nb_pts).toUtf8()+"\n");
-    config.write("trace="+tdir.path().toUtf8() +"/trace.bin " +QString::number(nb_traces).toUtf8()+ " "+QString::number(nb_pts).toUtf8()+"\n");
+    config.write("nsamples=" + QString::number(nb_pts).toUtf8() + "\n");
+    config.write("trace=" + tdir.path().toUtf8() + "/trace.bin "
+                 + QString::number(nb_traces).toUtf8() + " "
+                 + QString::number(nb_pts).toUtf8() + "\n");
 
     config.write("[Guesses]\n");
     config.write("files=1\n");
     config.write("guess_type=u\n");
     config.write("transpose=false\n");
-    config.write("guess=" + tdir.path().toUtf8() +"/input.bin" + " " + QString::number(nb_traces).toUtf8() + " 16\n");
+    config.write("guess=" + tdir.path().toUtf8() +"/input.bin" + " "
+                 + QString::number(nb_traces).toUtf8() + " 16\n");
     config.write("[General]\n");
     config.write("threads=8\n");
     config.write("order=1\n");
     config.write("return_type=double\n");
     config.write("algorithm=AES\n");
-    config.write("position="+tdir.path().toUtf8()+"/lut\n");
+    config.write("position=" + tdir.path().toUtf8() + "/lut\n");
     config.write("round=0\n");
     config.write("bytenum=all\n");
     config.write("bitnum=none\n");
-
     config.write("memory=4G\n");
     config.write("top=20\n");
 
@@ -226,7 +233,8 @@ void Attackwindow::on_attackButton_pressed()
 
     // Launch daredevil
     QProcess daredevil;
-    daredevil.start(this->daredevil_path + "daredevil -c " + config.fileName(), QIODevice::ReadOnly);
+    daredevil.start(this->daredevil_path + "daredevil -c " + config.fileName(),
+                    QIODevice::ReadOnly);
     daredevil.waitForFinished();
 
     ScaTool::attacklog->showlog(daredevil.readAllStandardOutput());

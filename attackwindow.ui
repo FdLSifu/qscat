@@ -505,7 +505,7 @@
      <property name="font">
       <font>
        <family>DejaVu Sans Mono</family>
-       <pointsize>8</pointsize>
+       <pointsize>9</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
