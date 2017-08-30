@@ -105,6 +105,8 @@ void MainWindow::on_open_pressed()
             {
                 size = entry.at(2).toInt(&sok,10);
             }
+            else
+                sok = true;
 
             if(!(rok & cok & sok & (size > 0) & (row*col*size == file_len)))
             {
