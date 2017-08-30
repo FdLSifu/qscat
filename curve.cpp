@@ -655,10 +655,16 @@ void Curve::colorbtn_pressed()
 {
     QPushButton * colorbtn = (QPushButton*)sender();
     Curve * curve = this;
-    QColor color = QColorDialog::getColor(curve->getColor());
+    QColorDialog qcd(0);
+    qcd.setWindowTitle("Pick a color");
+    qcd.exec();
+    QColor color = qcd.selectedColor();
 
-    // Update curve color
-    curve->setColor(color);
+    if (qcd.result())
+        // Update curve color
+        curve->setColor(color);
+    else
+        return;
 
     // Update curve color on list
     if (curve->displayed)
