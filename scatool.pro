@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     synchrodialog.cpp \
     synchro.cpp \
     curvelistwidget.cpp \
-    attackwindow.cpp
+    attackwindow.cpp \
+    attacklog.cpp
 
 HEADERS  += mainwindow.h \
     scatool.h \
@@ -42,12 +43,14 @@ HEADERS  += mainwindow.h \
     synchrodialog.h \
     synchro.h \
     curvelistwidget.h \
-    attackwindow.h
+    attackwindow.h \
+    attacklog.h
 
 FORMS    += design.ui \
     synchrodialog.ui \
     curvelistwidget.ui \
-    attackwindow.ui
+    attackwindow.ui \
+    attacklog.ui
 
 RESOURCES += \
     scatool_resource.qrc

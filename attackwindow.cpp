@@ -16,6 +16,7 @@
 #include <QStringList>
 #include <QMovie>
 #include <QLabel>
+#include <QHeaderView>
 
 Attackwindow::Attackwindow(QWidget *parent) :
     QDialog(parent),
@@ -45,18 +46,19 @@ Attackwindow::Attackwindow(QWidget *parent) :
 
     ui->spinnb_traces->setMaximum(0);
 
-    this->daredevil_path.clear();
+    QHeaderView* headerh = ui->byteIdxTable->horizontalHeader();
+    headerh->setSectionResizeMode(QHeaderView::Stretch);
 
+    QHeaderView* headerw = ui->byteIdxTable->verticalHeader();
+    headerw->setSectionResizeMode(QHeaderView::Stretch);
+
+    this->daredevil_path.clear();
     if (!system(daredevil_local.toUtf8() + "/daredevil/daredevil -h"))
         /* exec from qscat folder */
-        this->daredevil_path.append(daredevil_local.toUtf8() + "/daredevil/daredevil");
+        this->daredevil_path.append(daredevil_local.toUtf8() + "/daredevil/");
     else if (!system(daredevil_local.toUtf8() + "/../qscat/daredevil/daredevil -h"))
         /* exec from dev folder */
-        this->daredevil_path.append(daredevil_local.toUtf8() + "/../qscat/daredevil/daredevil");
-    else if (!system("daredevil -h"))
-        /* exec from PATH */
-        this->daredevil_path.append("daredevil");
-    qDebug() << "daredevil path " << this->daredevil_path;
+        this->daredevil_path.append(daredevil_local.toUtf8() + "/../qscat/daredevil/");
 }
 
 Attackwindow::~Attackwindow()
@@ -96,7 +98,6 @@ void Attackwindow::on_DataButton_pressed()
         return;
 
     QByteArray bin = this->qf.readAll();
-
     if (bin.length() % input_len)
         return;
 
@@ -153,7 +154,6 @@ void Attackwindow::on_ClearButton_pressed()
 
 void Attackwindow::on_attackButton_pressed()
 {
-
     // Get values from UI
     int attack_method = ui->methodBox->currentIndex();
     int algo = ui->algoBox->currentIndex();
@@ -188,6 +188,7 @@ void Attackwindow::on_attackButton_pressed()
     }
 
     QFile::copy(this->input_dataset, tdir.path() + "/input.bin");
+    QFile::copy(this->daredevil_path + "LUT/AES_AFTER_SBOX", tdir.path() + "/lut");
 
     // Create config file
     QFile config(tdir.path() + "/CONFIG");
@@ -210,7 +211,7 @@ void Attackwindow::on_attackButton_pressed()
     config.write("order=1\n");
     config.write("return_type=double\n");
     config.write("algorithm=AES\n");
-    config.write("position=LUT/AES_AFTER_SBOX\n");
+    config.write("position="+tdir.path().toUtf8()+"/lut\n");
     config.write("round=0\n");
     config.write("bytenum=all\n");
     config.write("bitnum=none\n");
@@ -225,59 +226,11 @@ void Attackwindow::on_attackButton_pressed()
 
     // Launch daredevil
     QProcess daredevil;
-    qDebug() << "start daredevil";
-    qDebug() << this->daredevil_path + " -c " + config.fileName();
-    daredevil.start(this->daredevil_path + " -c " + config.fileName(), QIODevice::ReadOnly);
+    daredevil.start(this->daredevil_path + "daredevil -c " + config.fileName(), QIODevice::ReadOnly);
     daredevil.waitForFinished();
 
-    QString stdout = daredevil.readAllStandardOutput();
-    QString stderr = daredevil.readAllStandardError();
+    ScaTool::attacklog->showlog(daredevil.readAllStandardOutput());
 
-    ui->daredevil_log->clear();
-    ui->daredevil_log->appendPlainText(stdout);
-
-    QStringList key_list = stdout.split("Most probable key sum(abs):");
-    QString key_str = (key_list.at(1));
-    QStringList key_list_split = key_str.split("Most probable key max(abs):");
-    QStringList sum_list = key_list_split.at(0).split("\n");
-    QStringList max_list = key_list_split.at(1).split("\n");
-
-    ui->list_keysum->clear();
-    ui->list_keysum->setRowCount(0);
-
-    int row = 0;
-    for (int i =0; i < sum_list.length() && row < 5; i++) {
-        QString str = sum_list.at(i);
-        qDebug() << "sum" << str;
-        if (str.length()) {
-            qDebug() << "ok !";
-            ui->list_keysum->insertRow(row);
-            ui->list_keysum->setItem(row, 0, new QTableWidgetItem(str.remove(0,12)));
-            row++;
-        }
-    }
-
-    ui->list_keymax->clear();
-    ui->list_keymax->setRowCount(0);
-
-    row = 0;
-    for (int i =0; i < max_list.length() && row < 5; i++) {
-        QString str = max_list.at(i);
-        qDebug() << "max" << str;
-        if (str.length()) {
-            qDebug() << "ok !";
-            ui->list_keymax->insertRow(row);
-            ui->list_keymax->setItem(row, 0, new QTableWidgetItem(str.remove(0,12)));
-            row++;
-        }
-    }
-
-/*
-    ui->daredevil_log->appendPlainText("ok..\n");
-    ui->daredevil_log->appendPlainText((keymax_list.at(0)));
-    ui->daredevil_log->appendPlainText("\n--------------------\n");
-    ui->daredevil_log->appendPlainText((keymax_list.at(1)));
-*/
     trace.remove();
     tdir.remove();
     movie->stop();
