@@ -232,32 +232,31 @@ bool Curve::isLoaded()
 int Curve::length()
 {
     int nbpoints,shift;
+
+    switch (this->type) {
+    case Curve::CurveType(FLOAT32):
+    case Curve::CurveType(UINT32):
+    case Curve::CurveType(INT32):
+        shift = 2;
+        break;
+    case Curve::CurveType(UINT16):
+    case Curve::CurveType(INT16):
+        shift = 1;
+        break;
+    case Curve::CurveType(UINT8):
+    case Curve::CurveType(INT8):
+        shift = 0;
+        break;
+    default:
+        assert(0);
+        break;
+    }
     if (ncol == 0)
     {
         FILE *file = fopen(fn.toLatin1().data(),"rb");
         assert(file);
 
         std::fseek(file,0,SEEK_END);
-
-        switch (this->type) {
-        case Curve::CurveType(FLOAT32):
-        case Curve::CurveType(UINT32):
-        case Curve::CurveType(INT32):
-            shift = 2;
-            break;
-        case Curve::CurveType(UINT16):
-        case Curve::CurveType(INT16):
-            shift = 1;
-            break;
-        case Curve::CurveType(UINT8):
-        case Curve::CurveType(INT8):
-            shift = 0;
-            break;
-        default:
-            assert(0);
-            break;
-        }
-
         nbpoints = ftell(file)>>shift;
         fclose(file);
     }
@@ -278,6 +277,7 @@ float * Curve::getrawdata(int *length, int single_offset)
     int16_t *bufferi16;
     uint8_t *bufferui8;
     int8_t *bufferi8;
+    double *bufferd;
     bool is_file_open;
     int tr_off = row*ncol;
     int size = 0;
@@ -502,6 +502,38 @@ float * Curve::getrawdata(int *length, int single_offset)
                 for(int i = 0; i < (*length + single_offset); i++)
                     (data)[i] = (float)(bufferi8[i]);
                 free(bufferi8);
+
+                for(int i = *length + single_offset; i < *length ; i++)
+                    data[i] = 0;
+
+            }
+            break;
+        case Curve::CurveType(DOUBLE):
+            *length  = size/sizeof(double);
+            data = (float *)malloc((*length)*sizeof(float));
+            // read full data
+            if (single_offset > 0)
+            {
+
+                for(int i = 0; i < single_offset; i++)
+                    data[i] = 0;
+
+                bufferd = (double*)malloc((*length - single_offset)*sizeof(double));
+                file.read(reinterpret_cast<char*>(bufferd),sizeof(double) * (*length - single_offset));
+                for(int i = 0; i < (*length - single_offset); i++)
+                    (data+single_offset)[i] = (float)(bufferd[i]);
+                free(bufferd);
+            }
+            else
+            {
+                file.seek(tr_off + (sizeof(double) * -single_offset));
+                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
+
+                bufferd = (double*)malloc((*length + single_offset)*sizeof(double));
+                file.read(reinterpret_cast<char*>(bufferd),sizeof(double) * (*length + single_offset));
+                for(int i = 0; i < (*length + single_offset); i++)
+                    (data)[i] = (float)(bufferd[i]);
+                free(bufferd);
 
                 for(int i = *length + single_offset; i < *length ; i++)
                     data[i] = 0;

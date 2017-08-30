@@ -22,7 +22,8 @@ class Curve : public QObject
         UINT16  =3,
         INT16   =4,
         UINT8   =5,
-        INT8    =6
+        INT8    =6,
+        DOUBLE  =7
     };
 
 public:

@@ -19,6 +19,7 @@ CurveListWidget::CurveListWidget(QWidget *parent) :
     ui->type_box->addItem("int16");
     ui->type_box->addItem("uint8");
     ui->type_box->addItem("int8");
+    ui->type_box->addItem("double");
     connect(ui->type_box,SIGNAL(currentIndexChanged(int)),this,SLOT(global_type_changed(int)));
 
 }
@@ -70,6 +71,7 @@ void CurveListWidget::addCurve(Curve *curve)
     cmbbox->addItem("int16");
     cmbbox->addItem("uint8");
     cmbbox->addItem("int8");
+    cmbbox->addItem("double");
     curve->settypecmbbox(cmbbox);
     ui->table_curve->setCellWidget(rowidx,colidx,cmbbox);
 
