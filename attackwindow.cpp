@@ -203,15 +203,22 @@ void Attackwindow::processOutput()
 {
     //qDebug() << this->process->readAllStandardError();
     QString line = this->process->readAllStandardOutput();
-    stdout_log.append(line);
-    ScaTool::attacklog->fillSumMaxCorr(stdout_log);
-    ScaTool::attacklog->fillSumMaxKey(stdout_log);
+    this->stdout_log.append(line);
+    ScaTool::attacklog->fillSumMaxCorr(this->stdout_log);
+    ScaTool::attacklog->fillSumMaxKey(this->stdout_log);
 }
 
 void Attackwindow::finished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    QFile log(this->daredevil_path + "../last_daredevil.log");
+
+    log.open(QIODevice::ReadWrite);
+    log.write(this->stdout_log.toUtf8());
+    log.flush();
+    log.close();
     this->stdout_log.clear();
     this->tdir->remove();
+    ui->attackButton->setEnabled(true);
 }
 
 void Attackwindow::on_attackButton_pressed()
@@ -227,6 +234,8 @@ void Attackwindow::on_attackButton_pressed()
     //ui->byteIdxTable->selectedItems()
     QMovie *movie = new QMovie(":images/ajax-loader.gif");
     QLabel *pr = new QLabel(this);
+
+    ui->attackButton->setEnabled(false);
     pr->setMovie(movie);
     pr->show();
     movie->start();
