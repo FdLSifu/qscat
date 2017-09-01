@@ -6,7 +6,7 @@
 #include <QFile>
 #include <QProcess>
 #include <QTemporaryDir>
-#include <QMutex>
+#include <QTime>
 
 namespace Ui {
 class Attackwindow;
@@ -38,9 +38,12 @@ private:
     QMap<QString, int> algo_map;
     QString input_dataset;
     void load_dataSet(QString filepath_dataset);
+    void saveDaredevilLog(void);
     QProcess *process;
     QString stdout_log;
     QTemporaryDir *tdir;
+    QTime processTime;
+    QString daredevilLog;
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;

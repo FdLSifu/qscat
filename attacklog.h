@@ -17,6 +17,7 @@ public:
     ~AttackLog();
     void fillSumMaxCorr(QString txt);
     void fillSumMaxKey(QString txt);
+    void updateLabelLog(QString txt);
 
 private:
     int getSplitResult(QString txt, QString delim1, QString delim2,

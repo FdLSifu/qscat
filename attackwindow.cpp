@@ -67,11 +67,23 @@ Attackwindow::Attackwindow(QWidget *parent) :
     else if (!system(daredevil_local.toUtf8() + "/../qscat/daredevil/daredevil -h"))
         /* exec from dev folder */
         this->daredevil_path.append(daredevil_local.toUtf8() + "/../qscat/daredevil/");
+    this->daredevilLog = daredevil_local + "/last_daredevil.log";
 }
 
 Attackwindow::~Attackwindow()
 {
     delete ui;
+}
+
+void Attackwindow::saveDaredevilLog(void)
+{
+    QFile log(this->daredevilLog);
+
+    log.open(QIODevice::ReadWrite);
+    log.write(this->stdout_log.toUtf8());
+    log.flush();
+    log.close();
+    this->stdout_log.clear();
 }
 
 void Attackwindow::dragEnterEvent(QDragEnterEvent *event)
@@ -210,14 +222,11 @@ void Attackwindow::processOutput()
 
 void Attackwindow::finished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    QFile log(this->daredevil_path + "../last_daredevil.log");
+    int time = this->processTime.elapsed();
 
-    log.open(QIODevice::ReadWrite);
-    log.write(this->stdout_log.toUtf8());
-    log.flush();
-    log.close();
-    this->stdout_log.clear();
+    saveDaredevilLog();
     this->tdir->remove();
+    ScaTool::attacklog->updateLabelLog("Computing time: " + QString::number(time) + " ms - daredevil log saved in " + this->daredevilLog);
     ui->attackButton->setEnabled(true);
 }
 
@@ -308,6 +317,7 @@ void Attackwindow::on_attackButton_pressed()
     connect(this->process, SIGNAL(readyReadStandardOutput()), this, SLOT(processOutput()));
     connect(this->process, SIGNAL(readyReadStandardError()), this, SLOT(processOutput()));
     connect(this->process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(finished(int,QProcess::ExitStatus)));
+    this->processTime.start();
     this->process->start(this->daredevil_path + "daredevil -c " + config.fileName());
 
     movie->stop();

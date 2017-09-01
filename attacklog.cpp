@@ -12,6 +12,7 @@ AttackLog::AttackLog(QWidget *parent) :
     ui->setupUi(this);
     this->is_complete = 0;
     this->next_byte = 0;
+    ui->log_label->setText("Attack in progress ...");
 }
 
 AttackLog::~AttackLog()
@@ -133,4 +134,9 @@ void AttackLog::fillSumMaxCorr(QString txt)
     ui->list_corrsum->resizeRowsToContents();
     ui->list_corrmax->resizeColumnsToContents();
     ui->list_corrmax->resizeRowsToContents();
+}
+
+void AttackLog::updateLabelLog(QString txt)
+{
+    ui->log_label->setText(txt);
 }
