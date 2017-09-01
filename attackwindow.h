@@ -4,6 +4,9 @@
 #include <QDialog>
 #include <QMap>
 #include <QFile>
+#include <QProcess>
+#include <QTemporaryDir>
+#include <QMutex>
 
 namespace Ui {
 class Attackwindow;
@@ -19,6 +22,10 @@ public:
     ~Attackwindow();
     QString daredevil_path;
 
+public slots:
+    void processOutput();
+    void finished(int exitCode, QProcess::ExitStatus exitStatus);
+
 private slots:
     void on_DataButton_pressed();
     void on_spinpts_start_valueChanged(int arg1);
@@ -31,6 +38,9 @@ private:
     QMap<QString, int> algo_map;
     QString input_dataset;
     void load_dataSet(QString filepath_dataset);
+    QProcess *process;
+    QString stdout_log;
+    QTemporaryDir *tdir;
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;

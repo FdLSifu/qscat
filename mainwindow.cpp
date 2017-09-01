@@ -44,7 +44,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ScaTool::synchrodialog = new SynchroDialog(this);
     ScaTool::attackdialog = new Attackwindow(this);
-    ScaTool::attacklog = new AttackLog(this);
     ScaTool::main_plot = ui->mainplot;
     ScaTool::statusbar = ui->statusbar;
 
@@ -60,7 +59,6 @@ MainWindow::~MainWindow()
     delete ScaTool::curve_table;
     delete ScaTool::synchrodialog;
     delete ScaTool::attackdialog;
-    delete ScaTool::attacklog;
 }
 
 MainWindow * MainWindow::getInstance()

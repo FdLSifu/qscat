@@ -2,6 +2,7 @@
 #define ATTACKLOG_H
 
 #include <QDialog>
+#include <QProcess>
 
 namespace Ui {
 class AttackLog;
@@ -14,14 +15,15 @@ class AttackLog : public QDialog
 public:
     explicit AttackLog(QWidget *parent = 0);
     ~AttackLog();
-    void showlog(QString stdout);
+    void fillSumMaxCorr(QString txt);
+    void fillSumMaxKey(QString txt);
 
 private:
-    void fillSumMaxKey(QString txt);
-    void getSplitResult(QString txt, QString delim1, QString delim2,
-                        QStringList *list1, QStringList *list2);
-    void fillSumMaxCorr(QString txt);
+    int getSplitResult(QString txt, QString delim1, QString delim2,
+                       QStringList *list1, QStringList *list2);
     Ui::AttackLog *ui;
+    int next_byte;
+    int is_complete;
 };
 
 #endif // ATTACKLOG_H
