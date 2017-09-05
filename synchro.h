@@ -12,19 +12,21 @@ class Synchro : public QObject, public QRunnable
    Q_OBJECT
 public:
     // Fields
-    Curve * curve;
-    Curve * cur_ref;
+    QList<Curve *> curves;
+    QList<int> curve_offset;
+    QList<qreal> result;
+    int curve_ref_idx;
     int numpass;
     int method;
     int leftpattern,rightpattern;
     int leftwindow,rightwindow;
     int precision;
-
+    bool preview;
     // Constructor
     Synchro(int num);
 
     // Function
-    int min_dist_curve();
+    qreal min_dist_curve(int idx);
 private:
     void run();
 

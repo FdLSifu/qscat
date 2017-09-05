@@ -21,6 +21,11 @@ SynchroDialog::SynchroDialog(QWidget *parent) :
     this->pattern_bar = new QLineSeries();
     this->window_bar = new QLineSeries();
 
+    ui->runpreview->setEnabled(false);
+    ui->runsynchro->setEnabled(false);
+
+    ui->threshold->setChart(new QChart());
+
     connect(this,&SynchroDialog::rejected,this,&SynchroDialog::closed);
     connect(ui->leftpattern,&QSpinBox::editingFinished,this,&SynchroDialog::pattern_value_changed);
     connect(ui->rightpattern,&QSpinBox::editingFinished,this,&SynchroDialog::pattern_value_changed);
@@ -33,6 +38,7 @@ void SynchroDialog::show()
     this->window_bar->show();
     this->pattern_bar->show();
     qobject_cast<QDialog*>(this)->show();
+
 }
 
 void SynchroDialog::addRefItem(QString name)
@@ -43,29 +49,12 @@ void SynchroDialog::addRefItem(QString name)
 SynchroDialog::~SynchroDialog()
 {
     delete ui;
-    qDeleteAll(synchropasses);
 }
 
 void SynchroDialog::on_runpreview_pressed()
 {
-    QList<Curve *> curve_displayed  = QList<Curve *>();
-    for (int i = 0; i < ScaTool::curves->length(); i++)
-    {
-        if (ScaTool::curves->at(i)->displayed == true)
-            curve_displayed.append(ScaTool::curves->at(i));
-    }
-
-    Curve *ref_curve = ScaTool::getCurveByName(ui->refcombo->currentText());
-    if (curve_displayed.indexOf(ref_curve) == -1)
-    {
-        printf("Error reference curve not displayed\n");
-        return;
-    }
-    else
-    {
-        ScaTool::sync_sod(&curve_displayed, ref_curve, ui->leftwindow->text().toInt(), ui->rightwindow->text().toInt(), ui->leftpattern->text().toInt(), ui->rightpattern->text().toInt(),ui->precision->text().toInt());
-    }
-
+    preview = true;
+    return on_runsynchro_pressed();
 }
 
 void SynchroDialog::on_runsynchro_pressed()
@@ -80,10 +69,39 @@ void SynchroDialog::on_runsynchro_pressed()
         // Trick to set length - 2 as the reference curve is done synchronized
         SynchroDialog::qprogressbar = new QProgressBar(this);
         SynchroDialog::qprogressbar->setMinimum(0);
-        SynchroDialog::qprogressbar->setMaximum(ScaTool::curves->length()-2);
+        if(this->preview)
+            SynchroDialog::qprogressbar->setMaximum(ScaTool::curves->length()-2);
         ScaTool::statusbar->addPermanentWidget(SynchroDialog::qprogressbar);
         SynchroDialog::qprogressbar->show();
-        ScaTool::sync_sod(ScaTool::curves, ScaTool::getCurveByName(ui->refcombo->currentText()), ui->leftwindow->text().toInt(), ui->rightwindow->text().toInt(), ui->leftpattern->text().toInt(), ui->rightpattern->text().toInt(),ui->precision->text().toInt());
+
+        int passnum = ui->stepcombo->currentIndex();
+        runningsynchro = synchropasses.at(passnum);
+
+        runningsynchro->curves = *ScaTool::curves;
+
+        // Get curve's offset
+        runningsynchro->curve_offset.clear();
+        for(int i = 0; i < runningsynchro->curves.length() ; i++)
+        {
+            Curve *c = runningsynchro->curves.at(i);
+            // Apply previous pass
+            if(passnum > 0)
+                runningsynchro->curve_offset.append(runningsynchro->curves.at(i)->offsets.at(passnum-1));
+            else
+                runningsynchro->curve_offset.append(0);
+        }
+
+        runningsynchro->curve_ref_idx = 0;
+        runningsynchro->leftwindow = ui->leftwindow->text().toInt();
+        runningsynchro->rightwindow = ui->rightwindow->text().toInt();
+        runningsynchro->leftpattern = ui->leftpattern->text().toInt();
+        runningsynchro->rightpattern = ui->rightpattern->text().toInt();
+        runningsynchro->precision = ui->precision->text().toInt();
+        runningsynchro->preview = this->preview;
+        runningsynchro->setAutoDelete(false);
+        QThreadPool::globalInstance()->tryStart(runningsynchro);
+
+        this->preview = false;
     }
 }
 
@@ -98,6 +116,23 @@ void SynchroDialog::update_progressdialog()
             ScaTool::statusbar->removeWidget(SynchroDialog::qprogressbar);
             delete SynchroDialog::qprogressbar;
             SynchroDialog::qprogressbar = 0;
+
+            QThreadPool::globalInstance()->releaseThread();
+
+            QLineSeries *series = new QLineSeries();
+
+            for(int i = 0; i < runningsynchro->result.length() ; i++)
+                series->append(i,runningsynchro->result.at(i));
+
+            if(!ui->threshold->chart()->series().isEmpty())
+            {
+                ui->threshold->chart()->removeAllSeries();
+                ui->threshold->chart()->removeAxis(ui->threshold->chart()->axisX());
+                ui->threshold->chart()->removeAxis(ui->threshold->chart()->axisY());
+            }
+            ui->threshold->chart()->addSeries(series);
+            ui->threshold->chart()->createDefaultAxes();
+
         }
     }
 }
@@ -105,13 +140,29 @@ void SynchroDialog::update_progressdialog()
 void SynchroDialog::on_addstep_pressed()
 {
 
-    Synchro *sync = new Synchro(0);
+    Synchro *sync = new Synchro(synchropasses.length());
     synchropasses.append(sync);
 
     ui->stepcombo->addItem("Pass "+QString::number(synchropasses.length()));
+    ui->runpreview->setEnabled(true);
+    ui->runsynchro->setEnabled(true);
 }
 
-
+void SynchroDialog::on_removestep_pressed()
+{
+    if (!synchropasses.isEmpty())
+    {
+        Synchro * sync = synchropasses.last();
+        synchropasses.removeLast();
+        ui->stepcombo->removeItem(synchropasses.length());
+        delete sync;
+    }
+    if(synchropasses.isEmpty())
+    {
+        ui->runpreview->setEnabled(false);
+        ui->runsynchro->setEnabled(false);
+    }
+}
 
 void SynchroDialog::pattern_value_changed()
 {
@@ -178,5 +229,20 @@ void SynchroDialog::closed()
 {
     this->window_bar->hide();
     this->pattern_bar->hide();
-//    e->accept();
+}
+
+
+void SynchroDialog::on_stepcombo_currentIndexChanged(int index)
+{
+    // We have selected a pass, let's update the graph
+    for (int i = 0; i < ScaTool::curves->length(); i++)
+    {
+        if (ScaTool::curves->at(i)->displayed == true)
+        {
+            Curve *c = ScaTool::curves->at(i);
+            if (c->offsets.length() > index)
+                c->shift(c->offsets.at(index)-c->xoffset);
+        }
+    }
+
 }

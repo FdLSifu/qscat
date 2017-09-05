@@ -1,6 +1,6 @@
 #include "synchro.h"
 #include "mainwindow.h"
-
+#include "assert.h"
 
 Synchro::Synchro(int num):
       QObject()
@@ -13,37 +13,65 @@ Synchro::Synchro(int num):
 
 void Synchro::run()
 {
-    Synchro::min_dist_curve();
-}
-
-int Synchro::min_dist_curve()
-{
-    qreal dist = 0;
-    qreal distmin = std::numeric_limits<qreal>::max();
-    int offset = 0;
-
-    QLineSeries * ref_subseries = cur_ref->getSubSeries(leftpattern,rightpattern);
-    QLineSeries * work_subseries = curve->getSubSeries(leftpattern+leftwindow, rightpattern+rightwindow);
-
-    for (int s = leftwindow; s < rightwindow; s++)
+    if (method == SYNCHRO_METHOD_SOD)
     {
-        dist = 0;
-
-        for (int p = leftpattern ; p < rightpattern; p += precision)
-            dist += qAbs(ref_subseries->at(p-leftpattern).y() - work_subseries->at(p+s-leftpattern-leftwindow).y());
-
-        distmin = std::min(dist,distmin);
-        if (distmin == dist)
+        result.clear();
+        for(int i = 0; i < this->curves.length() ; i++)
         {
-            offset = -s;
+            result.append(Synchro::min_dist_curve(i));
         }
     }
+}
 
-    curve->shift(offset - curve->xoffset);
+qreal Synchro::min_dist_curve(int idx)
+{
+    qreal dist = 0;
+    int offset = 0;
 
-    delete ref_subseries;
-    delete work_subseries;
+    qreal distmin = std::numeric_limits<qreal>::max();
+    Curve * curve = this->curves.at(idx);
+    Curve * cur_ref = this->curves.at(this->curve_ref_idx);
+
+    if( (this->preview && curve->displayed) | !(this->preview) )
+    {
+        int initial_ref_offset = this->curve_offset.at(this->curve_ref_idx);
+        int initial_offset = this->curve_offset.at(idx);
+
+        QLineSeries * ref_subseries = cur_ref->getSubSeries(initial_ref_offset+leftpattern,initial_ref_offset+rightpattern);
+        QLineSeries * work_subseries = curve->getSubSeries(initial_offset+initial_ref_offset+leftpattern+leftwindow, initial_offset+initial_ref_offset+rightpattern+rightwindow);
+
+        for (int s = leftwindow; s < rightwindow; s++)
+        {
+            dist = 0;
+
+            for (int p = leftpattern ; p < rightpattern; p += precision)
+                dist += qAbs(ref_subseries->at(p-leftpattern).y() - work_subseries->at(p+s-leftpattern-leftwindow).y());
+
+            distmin = std::min(dist,distmin);
+            if (distmin == dist)
+            {
+                offset = -s;
+            }
+        }
+
+        // apply shift
+        curve->shift(offset - curve->xoffset + initial_offset);
+
+        // Populate offsets
+        if (curve->offsets.length() > numpass)
+            curve->offsets.replace(numpass,curve->xoffset);
+        else if (curve->offsets.length() == numpass)
+            curve->offsets.append(curve->xoffset);
+        else
+            // Impossible but who knows
+            assert(false);
+
+        delete ref_subseries;
+        delete work_subseries;
+    }
+    // emit signals for progressbar
     emit this->finish();
+
     return distmin;
 }
 

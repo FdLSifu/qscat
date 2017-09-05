@@ -42,7 +42,7 @@ public:
     int display_width = 0;
     int idx;
     int xoffset = 0;
-    int yoffset = 0;
+    QList<int> offsets;
     bool onefile = false;
     int row = 0;
     int ncol = 0;

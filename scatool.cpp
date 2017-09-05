@@ -49,27 +49,3 @@ Curve* ScaTool::getCurveFromDisplaySerie(QLineSeries * serie)
     }
     return 0;
 }
-
-void ScaTool::sync_sod(QList<Curve *> * lcurves, Curve *ref_curve, int lwin, int rwin, int lpattern, int rpattern, int precision)
-{
-    int idx_ref = lcurves->indexOf(ref_curve);
-
-    for(int i = 0; i < lcurves->length(); i++)
-    {
-        Curve *c = lcurves->at(i);
-
-        if (idx_ref != i)
-        {
-            Synchro *sync = new Synchro(0);
-            sync->curve = c;
-            sync->cur_ref = ref_curve;
-            sync->leftwindow = lwin;
-            sync->rightwindow = rwin;
-            sync->leftpattern = lpattern;
-            sync->rightpattern = rpattern;
-            sync->precision = precision;
-
-            QThreadPool::globalInstance()->start(sync);
-        }
-    }
-}

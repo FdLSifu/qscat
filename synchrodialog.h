@@ -20,8 +20,9 @@ public:
     QLineSeries * pattern_bar;
     QLineSeries * window_bar;
     static QProgressBar* qprogressbar;
-
+    Synchro * runningsynchro;
     QList<Synchro *> synchropasses;
+    bool preview = false;
 
     // Constructor
     explicit SynchroDialog(QWidget *parent);
@@ -43,6 +44,10 @@ private slots:
     void on_addstep_pressed();
     void pattern_value_changed();
     void closed();
+
+    void on_removestep_pressed();
+
+    void on_stepcombo_currentIndexChanged(int index);
 
 private:
     Ui::SynchroDialog *ui;
