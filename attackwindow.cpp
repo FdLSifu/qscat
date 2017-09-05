@@ -61,10 +61,10 @@ Attackwindow::Attackwindow(QWidget *parent) :
     headerw->setSectionResizeMode(QHeaderView::Stretch);
 
     this->daredevil_path.clear();
-    if (!system(daredevil_local.toUtf8() + "/daredevil/daredevil -h"))
+    if (QFileInfo(daredevil_local.toUtf8() + "/daredevil/daredevil").isExecutable())
         /* exec from qscat folder */
         this->daredevil_path.append(daredevil_local.toUtf8() + "/daredevil/");
-    else if (!system(daredevil_local.toUtf8() + "/../qscat/daredevil/daredevil -h"))
+    else if (QFileInfo(daredevil_local.toUtf8() + "/../qscat/daredevil/daredevil").isExecutable())
         /* exec from dev folder */
         this->daredevil_path.append(daredevil_local.toUtf8() + "/../qscat/daredevil/");
     this->daredevilLog = daredevil_local + "/last_daredevil.log";
