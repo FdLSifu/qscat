@@ -180,7 +180,7 @@ void CurveListWidget::on_displayoff_pressed()
     }
 }
 
-void CurveListWidget::on_delete_2_pressed()
+void CurveListWidget::on_deletecurve_pressed()
 {
     int rowidx;
     QList<QTableWidgetItem *> itemlist = ui->table_curve->selectedItems();
@@ -217,7 +217,40 @@ void CurveListWidget::updateshiftvalue()
 
 void CurveListWidget::rowselected(int row, int column)
 {
-    /*Curve *c = ScaTool::getCurveByName(ui->table_curve->item(row,2)->text());
+    /*
+    Curve *c = ScaTool::getCurveByName(ui->table_curve->item(row,2)->text());
     if (c->displayed)
-        printf("TODO : to bring front");*/
+        printf("TODO : to bring front");
+    */
+}
+
+void CurveListWidget::on_redraw_pressed()
+{
+    Curve *curve;
+    int start = ui->curveStart->value();
+    int end = ui->curveEnd->value() + 1;
+
+    if ((end - start) < 1)
+        return;
+
+    if (end >= ui->table_curve->rowCount())
+        return;
+
+    if (!ScaTool::curves->length())
+        return;
+
+    for(int i = 0; i < ui->table_curve->rowCount() ; i++) {
+        curve = ScaTool::getCurveByName(ui->table_curve->item(i,2)->text());
+        curve->chkbox->setChecked(false);
+    }
+
+    for(int i = start; i < end ; i++) {
+        curve = ScaTool::getCurveByName(ui->table_curve->item(i,2)->text());
+        curve->chkbox->setChecked(true);
+    }
+}
+
+void CurveListWidget::setCurveRangeMax(void)
+{
+    ui->label_range->setText("[0 - " + QString::number(ui->table_curve->rowCount()) + "]");
 }

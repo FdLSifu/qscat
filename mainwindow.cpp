@@ -242,6 +242,7 @@ void MainWindow::load_files(QStringList files)
             }
         }
     }
+    ScaTool::curve_table->setCurveRangeMax();
     // Ui effect to show curve list
     if (ScaTool::dockcurves->isHidden())
         ScaTool::dockcurves->show();
