@@ -37,7 +37,7 @@ qreal Synchro::min_dist_curve(int idx)
         int initial_offset = this->curve_offset.at(idx);
 
         QLineSeries * ref_subseries = cur_ref->getSubSeries(initial_ref_offset+leftpattern,initial_ref_offset+rightpattern);
-        QLineSeries * work_subseries = curve->getSubSeries(initial_offset+initial_ref_offset+leftpattern+leftwindow, initial_offset+initial_ref_offset+rightpattern+rightwindow);
+        QLineSeries * work_subseries = curve->getSubSeries(initial_offset+leftpattern+leftwindow, initial_offset+rightpattern+rightwindow);
 
         for (int s = leftwindow; s < rightwindow; s++)
         {
@@ -54,7 +54,7 @@ qreal Synchro::min_dist_curve(int idx)
         }
 
         // apply shift
-        curve->shift(offset - curve->xoffset + initial_offset);
+        curve->shift(offset - curve->xoffset - initial_offset);
 
         // Populate offsets
         if (curve->offsets.length() > numpass)
