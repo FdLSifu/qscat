@@ -233,11 +233,11 @@ void CurveListWidget::on_redraw_pressed()
     if ((end - start) < 1)
         return;
 
-    if (end >= ui->table_curve->rowCount())
-        return;
-
     if (!ScaTool::curves->length())
         return;
+
+    if ((end-1) >= ui->table_curve->rowCount())
+	end = ui->table_curve->rowCount();
 
     for(int i = 0; i < ui->table_curve->rowCount() ; i++) {
         curve = ScaTool::getCurveByName(ui->table_curve->item(i,2)->text());
@@ -252,5 +252,5 @@ void CurveListWidget::on_redraw_pressed()
 
 void CurveListWidget::setCurveRangeMax(void)
 {
-    ui->label_range->setText("[0 - " + QString::number(ui->table_curve->rowCount()) + "]");
+    ui->label_range->setText("[0 - " + QString::number(ui->table_curve->rowCount() - 1) + "]");
 }
