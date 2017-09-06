@@ -66,25 +66,33 @@ void SynchroDialog::on_runsynchro_pressed()
     }
     else
     {
-        // Trick to set length - 2 as the reference curve is done synchronized
-        SynchroDialog::qprogressbar = new QProgressBar(this);
-        SynchroDialog::qprogressbar->setMinimum(0);
-        if(this->preview)
-            SynchroDialog::qprogressbar->setMaximum(ScaTool::curves->length()-2);
-        ScaTool::statusbar->addPermanentWidget(SynchroDialog::qprogressbar);
-        SynchroDialog::qprogressbar->show();
-
         int passnum = ui->stepcombo->currentIndex();
         runningsynchro = synchropasses.at(passnum);
 
-        runningsynchro->curves = *ScaTool::curves;
+        runningsynchro->curves.clear();
+        for (int i = 0; i < ScaTool::curves->length(); i++)
+        {
+            Curve * c = ScaTool::curves->at(i);
+            // For preview add only displayed curves
+            if (!this->preview | c->displayed)
+                runningsynchro->curves.append(c);
+        }
+
+        if (!this->preview){
+            // Trick to set length - 2 as the reference curve is done synchronized
+            SynchroDialog::qprogressbar = new QProgressBar(this);
+            SynchroDialog::qprogressbar->setMinimum(0);
+            SynchroDialog::qprogressbar->setMaximum(runningsynchro->curves.length()-2);
+            ScaTool::statusbar->addPermanentWidget(SynchroDialog::qprogressbar);
+            SynchroDialog::qprogressbar->show();
+        }
 
         // Get curve's offset
         runningsynchro->curve_offset.clear();
         for(int i = 0; i < runningsynchro->curves.length() ; i++)
         {
             Curve *c = runningsynchro->curves.at(i);
-            // Apply previous pass
+            // Apply previous pass if any
             if(passnum > 0)
                 runningsynchro->curve_offset.append(runningsynchro->curves.at(i)->offsets.at(passnum-1));
             else
@@ -230,7 +238,6 @@ void SynchroDialog::closed()
     this->window_bar->hide();
     this->pattern_bar->hide();
 }
-
 
 void SynchroDialog::on_stepcombo_currentIndexChanged(int index)
 {

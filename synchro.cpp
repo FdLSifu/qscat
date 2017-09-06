@@ -32,7 +32,6 @@ qreal Synchro::min_dist_curve(int idx)
     Curve * curve = this->curves.at(idx);
     Curve * cur_ref = this->curves.at(this->curve_ref_idx);
 
-    if( (this->preview && curve->displayed) | !(this->preview) )
     {
         int initial_ref_offset = this->curve_offset.at(this->curve_ref_idx);
         int initial_offset = this->curve_offset.at(idx);
