@@ -4,6 +4,8 @@
 #include <QHeaderView>
 #include <QProcess>
 #include <QDebug>
+#include <QPushButton>
+#include <assert.h>
 
 AttackLog::AttackLog(QWidget *parent) :
     QDialog(parent),
@@ -13,6 +15,23 @@ AttackLog::AttackLog(QWidget *parent) :
     this->is_complete = 0;
     this->next_byte = 0;
     ui->log_label->setText("Attack in progress ...");
+
+    connect(ui->pushButton_1, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_2, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_3, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_4, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_5, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_6, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_7, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_8, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_9, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_10, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_11, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_12, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_13, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_14, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_15, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_16, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
 }
 
 AttackLog::~AttackLog()
@@ -139,4 +158,95 @@ void AttackLog::fillSumMaxCorr(QString txt)
 void AttackLog::updateLabelLog(QString txt)
 {
     ui->log_label->setText(txt);
+}
+
+QList<QLineSeries*>* AttackLog::getCorrSerie(int byte_idx)
+{
+    int i_point = 0;
+    int i_guess = 0;
+    QList<QLineSeries*> *ql = new QList<QLineSeries*>();
+    FILE *data;
+    data = fopen("./correlation.bin","rb");
+
+    int nb_guess = 256;
+
+    fseek(data,0,SEEK_END);
+    int nb_point = ftell(data)/(nb_guess*16*sizeof(double));
+    fseek(data,0,SEEK_SET);
+
+    i_guess = 0;
+
+    double (*rawdata)[256][nb_point] = (double(*)[256][nb_point])malloc(16*256*nb_point*sizeof(double));
+    fread(rawdata,16*256*nb_point,sizeof(double),data);
+
+    while(i_guess < nb_guess)
+    {
+        QLineSeries * lineserie = new QLineSeries();
+        lineserie->setUseOpenGL(true);
+
+        i_point = 0;
+
+        while(i_point < nb_point)
+        {
+            lineserie->append(i_point,rawdata[byte_idx][i_guess][i_point]);
+            i_point ++;
+        }
+        i_guess ++;
+        ql->append(lineserie);
+    }
+    free(rawdata);
+    return ql;
+}
+
+void AttackLog::on_pushButton_pressed()
+{
+    int idx = 0;
+    if (QObject::sender() == ui->pushButton_1)
+        idx=0;
+    else if (QObject::sender() == ui->pushButton_2)
+        idx=1;
+    else if (QObject::sender() == ui->pushButton_3)
+        idx=2;
+    else if (QObject::sender() == ui->pushButton_4)
+        idx=3;
+    else if (QObject::sender() == ui->pushButton_5)
+        idx=4;
+    else if (QObject::sender() == ui->pushButton_6)
+        idx=5;
+    else if (QObject::sender() == ui->pushButton_7)
+        idx=6;
+    else if (QObject::sender() == ui->pushButton_8)
+        idx=7;
+    else if (QObject::sender() == ui->pushButton_9)
+        idx=8;
+    else if (QObject::sender() == ui->pushButton_10)
+        idx=9;
+    else if (QObject::sender() == ui->pushButton_11)
+        idx=10;
+    else if (QObject::sender() == ui->pushButton_12)
+        idx=11;
+    else if (QObject::sender() == ui->pushButton_13)
+        idx=12;
+    else if (QObject::sender() == ui->pushButton_14)
+        idx=13;
+    else if (QObject::sender() == ui->pushButton_15)
+        idx=14;
+    else if (QObject::sender() == ui->pushButton_16)
+        idx=15;
+    else
+        assert(false);
+
+    QList<QLineSeries*> * ql = getCorrSerie(idx);
+    if(!ui->corrchart->chart()->series().isEmpty())
+    {
+        ui->corrchart->chart()->removeAllSeries();
+        ui->corrchart->chart()->removeAxis(ui->corrchart->chart()->axisX());
+        ui->corrchart->chart()->removeAxis(ui->corrchart->chart()->axisY());
+    }
+
+    for (int i = 0; i < ql->length(); i++)
+    {
+        ui->corrchart->chart()->addSeries(ql->at(i));
+    }
+    ui->corrchart->chart()->createDefaultAxes();
 }

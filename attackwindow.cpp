@@ -301,6 +301,7 @@ void Attackwindow::on_attackButton_pressed()
     config.write("bitnum=none\n");
     config.write("memory=4G\n");
     config.write("top=20\n");
+    config.write("corrout=t\n");
 
     config.flush();
     trace.flush();
@@ -317,6 +318,7 @@ void Attackwindow::on_attackButton_pressed()
     connect(this->process, SIGNAL(readyReadStandardOutput()), this, SLOT(processOutput()));
     connect(this->process, SIGNAL(readyReadStandardError()), this, SLOT(processOutput()));
     connect(this->process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(finished(int,QProcess::ExitStatus)));
+
     this->processTime.start();
     this->process->start(this->daredevil_path + "daredevil -c " + config.fileName());
 

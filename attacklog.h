@@ -1,8 +1,9 @@
 #ifndef ATTACKLOG_H
 #define ATTACKLOG_H
-
+#include <QLineSeries>
 #include <QDialog>
 #include <QProcess>
+
 
 namespace Ui {
 class AttackLog;
@@ -18,6 +19,10 @@ public:
     void fillSumMaxCorr(QString txt);
     void fillSumMaxKey(QString txt);
     void updateLabelLog(QString txt);
+    QList<QtCharts::QLineSeries *>* getCorrSerie(int byte_idx);
+
+private slots:
+    void on_pushButton_pressed();
 
 private:
     int getSplitResult(QString txt, QString delim1, QString delim2,
