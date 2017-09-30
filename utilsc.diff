@@ -1,0 +1,29 @@
+--- ../../Daredevil/utils.cpp	2017-07-22 14:22:17.326397194 +0200
++++ ../../Daredevil-fork/utils.cpp	2017-08-29 17:55:07.981076345 +0200
+@@ -645,6 +645,7 @@
+   config.bitnum = -2;
+   config.complete_correct_key = NULL;
+   config.original_correct_key = NULL;
++  config.corrout = false;
+ 
+   while (getline(fin, line)) {
+     if (line[0] == '#'){
+@@ -813,6 +814,9 @@
+       }
+       //printf("%s %li %f\n", tmp.c_str(), tmp.size(), atof(tmp.substr(0, tmp.size() - 1).c_str()));
+       config.memory = (long int)(atof(tmp.substr(0, tmp.size() - 1).c_str())*suffix);
++    }else if (line.find("corrout") != string::npos) {
++      string tmp = line.substr(line.find("=") + 1);
++      config.corrout =  (tmp[0] == 't' ? true : false);
+     }
+ 
+   }
+@@ -978,6 +982,8 @@
+ 
+   if (conf.sep == "") printf("\tSeparator :\t\t STANDARD\n");
+   else printf("\tSeparator :\t\t %s\n", conf.sep.c_str());
++  printf("\tCorrelation output:\t %s\n", conf.corrout ? "True" : "False");
++
+   printf("\n  [TRACES]\n");
+   printf("\tTraces files:\t\t %i\n", conf.n_file_trace);
+   printf("\tTraces type:\t\t %c\n", conf.type_trace);
