@@ -29,21 +29,17 @@ Attackwindow::Attackwindow(QWidget *parent) :
     ui->setupUi(this);
 
     int algo_idx = 0;
-    algo_map["Message"] = algo_idx++;
     algo_map["AES"] = algo_idx++;
-    algo_map["DES"] = algo_idx++;
 
     ui->algoBox->clear();
     ui->algoBox->addItems(QStringList()
-                          <<"Identity"
-                          <<"AES"
-                          <<"DES");
+                          <<"AES");
 
     ui->functionBox->clear();
     ui->functionBox->addItems(QStringList()
-                              <<"Input"
                               <<"1st round output SBOX"
-                              <<"1st XOR");
+                              <<"1st XOR"
+                              <<"Input");
 
     ui->methodBox->clear();
     ui->methodBox->addItems(QStringList() << "CPA");
@@ -168,6 +164,12 @@ void Attackwindow::load_dataSet(QString filepath_dataset)
 
     ui->spinnb_traces->setMaximum(row_index);
     ui->spinnb_traces->setValue(row_index);
+
+    int curve_pts = std::numeric_limits<int>::max();
+    for (int i = 0; i < ScaTool::curves->length(); i++)
+        curve_pts = std::min(curve_pts,ScaTool::curves->at(i)->length());
+    ui->spinpts_end->setMaximum(curve_pts);
+    ui->spinpts_end->setValue(curve_pts);
 }
 
 void Attackwindow::on_DataButton_pressed()
@@ -177,7 +179,7 @@ void Attackwindow::on_DataButton_pressed()
     load_dataSet(filepath_dataset);
 }
 
-void Attackwindow::on_spinpts_start_valueChanged(int arg1)
+void Attackwindow::on_spinpts_start_editingFinished()
 {
     //Update value range
     if (ScaTool::curves->length() > 0) {
@@ -186,11 +188,11 @@ void Attackwindow::on_spinpts_start_valueChanged(int arg1)
     }
 
     // Respect min and max
-    if (arg1 > ui->spinpts_end->value())
+    if (ui->spinpts_start->value() > ui->spinpts_end->value())
         ui->spinpts_end->setValue(ui->spinpts_start->value());
 }
 
-void Attackwindow::on_spinpts_end_valueChanged(int arg1)
+void Attackwindow::on_spinpts_end_editingFinished()
 {
     //Update value range
     if (ScaTool::curves->length() > 0) {
@@ -199,7 +201,7 @@ void Attackwindow::on_spinpts_end_valueChanged(int arg1)
     }
 
     // Respect min and max
-    if (ui->spinpts_start->value() > arg1)
+    if (ui->spinpts_start->value() > ui->spinpts_end->value())
         ui->spinpts_start->setValue(ui->spinpts_end->value());
 }
 
@@ -233,13 +235,12 @@ void Attackwindow::finished(int exitCode, QProcess::ExitStatus exitStatus)
 void Attackwindow::on_attackButton_pressed()
 {
     // Get values from UI
-    int attack_method = ui->methodBox->currentIndex();
-    int algo = ui->algoBox->currentIndex();
     int sel_fun = ui->functionBox->currentIndex();
     int pts_min = ui->spinpts_start->value();
     int pts_max = ui->spinpts_end->value();
     int nb_pts = pts_max - pts_min;
     int nb_traces = ui->spinnb_traces->value();
+    int length;
     //ui->byteIdxTable->selectedItems()
     QMovie *movie = new QMovie(":images/ajax-loader.gif");
     QLabel *pr = new QLabel(this);
@@ -261,14 +262,17 @@ void Attackwindow::on_attackButton_pressed()
     for (int i = 0; i < nb_traces; i++)
     {
         Curve* c = ScaTool::curves->at(i);
-        float * buf = c->getrawdata(&nb_pts, c->xoffset);
-        trace.write(reinterpret_cast<const char*>(buf), nb_pts<<2);
+        float * buf = c->getrawdata(&length, c->xoffset);
+        trace.write(reinterpret_cast<const char*>(&buf[pts_min]), nb_pts<<2);
         free(buf);
-
     }
 
     QFile::copy(this->input_dataset, this->tdir->path() + "/input.bin");
-    QFile::copy(this->daredevil_path + "LUT/AES_AFTER_SBOX",
+    if (sel_fun == 0)
+        QFile::copy(this->daredevil_path + "LUT/AES_AFTER_SBOX",
+                this->tdir->path() + "/lut");
+    else
+        QFile::copy(this->daredevil_path + "LUT/AES_BEFORE_SBOX",
                 this->tdir->path() + "/lut");
 
     // Create config file
