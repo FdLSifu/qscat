@@ -46,6 +46,8 @@ public:
     bool onefile = false;
     int row = 0;
     int ncol = 0;
+    float min;
+    float max;
     // Constructor
     Curve(int id);
 

@@ -168,29 +168,43 @@ void Curve::updateDisplaySeries()
 QList<QPointF> Curve::downsample_minmax(float *data,int factor, int nbpoints)
 {
     QList<QPointF> points_list;
-    float dmin = std::numeric_limits<float>::max();
-    float dmax = -std::numeric_limits<float>::max();
+    // Curve local min max
+    float lmin = std::numeric_limits<float>::max();
+    float lmax = -std::numeric_limits<float>::max();
+    // Curve absolute min max
+    this->min = lmin;
+    this->max = lmax;
     for (int i = 0; i < nbpoints ; i ++)
     {
         if (factor > 1)
         {
             if (i%factor == 0)
             {
-                dmin = std::min(data[i],dmin);
-                dmax = std::max(data[i],dmax);
-                points_list.append(QPointF(i+xoffset,dmin));
-                points_list.append(QPointF(i+xoffset,dmax));
+                lmin = std::min(data[i],lmin);
+                lmax = std::max(data[i],lmax);
+                points_list.append(QPointF(i+xoffset,lmin));
+                points_list.append(QPointF(i+xoffset,lmax));
 
-                dmin = std::numeric_limits<float>::max();
-                dmax = -std::numeric_limits<float>::max();
+                // Point has been added to be displayed
+                // Keep track on max/min to have adequated range
+                this->max = std::max(lmax,this->max);
+                this->min = std::min(lmin,this->min);
+
+                // Reset dmin dmax
+                lmin = std::numeric_limits<float>::max();
+                lmax = -std::numeric_limits<float>::max();
                 continue;
             }
-            dmin = std::min(data[i],dmin);
-            dmax = std::max(data[i],dmax);
+            lmin = std::min(data[i],lmin);
+            lmax = std::max(data[i],lmax);
         }
         else
         {
             points_list.append(QPointF(i+xoffset,data[i]));
+            // Point has been added to be displayed
+            // Keep track on max/min to have adequated range
+            this->max = std::max(data[i],this->max);
+            this->min = std::min(data[i],this->min);
         }
 
     }
