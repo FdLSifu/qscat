@@ -175,6 +175,13 @@
       </item>
      </layout>
     </item>
+    <item row="2" column="7">
+     <widget class="QPushButton" name="fity">
+      <property name="text">
+       <string>Fit Y</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

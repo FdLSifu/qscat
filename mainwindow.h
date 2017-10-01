@@ -40,6 +40,8 @@ private slots:
 
     void on_save_pressed();
 
+    void on_fity_pressed();
+
 public slots:
     void updateStatusBar();
 

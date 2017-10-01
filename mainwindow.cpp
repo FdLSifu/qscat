@@ -345,6 +345,7 @@ void MainWindow::on_curves_pressed()
         ScaTool::dockcurves->hide();
         ui->curves->setIcon(QIcon(":images/arrow-up.png"));
     }
+
 }
 
 void MainWindow::on_attack_pressed()
@@ -379,4 +380,19 @@ void MainWindow::on_save_pressed()
 
     }
 
+}
+
+void MainWindow::on_fity_pressed()
+{
+    float min = std::numeric_limits<float>::max();
+    float max = -std::numeric_limits<float>::max();
+    for(int i = 0; i < ScaTool::curves->length() ; i ++)
+    {
+        if (ScaTool::curves->at(i)->displayed)
+        {
+            max = std::max(max,ScaTool::curves->at(i)->max);
+            min = std::min(min,ScaTool::curves->at(i)->min);
+        }
+    }
+    ScaTool::main_plot->chart()->axisY()->setRange(min,max);
 }
