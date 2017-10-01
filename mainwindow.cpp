@@ -187,6 +187,7 @@ void MainWindow::load_files(QStringList files)
 
         for (int i = 0; i < row; i ++)
         {
+            QCoreApplication::processEvents();
             int idx = ScaTool::curves->length();
 
             Curve *curve = new Curve(idx);
@@ -214,6 +215,8 @@ void MainWindow::load_files(QStringList files)
     {
         for (QStringList::iterator it = files.begin();
              it != files.end(); ++it) {
+            QCoreApplication::processEvents();
+
             QString fn = *it;
 
             // Check file exist

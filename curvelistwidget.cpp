@@ -127,6 +127,7 @@ void CurveListWidget::global_type_changed(int type)
     Curve * curve;
     for(int rowidx = 0; rowidx < ui->table_curve->rowCount(); rowidx++)
     {
+        QCoreApplication::processEvents();
         curve = ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text());
         if (curve == 0)
             return;

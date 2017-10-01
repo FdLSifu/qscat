@@ -153,6 +153,7 @@ void Attackwindow::load_dataSet(QString filepath_dataset)
 
     int row_index = 0;
     for (int i = 0; i < bin.length(); i+=16) {
+        QCoreApplication::processEvents();
         QString cl = "";
         for (int j = 0; j < input_len; j++)
             cl.append(QString().sprintf("%02x",(unsigned char)bin[i+j]));
