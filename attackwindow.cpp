@@ -38,6 +38,7 @@ Attackwindow::Attackwindow(QWidget *parent) :
     ui->functionBox->clear();
     ui->functionBox->addItems(QStringList()
                               <<"1st round output SBOX"
+                              <<"1st round output Mult Inv"
                               <<"1st XOR"
                               <<"Input");
 
@@ -271,6 +272,9 @@ void Attackwindow::on_attackButton_pressed()
     QFile::copy(this->input_dataset, this->tdir->path() + "/input.bin");
     if (sel_fun == 0)
         QFile::copy(this->daredevil_path + "LUT/AES_AFTER_SBOX",
+                this->tdir->path() + "/lut");
+    else if (sel_fun == 1)
+        QFile::copy(this->daredevil_path + "LUT/AES_AFTER_MULTINV",
                 this->tdir->path() + "/lut");
     else
         QFile::copy(this->daredevil_path + "LUT/AES_BEFORE_SBOX",
