@@ -349,7 +349,6 @@ float * Curve::getrawdata(int *length, int single_offset)
             else
             {
                 file.seek(tr_off + (sizeof(uint32_t) * -single_offset));
-                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferui32 = (uint32_t*)malloc((*length + single_offset)*sizeof(uint32_t));
                 file.read(reinterpret_cast<char*>(bufferui32),sizeof(uint32_t) * (*length + single_offset));
@@ -381,7 +380,6 @@ float * Curve::getrawdata(int *length, int single_offset)
             else
             {
                 file.seek(tr_off + (sizeof(int32_t) * -single_offset));
-                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferi32 = (int32_t*)malloc((*length + single_offset)*sizeof(int32_t));
                 file.read(reinterpret_cast<char*>(bufferi32),sizeof(int32_t) * (*length + single_offset));
@@ -413,7 +411,6 @@ float * Curve::getrawdata(int *length, int single_offset)
             else
             {
                 file.seek(tr_off + (sizeof(uint16_t) * -single_offset));
-                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferui16 = (uint16_t*)malloc((*length + single_offset)*sizeof(uint16_t));
                 file.read(reinterpret_cast<char*>(bufferui16),sizeof(uint16_t) * (*length + single_offset));
@@ -445,7 +442,6 @@ float * Curve::getrawdata(int *length, int single_offset)
             else
             {
                 file.seek(tr_off + (sizeof(int16_t) * -single_offset));
-                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferi16 = (int16_t*)malloc((*length + single_offset)*sizeof(int16_t));
                 file.read(reinterpret_cast<char*>(bufferi16),sizeof(int16_t) * (*length + single_offset));
@@ -477,7 +473,6 @@ float * Curve::getrawdata(int *length, int single_offset)
             else
             {
                 file.seek(tr_off + (sizeof(uint8_t) * -single_offset));
-                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferui8 = (uint8_t*)malloc((*length + single_offset)*sizeof(uint8_t));
                 file.read(reinterpret_cast<char*>(bufferui8),sizeof(uint8_t) * (*length + single_offset));
@@ -509,7 +504,6 @@ float * Curve::getrawdata(int *length, int single_offset)
             else
             {
                 file.seek(tr_off + (sizeof(int8_t) * -single_offset));
-                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferi8 = (int8_t*)malloc((*length + single_offset)*sizeof(int8_t));
                 file.read(reinterpret_cast<char*>(bufferi8),sizeof(int8_t) * (*length + single_offset));
@@ -541,12 +535,13 @@ float * Curve::getrawdata(int *length, int single_offset)
             else
             {
                 file.seek(tr_off + (sizeof(double) * -single_offset));
-                file.read(reinterpret_cast<char*>(data),sizeof(float) * (*length + single_offset));
 
                 bufferd = (double*)malloc((*length + single_offset)*sizeof(double));
                 file.read(reinterpret_cast<char*>(bufferd),sizeof(double) * (*length + single_offset));
+
                 for(int i = 0; i < (*length + single_offset); i++)
                     (data)[i] = (float)(bufferd[i]);
+
                 free(bufferd);
 
                 for(int i = *length + single_offset; i < *length ; i++)
