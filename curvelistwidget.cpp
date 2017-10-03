@@ -141,23 +141,11 @@ void CurveListWidget::global_type_changed(int type)
 
 void CurveListWidget::on_clearall_pressed()
 {
-
-    qDeleteAll(ScaTool::synchrodialog->synchropasses.begin(),ScaTool::synchrodialog->synchropasses.end());
-
-    this->clear();
-
     if (ScaTool::curves->length() > 0)
     {
         qDeleteAll(ScaTool::curves->begin(),ScaTool::curves->end());
         ScaTool::curves->clear();
     }
-    if (ScaTool::dockcurves->isHidden())
-        ScaTool::dockcurves->show();
-    for (int i = 0 ; i < ScaTool::main_plot->chart()->axes(Qt::Horizontal).length(); i ++)
-        ScaTool::main_plot->chart()->removeAxis(ScaTool::main_plot->chart()->axes().at(i));
-    for (int i = 0 ; i < ScaTool::main_plot->chart()->axes(Qt::Vertical).length(); i ++)
-        ScaTool::main_plot->chart()->removeAxis(ScaTool::main_plot->chart()->axes().at(i));
-    ScaTool::curve_table->firstDisplayed = true;
 
 }
 
@@ -181,24 +169,20 @@ void CurveListWidget::on_displayoff_pressed()
     }
 }
 
-void CurveListWidget::on_deletecurve_pressed()
+void CurveListWidget::on_deleteCurve_pressed()
 {
-    int rowidx;
     QList<QTableWidgetItem *> itemlist = ui->table_curve->selectedItems();
-
-    for(int i = 0 ; i < itemlist.length(); i++)
+    for (QList<QTableWidgetItem*>::iterator it = itemlist.begin();
+         it != itemlist.end(); ++it)
     {
-        rowidx = itemlist.at(i)->row();
-        Curve *c = ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text());
-        if (c->displayed)
-        {
-            c->chkbox->setChecked(false);
-            ScaTool::main_plot->chart()->removeSeries(c->getDisplaySeries());
-        }
-        ui->table_curve->removeRow(rowidx);
-
-        Q_ASSERT(ScaTool::curves->removeOne(c));
-
+        QTableWidgetItem *item = *it;
+        if (!item)
+            continue;
+        int rowidx = item->row();
+        if (rowidx == -1)
+            continue;
+        QString cname = ui->table_curve->item(rowidx,2)->text();
+        Curve *c = ScaTool::getCurveByName(cname);
         delete c;
     }
 }
@@ -223,6 +207,23 @@ void CurveListWidget::rowselected(int row, int column)
     if (c->displayed)
         printf("TODO : to bring front");
     */
+}
+
+void CurveListWidget::removeRow(Curve *c)
+{
+    bool found = false;
+    int i = 0;
+    while( i < ui->table_curve->rowCount())
+    {
+        if(c->cname == ui->table_curve->item(i,2)->text())
+        {
+            found = true;
+            break;
+        }
+        i++;
+    }
+    if (found)
+        ui->table_curve->removeRow(i);
 }
 
 void CurveListWidget::on_redraw_pressed()

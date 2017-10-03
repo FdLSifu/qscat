@@ -30,6 +30,8 @@ public:
 
     // Functions
     void addRefItem(QString name);
+    void clearRefItem();
+    void removeRefItem(QString name);
 
     void show();
 

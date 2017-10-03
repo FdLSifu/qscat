@@ -46,6 +46,16 @@ void SynchroDialog::addRefItem(QString name)
     ui->refcombo->addItem(name);
 }
 
+void SynchroDialog::clearRefItem()
+{
+    ui->refcombo->clear();
+}
+
+void SynchroDialog::removeRefItem(QString name)
+{
+    int idx = ui->refcombo->findText(name);
+    ui->refcombo->removeItem(idx);
+}
 SynchroDialog::~SynchroDialog()
 {
     delete ui;

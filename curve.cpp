@@ -22,16 +22,44 @@ Curve::Curve(int id) :
 
 Curve::~Curve()
 {
+    // Disable curve if displayed
+    if (displayed)
+    {
+        chkbox->setChecked(false);
+        ScaTool::main_plot->chart()->removeSeries(getDisplaySeries());
+    }
+    // Remove from table list
+    ScaTool::curve_table->removeRow(this);
+    // Remove from synchro list
+    ScaTool::synchrodialog->removeRefItem(cname);
+    // Remove from internal list
+    Q_ASSERT(ScaTool::curves->removeOne(this));
+
+    // Delete fullseries
     if (this->fullseries != 0)
         resetFullSeries();
+    // Delete display series
     if (this->displayseries != 0)
         resetDisplaySeries();
+
+    // Delete related objects
     if (this->chkbox != 0)
         delete this->chkbox;
     if (this->color_btn != 0)
         delete this->color_btn;
     if (this->type_cmbbox != 0)
         delete this->type_cmbbox;
+
+    if (ScaTool::curves->isEmpty())
+    {
+        qDeleteAll(ScaTool::synchrodialog->synchropasses.begin(),ScaTool::synchrodialog->synchropasses.end());
+        for (int i = 0 ; i < ScaTool::main_plot->chart()->axes(Qt::Horizontal).length(); i ++)
+            ScaTool::main_plot->chart()->removeAxis(ScaTool::main_plot->chart()->axes().at(i));
+        for (int i = 0 ; i < ScaTool::main_plot->chart()->axes(Qt::Vertical).length(); i ++)
+            ScaTool::main_plot->chart()->removeAxis(ScaTool::main_plot->chart()->axes().at(i));
+        ScaTool::curve_table->firstDisplayed = true;
+        ScaTool::synchrodialog->clearRefItem();
+    }
 }
 
 QColor Curve::getColor()
@@ -248,6 +276,9 @@ int Curve::length()
     int nbpoints,shift;
 
     switch (this->type) {
+    case Curve::CurveType(DOUBLE):
+        shift = 3;
+        break;
     case Curve::CurveType(FLOAT32):
     case Curve::CurveType(UINT32):
     case Curve::CurveType(INT32):

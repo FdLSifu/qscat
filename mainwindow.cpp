@@ -327,12 +327,14 @@ void MainWindow::on_refresh_pressed()
     }
     ScaTool::curves->clear();
     ScaTool::curve_table->clear();
+    ScaTool::synchrodialog->clearRefItem();
     if (ScaTool::dockcurves->isHidden())
         ScaTool::dockcurves->show();
     for (int i = 0 ; i < ScaTool::main_plot->chart()->axes(Qt::Horizontal).length(); i ++)
         ScaTool::main_plot->chart()->removeAxis(ScaTool::main_plot->chart()->axes().at(i));
     for (int i = 0 ; i < ScaTool::main_plot->chart()->axes(Qt::Vertical).length(); i ++)
         ScaTool::main_plot->chart()->removeAxis(ScaTool::main_plot->chart()->axes().at(i));
+    ScaTool::main_plot->chart()->removeAllSeries();
     ScaTool::curve_table->firstDisplayed = true;
 }
 

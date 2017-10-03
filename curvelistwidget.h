@@ -25,6 +25,7 @@ public:
     Curve * getSelectedCurve();
     QList<Curve *> getSelectedCurves();
     void setCurveRangeMax(void);
+    void removeRow(Curve *c);
 
 private slots:
     void global_type_changed(int type);
@@ -32,9 +33,9 @@ private slots:
     void on_clearall_pressed();
     void on_displayall_pressed();
     void on_displayoff_pressed();
-    void on_deletecurve_pressed();
     void on_redraw_pressed();
     void updateshiftvalue();
+    void on_deleteCurve_pressed();
 
 private:
     Ui::CurveListWidget *ui;
