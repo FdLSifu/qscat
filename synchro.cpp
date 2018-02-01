@@ -32,13 +32,14 @@ qreal Synchro::min_dist_curve(int idx)
     Curve * curve = this->curves.at(idx);
     Curve * cur_ref = this->curves.at(this->curve_ref_idx);
 
+    int initial_ref_offset = this->curve_offset.at(this->curve_ref_idx);
+    int initial_offset = this->curve_offset.at(idx);
+
+    QLineSeries * ref_subseries = cur_ref->getSubSeries(initial_ref_offset+leftpattern,initial_ref_offset+rightpattern);
+    QLineSeries * work_subseries = curve->getSubSeries(initial_offset+leftpattern+leftwindow, initial_offset+rightpattern+rightwindow);
+
+    if (cur_ref != curve)
     {
-        int initial_ref_offset = this->curve_offset.at(this->curve_ref_idx);
-        int initial_offset = this->curve_offset.at(idx);
-
-        QLineSeries * ref_subseries = cur_ref->getSubSeries(initial_ref_offset+leftpattern,initial_ref_offset+rightpattern);
-        QLineSeries * work_subseries = curve->getSubSeries(initial_offset+leftpattern+leftwindow, initial_offset+rightpattern+rightwindow);
-
         for (int s = leftwindow; s < rightwindow; s++)
         {
             dist = 0;
@@ -52,9 +53,15 @@ qreal Synchro::min_dist_curve(int idx)
                 offset = -s;
             }
         }
-
+    }
+    else
+    {
+        offset = 0;
+        distmin = 0;
+    }
+    {
         // apply shift
-        curve->shift(offset - curve->xoffset - initial_offset);
+        curve->shift(offset - curve->xoffset + initial_offset);
 
         // Populate offsets
         if (curve->offsets.length() > numpass)

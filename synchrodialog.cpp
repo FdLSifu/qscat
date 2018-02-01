@@ -189,6 +189,39 @@ void SynchroDialog::pattern_value_changed()
     qreal lp = ui->leftpattern->text().toDouble();
     qreal rp = ui->rightpattern->text().toDouble();
 
+    // Get nbpoints
+    int nbpoints = 0;
+    for(int i = 0; i < ScaTool::curves->length(); i++)
+    {
+        if(nbpoints == 0)
+            nbpoints = ScaTool::curves->at(i)->length();
+        else
+            nbpoints = std::min(nbpoints,ScaTool::curves->at(i)->length());
+    }
+
+    // Set range
+    ui->leftpattern->setMinimum(0);
+    ui->rightpattern->setMinimum(0);
+    ui->leftpattern->setMaximum(nbpoints);
+    ui->rightpattern->setMaximum(nbpoints);
+
+    // Check range
+    if(lp > rp)
+    {
+        rp = lp;
+        ui->rightpattern->setValue(rp);
+    }
+    if (lp+lw < 0)
+    {
+        lw = -lp;
+        ui->leftwindow->setValue(lw);
+    }
+    if (rp+rw > nbpoints)
+    {
+        rw = nbpoints - rp;
+        ui->rightwindow->setValue(rw);
+    }
+
     if ((ScaTool::main_plot->chart()->series().indexOf(this->pattern_bar) < 0) && (ScaTool::main_plot->chart()->series().indexOf(this->window_bar) < 0))
     {
         ScaTool::main_plot->chart()->addSeries(this->pattern_bar);
