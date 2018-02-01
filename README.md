@@ -14,10 +14,10 @@ Here is the steps to perform key recovery:
 
 Thanks to QSCAT you can do:
 + Signal traces visualation [done => 100%]
-+ Signal traces synchronization [functionnal => 70%]
++ Signal traces synchronization [functionnal => 100%]
   + Manual synchronization
   + Multi threaded automatic synchronization [Sum of Differences (SOD) lacks some other methods]
-+ Correlation Power Analysis CPA [0%]
++ Correlation Power Analysis CPA [100%]
 + Differential Power Analysis DPA [0%]
 + Template Analysis [0%]
 
