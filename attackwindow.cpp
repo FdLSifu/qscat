@@ -100,16 +100,6 @@ void Attackwindow::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
-void Attackwindow::dropEvent(QDropEvent *event)
-{
-    const QMimeData* mimeData = event->mimeData();
-    if (mimeData->hasUrls())
-    {
-        QList<QUrl> urlList = mimeData->urls();
-        load_dataSet(urlList.at(0).toLocalFile());
-    }
-}
-
 void Attackwindow::dragMoveEvent(QDragMoveEvent *event)
 {
     event->acceptProposedAction();
@@ -118,67 +108,6 @@ void Attackwindow::dragMoveEvent(QDragMoveEvent *event)
 void Attackwindow::dragLeaveEvent(QDragLeaveEvent *event)
 {
     event->accept();
-}
-
-void Attackwindow::load_dataSet(QString filepath_dataset)
-{
-    int input_len;
-    this->input_dataset = filepath_dataset;
-    this->qf.setFileName(this->input_dataset);
-    if (!this->qf.open(QIODevice::ReadOnly))
-        return;
-
-    ui->tableWidget->clear();
-    ui->tableWidget->setRowCount(0);
-
-    switch (ui->algoBox->currentIndex()) {
-    case 0:
-        input_len = 16;
-        break;
-    case 1:
-        input_len = 16;
-        break;
-    case 2:
-        input_len = 8;
-        break;
-    default:
-        input_len = -1;
-    }
-
-    if (input_len < 0)
-        return;
-
-    QByteArray bin = this->qf.readAll();
-    if (bin.length() % input_len)
-        return;
-
-    int row_index = 0;
-    for (int i = 0; i < bin.length(); i+=16) {
-        QCoreApplication::processEvents();
-        QString cl = "";
-        for (int j = 0; j < input_len; j++)
-            cl.append(QString().sprintf("%02x",(unsigned char)bin[i+j]));
-        cl.append("\n");
-        ui->tableWidget->insertRow(row_index);
-        ui->tableWidget->setItem(row_index, 0, new QTableWidgetItem(cl));
-        row_index++;
-    }
-
-    ui->spinnb_traces->setMaximum(row_index);
-    ui->spinnb_traces->setValue(row_index);
-
-    int curve_pts = std::numeric_limits<int>::max();
-    for (int i = 0; i < ScaTool::curves->length(); i++)
-        curve_pts = std::min(curve_pts,ScaTool::curves->at(i)->length());
-    ui->spinpts_end->setMaximum(curve_pts);
-    ui->spinpts_end->setValue(curve_pts);
-}
-
-void Attackwindow::on_DataButton_pressed()
-{
-    QString filepath_dataset;
-    filepath_dataset = QFileDialog::getOpenFileName(this, QString("Select data set file"));
-    load_dataSet(filepath_dataset);
 }
 
 void Attackwindow::on_spinpts_start_editingFinished()
@@ -205,14 +134,6 @@ void Attackwindow::on_spinpts_end_editingFinished()
     // Respect min and max
     if (ui->spinpts_start->value() > ui->spinpts_end->value())
         ui->spinpts_start->setValue(ui->spinpts_end->value());
-}
-
-void Attackwindow::on_ClearButton_pressed()
-{
-    ui->tableWidget->clear();
-    ui->tableWidget->setRowCount(0);
-    ui->spinnb_traces->setMaximum(0);
-    ui->spinnb_traces->setValue(0);
 }
 
 void Attackwindow::processOutput()

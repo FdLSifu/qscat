@@ -729,4 +729,3 @@ void Curve::curve_type_changed(int type)
     this->type = type;
     this->updateDisplaySeries();
 }
-

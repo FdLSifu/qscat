@@ -4,6 +4,7 @@
 #include <QTableWidgetItem>
 #include <QValueAxis>
 #include <QColorDialog>
+#include <QFileDialog>
 
 CurveListWidget::CurveListWidget(QWidget *parent) :
     QWidget(parent),
@@ -259,4 +260,56 @@ void CurveListWidget::on_redraw_pressed()
 void CurveListWidget::setCurveRangeMax(void)
 {
     ui->label_range->setText("[0 - " + QString::number(ui->table_curve->rowCount() - 1) + "]");
+}
+
+void CurveListWidget::clear_dataSet()
+{
+    Curve * curve;
+    for(int i = 0; i < ui->table_curve->rowCount() ; i++) {
+        curve = ScaTool::getCurveByName(ui->table_curve->item(i,2)->text());
+        curve->textin = "";
+        ui->table_curve->item(i,6)->setText(curve->textin);
+    }
+}
+
+void CurveListWidget::load_dataSet(QString filepath_dataset)
+{
+    Curve *curve;
+    int input_len = 16; // HARDCODED FOR AES => BAD!
+    QFile qf;
+    QString input_dataset = filepath_dataset;
+    qf.setFileName(input_dataset);
+    if (!qf.open(QIODevice::ReadOnly))
+        return;
+
+    clear_dataSet();
+
+    QByteArray bin = qf.readAll();
+    if ( (bin.length() % input_len) || ((bin.length()/input_len) > ui->table_curve->rowCount()) )
+        return;
+
+    int row_index = 0;
+    for (int i = 0; i < bin.length(); i+=input_len) {
+        QCoreApplication::processEvents();
+        QString cl = "";
+        for (int j = 0; j < input_len; j++)
+            cl.append(QString().sprintf("%02x",(unsigned char)bin[i+j]));
+
+        curve = ScaTool::getCurveByName(ui->table_curve->item(row_index,2)->text());
+        curve->textin = cl;
+        ui->table_curve->item(i,6)->setText(curve->textin);
+        row_index++;
+    }
+}
+
+void CurveListWidget::on_opendata_pressed()
+{
+    QString filepath_dataset;
+    filepath_dataset = QFileDialog::getOpenFileName(this, QString("Select data set file"));
+    load_dataSet(filepath_dataset);
+}
+
+void CurveListWidget::on_cleardata_pressed()
+{
+    clear_dataSet();
 }

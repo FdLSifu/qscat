@@ -48,6 +48,7 @@ public:
     int ncol = 0;
     float min;
     float max;
+    QString textin;
     // Constructor
     Curve(int id);
 
