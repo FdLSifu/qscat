@@ -17,7 +17,7 @@
    <string notr="true">QSCAT (Qt Side Channel Analysis Tool)</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="scatool_resource.qrc">
+   <iconset resource="qscat_resource.qrc">
     <normaloff>:/images/turkish-cat.png</normaloff>:/images/turkish-cat.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -90,7 +90,7 @@
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset resource="scatool_resource.qrc">
+       <iconset resource="qscat_resource.qrc">
         <normaloff>:/images/arrow-down.png</normaloff>
         <normalon>:/images/arrow-up.png</normalon>:/images/arrow-down.png</iconset>
       </property>
@@ -105,7 +105,7 @@
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset resource="scatool_resource.qrc">
+       <iconset resource="qscat_resource.qrc">
         <normaloff>:/images/fileopen.png</normaloff>:/images/fileopen.png</iconset>
       </property>
      </widget>
@@ -133,7 +133,7 @@
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset resource="scatool_resource.qrc">
+       <iconset resource="qscat_resource.qrc">
         <normaloff>:/images/remove.png</normaloff>:/images/remove.png</iconset>
       </property>
      </widget>
@@ -144,7 +144,7 @@
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset resource="scatool_resource.qrc">
+       <iconset resource="qscat_resource.qrc">
         <normaloff>:/images/filesave.png</normaloff>:/images/filesave.png</iconset>
       </property>
      </widget>
@@ -201,7 +201,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="scatool_resource.qrc"/>
+  <include location="qscat_resource.qrc"/>
  </resources>
  <connections/>
 </ui>

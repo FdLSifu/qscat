@@ -8,7 +8,7 @@ QT       += core gui charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = scatool
+TARGET = qscat
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -53,6 +53,6 @@ FORMS    += design.ui \
     attacklog.ui
 
 RESOURCES += \
-    scatool_resource.qrc
+    qscat_resource.qrc
 
 DISTFILES +=
