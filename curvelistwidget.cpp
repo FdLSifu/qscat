@@ -75,6 +75,10 @@ void CurveListWidget::addCurve(Curve *curve)
     curve->settypecmbbox(cmbbox);
     ui->table_curve->setCellWidget(rowidx,colidx,cmbbox);
 
+    // Apply global type
+    cmbbox->setCurrentIndex(ui->type_box->currentIndex());
+    curve->curve_type_changed(ui->type_box->currentIndex());
+
     //Offset
     colidx++;
     ui->table_curve->setItem(rowidx,colidx,new QTableWidgetItem(QString::number(curve-> xoffset)));
