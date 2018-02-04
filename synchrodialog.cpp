@@ -92,7 +92,7 @@ void SynchroDialog::on_runsynchro_pressed()
             // Trick to set length - 2 as the reference curve is done synchronized
             SynchroDialog::qprogressbar = new QProgressBar(this);
             SynchroDialog::qprogressbar->setMinimum(0);
-            SynchroDialog::qprogressbar->setMaximum(runningsynchro->curves.length()-2);
+            SynchroDialog::qprogressbar->setMaximum(runningsynchro->curves.length());
             ScaTool::statusbar->addPermanentWidget(SynchroDialog::qprogressbar);
             SynchroDialog::qprogressbar->show();
         }
@@ -129,7 +129,7 @@ void SynchroDialog::update_progressdialog()
     if (SynchroDialog::qprogressbar)
     {
         SynchroDialog::qprogressbar->setValue(SynchroDialog::qprogressbar->value()+1);
-        if(SynchroDialog::qprogressbar->value() == (SynchroDialog::qprogressbar->maximum() - 1))
+        if(SynchroDialog::qprogressbar->value() >= SynchroDialog::qprogressbar->maximum() - 1)
         {
             ScaTool::statusbar->removeWidget(SynchroDialog::qprogressbar);
             delete SynchroDialog::qprogressbar;
