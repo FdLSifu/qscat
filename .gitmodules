@@ -1,3 +1,6 @@
 [submodule "daredevil"]
 	path = daredevil
 	url = https://github.com/FdLSifu/Daredevil
+[submodule "liquid-dsp"]
+	path = liquid-dsp
+	url = https://github.com/jgaeddert/liquid-dsp
