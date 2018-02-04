@@ -18,6 +18,7 @@ Curve::Curve(int id) :
     this->fullseries = 0;
     this->displayseries = 0;
     this->color = QColor(Qt::white);
+    this->textin = "";
 }
 
 Curve::~Curve()

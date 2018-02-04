@@ -168,7 +168,15 @@ void Attackwindow::on_attackButton_pressed()
     QMovie *movie = new QMovie(":images/ajax-loader.gif");
     QLabel *pr = new QLabel(this);
 
-    ui->attackButton->setEnabled(false);
+    if (ui->attackButton->text().compare(QString("Stop Attack")) == 0)
+    {
+        ui->attackButton->setText(QString("Launch Attack"));
+        this->process->terminate();
+        this->tdir->remove();
+        return;
+    }
+    else
+        ui->attackButton->setText(QString("Stop Attack"));
     pr->setMovie(movie);
     pr->show();
     movie->start();
@@ -254,4 +262,16 @@ void Attackwindow::on_attackButton_pressed()
 
     movie->stop();
     pr->hide();
+}
+
+void Attackwindow::setTraceNb(int t)
+{
+    ui->spinnb_traces->setMaximum(t);
+    ui->spinnb_traces->setValue(t);
+}
+
+void Attackwindow::setPtsNb(int p)
+{
+    ui->spinpts_end->setMaximum(p);
+    ui->spinpts_end->setValue(p);
 }

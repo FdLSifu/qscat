@@ -20,7 +20,9 @@ public:
     explicit Attackwindow(QWidget *parent = 0);
     ~Attackwindow();
     QString daredevil_path;
-
+    QString input_dataset;
+    void setTraceNb(int t);
+    void setPtsNb(int p);
 public slots:
     void processOutput();
     void finished(int exitCode, QProcess::ExitStatus exitStatus);
@@ -33,7 +35,6 @@ private slots:
 private:
     Ui::Attackwindow *ui;
     QMap<QString, int> algo_map;
-    QString input_dataset;
     void saveDaredevilLog(void);
     QProcess *process;
     QString stdout_log;

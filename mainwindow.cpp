@@ -209,6 +209,7 @@ void MainWindow::load_files(QStringList files)
                 // Add curve to synchro table display
                 ScaTool::synchrodialog->addRefItem(curve->cname);
             }
+            ScaTool::statusbar->showMessage("Loading curve ... "+QString::number(i)+"/"+QString::number(row),0);
         }
     }
     else
@@ -243,8 +244,10 @@ void MainWindow::load_files(QStringList files)
                 // Add curve to synchro table display
                 ScaTool::synchrodialog->addRefItem(curve->cname);
             }
+            ScaTool::statusbar->showMessage("Loading curve ... "+QString::number(idx)+"/"+QString::number(files.length()),0);
         }
     }
+    ScaTool::statusbar->showMessage("Loading curve done",1000);
     ScaTool::curve_table->setCurveRangeMax();
     // Ui effect to show curve list
     if (ScaTool::dockcurves->isHidden())

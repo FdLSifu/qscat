@@ -91,6 +91,10 @@ void CurveListWidget::addCurve(Curve *curve)
     curve->setchkbox(chkbox);
     ui->table_curve->setCellWidget(rowidx,colidx,chkbox);
 
+    //Textin
+    colidx ++;
+    ui->table_curve->setItem(rowidx,colidx,new QTableWidgetItem(QString("")));
+
     // Handler
     connect(colorbtn,&QPushButton::pressed,curve,&Curve::colorbtn_pressed);
     connect(chkbox,&QCheckBox::toggled,curve,&Curve::chkbox_toggled);
@@ -270,6 +274,9 @@ void CurveListWidget::clear_dataSet()
         curve->textin = "";
         ui->table_curve->item(i,6)->setText(curve->textin);
     }
+
+    ScaTool::attackdialog->setTraceNb(0);
+    ScaTool::attackdialog->setPtsNb(0);
 }
 
 void CurveListWidget::load_dataSet(QString filepath_dataset)
@@ -278,6 +285,8 @@ void CurveListWidget::load_dataSet(QString filepath_dataset)
     int input_len = 16; // HARDCODED FOR AES => BAD!
     QFile qf;
     QString input_dataset = filepath_dataset;
+    // Used for daredevil copy
+    ScaTool::attackdialog->input_dataset = filepath_dataset;
     qf.setFileName(input_dataset);
     if (!qf.open(QIODevice::ReadOnly))
         return;
@@ -297,9 +306,18 @@ void CurveListWidget::load_dataSet(QString filepath_dataset)
 
         curve = ScaTool::getCurveByName(ui->table_curve->item(row_index,2)->text());
         curve->textin = cl;
-        ui->table_curve->item(i,6)->setText(curve->textin);
+        ui->table_curve->item(row_index,6)->setText(curve->textin);
         row_index++;
     }
+
+    int curve_pts = std::numeric_limits<int>::max();
+    for (int i = 0; i < ScaTool::curves->length(); i++)
+        curve_pts = std::min(curve_pts,ScaTool::curves->at(i)->length());
+
+    ScaTool::attackdialog->setTraceNb(row_index);
+    ScaTool::attackdialog->setPtsNb(curve_pts);
+
+
 }
 
 void CurveListWidget::on_opendata_pressed()
