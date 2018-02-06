@@ -404,3 +404,8 @@ void MainWindow::on_fity_pressed()
     }
     ScaTool::main_plot->chart()->axisY()->setRange(min,max);
 }
+
+void MainWindow::on_color_pressed()
+{
+
+}

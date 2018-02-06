@@ -331,3 +331,43 @@ void CurveListWidget::on_cleardata_pressed()
 {
     clear_dataSet();
 }
+
+void CurveListWidget::on_openoffsets_pressed()
+{
+    int buf = 0;
+    int curve_length = 0;
+    if (ScaTool::curves->length() == 0)
+        return;
+
+    // Create offsets data file
+    QString fileName = QFileDialog::getOpenFileName(this,tr("Load Offsets"),QDir::currentPath(),tr("Binary (*.bin)"));
+    QFile trace(fileName);
+    if (trace.open(QIODevice::ReadOnly) == false)
+            return;
+
+    for (int i = 0; i < ScaTool::curves->length(); i++)
+    {
+        Curve* c = ScaTool::curves->at(i);
+        trace.read(reinterpret_cast<char*>(&buf), sizeof(int));
+        c->shift(buf-c->xoffset);
+    }
+}
+
+void CurveListWidget::on_saveoffsets_pressed()
+{
+    int curve_length = 0;
+    if (ScaTool::curves->length() == 0)
+        return;
+
+    // Create offsets data file
+    QString fileName = QFileDialog::getSaveFileName(this,tr("Save Offsets"),QDir::currentPath(),tr("Binary (*.bin)"));
+    QFile trace(fileName);
+    if (trace.open(QIODevice::WriteOnly) == false)
+            return;
+
+    for (int i = 0; i < ScaTool::curves->length(); i++)
+    {
+        Curve* c = ScaTool::curves->at(i);
+        trace.write(reinterpret_cast<const char*>(&c->xoffset), sizeof(int));
+    }
+}

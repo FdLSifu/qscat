@@ -7,5 +7,6 @@
         <file>images/arrow-down.png</file>
         <file>images/ajax-loader.gif</file>
         <file>images/turkish-cat.png</file>
+        <file>images/color.png</file>
     </qresource>
 </RCC>

@@ -41,6 +41,10 @@ private slots:
 
     void on_cleardata_pressed();
 
+    void on_openoffsets_pressed();
+
+    void on_saveoffsets_pressed();
+
 private:
     Ui::CurveListWidget *ui;
 };

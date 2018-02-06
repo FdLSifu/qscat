@@ -260,6 +260,20 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="openoffsets">
+       <property name="text">
+        <string>Open Offsets</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="saveoffsets">
+       <property name="text">
+        <string>Save Offsets</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="opendata">
        <property name="text">
         <string>Open DataSet</string>

@@ -106,7 +106,7 @@ void SynchroDialog::on_runsynchro_pressed()
             if(passnum > 0)
                 runningsynchro->curve_offset.append(runningsynchro->curves.at(i)->offsets.at(passnum-1));
             else
-                runningsynchro->curve_offset.append(0);
+                runningsynchro->curve_offset.append(c->xoffset);
         }
 
         runningsynchro->curve_ref_idx = 0;

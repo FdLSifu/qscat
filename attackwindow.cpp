@@ -152,7 +152,7 @@ void Attackwindow::finished(int exitCode, QProcess::ExitStatus exitStatus)
     saveDaredevilLog();
     this->tdir->remove();
     ScaTool::attacklog->updateLabelLog("Computing time: " + QString::number(time) + " ms - daredevil log saved in " + this->daredevilLog);
-    ui->attackButton->setEnabled(true);
+    ui->attackButton->setText(QString("Launch Attack"));
 }
 
 void Attackwindow::on_attackButton_pressed()
