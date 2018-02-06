@@ -2,6 +2,7 @@
 #define SYNCHRO_H
 
 #include "curve.h"
+#include <QFuture>
 #include <QRunnable>
 #include <QObject>
 
@@ -14,7 +15,7 @@ public:
     // Fields
     QList<Curve *> curves;
     QList<int> curve_offset;
-    QList<qreal> result;
+    QList<QFuture<qreal>> result;
     int curve_ref_idx;
     int numpass;
     int method;
@@ -26,7 +27,7 @@ public:
     Synchro(int num);
 
     // Function
-    qreal min_dist_curve(int idx);
+    qreal static min_dist_curve(Synchro *s,int idx);
 private:
     void run();
 

@@ -138,9 +138,8 @@ void SynchroDialog::update_progressdialog()
             QThreadPool::globalInstance()->releaseThread();
 
             QLineSeries *series = new QLineSeries();
-
             for(int i = 0; i < runningsynchro->result.length() ; i++)
-                series->append(i,runningsynchro->result.at(i));
+                series->append(i,runningsynchro->result.at(i).result());
 
             if(!ui->threshold->chart()->series().isEmpty())
             {
