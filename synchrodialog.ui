@@ -14,6 +14,27 @@
    <string>Synchronization Window</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="2" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetNoConstraint</enum>
+     </property>
+     <item>
+      <widget class="QPushButton" name="addstep">
+       <property name="text">
+        <string>Add Step</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="removestep">
+       <property name="text">
+        <string>Remove Step</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="6" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
@@ -48,6 +69,31 @@
         <number>10000000</number>
        </property>
       </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="10" column="0">
+    <widget class="QPushButton" name="runsynchro">
+     <property name="text">
+      <string>Run Synchro</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <layout class="QFormLayout" name="formLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="methodlabel">
+         <property name="text">
+          <string>Synchro Method</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="methodcombo"/>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -100,13 +146,6 @@
      </item>
     </layout>
    </item>
-   <item row="10" column="0">
-    <widget class="QPushButton" name="runsynchro">
-     <property name="text">
-      <string>Run Synchro</string>
-     </property>
-    </widget>
-   </item>
    <item row="5" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -124,6 +163,32 @@
       </layout>
      </item>
     </layout>
+   </item>
+   <item row="9" column="0">
+    <widget class="QPushButton" name="runpreview">
+     <property name="text">
+      <string>Preview</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QComboBox" name="stepcombo"/>
+   </item>
+   <item row="2" column="1" colspan="2">
+    <widget class="QLabel" name="label">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Synchronization Threshold</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </item>
    <item row="8" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -149,73 +214,15 @@
      </item>
     </layout>
    </item>
-   <item row="2" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_6">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetNoConstraint</enum>
-     </property>
-     <item>
-      <widget class="QPushButton" name="addstep">
-       <property name="text">
-        <string>Add Step</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="removestep">
-       <property name="text">
-        <string>Remove Step</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="9" column="0">
-    <widget class="QPushButton" name="runpreview">
+   <item row="11" column="0">
+    <widget class="QPushButton" name="stopsynchro">
      <property name="text">
-      <string>Preview</string>
+      <string>Stop Synchro</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
-    <widget class="QComboBox" name="stepcombo"/>
-   </item>
-   <item row="4" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <layout class="QFormLayout" name="formLayout_2">
-       <item row="0" column="0">
-        <widget class="QLabel" name="methodlabel">
-         <property name="text">
-          <string>Synchro Method</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="methodcombo"/>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </item>
-   <item row="3" column="1" rowspan="8" colspan="2">
+   <item row="3" column="1" rowspan="9" colspan="2">
     <widget class="QtCharts::QChartView" name="threshold" native="true"/>
-   </item>
-   <item row="2" column="1" colspan="2">
-    <widget class="QLabel" name="label">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Synchronization Threshold</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

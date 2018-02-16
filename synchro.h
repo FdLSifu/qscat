@@ -23,6 +23,8 @@ public:
     int leftwindow,rightwindow;
     int precision;
     bool preview;
+    static bool stop;
+    static QMutex mutex;
     // Constructor
     Synchro(int num);
 

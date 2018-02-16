@@ -4,6 +4,9 @@
 #include <QFutureWatcher>
 #include <QtConcurrent/QtConcurrent>
 
+bool Synchro::stop = false;
+QMutex Synchro::mutex;
+
 Synchro::Synchro(int num):
       QObject()
 {
@@ -47,6 +50,15 @@ qreal Synchro::min_dist_curve(Synchro *sync,int idx)
         for (int s = sync->leftwindow; s < sync->rightwindow; s++)
         {
             dist = 0;
+            // Stop and exit
+            Synchro::mutex.lock();
+            if(Synchro::stop)
+            {
+                Synchro::mutex.unlock();
+                distmin = 0;
+                break;
+            }
+            Synchro::mutex.unlock();
 
             for (int p = sync->leftpattern ; p < sync->rightpattern; p += sync->precision)
                 dist += qAbs(ref_subseries->at(p-sync->leftpattern).y() - work_subseries->at(p+s-sync->leftpattern-sync->leftwindow).y());

@@ -51,6 +51,8 @@ private slots:
 
     void on_stepcombo_currentIndexChanged(int index);
 
+    void on_stopsynchro_pressed();
+
 private:
     Ui::SynchroDialog *ui;
 };

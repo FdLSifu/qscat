@@ -69,6 +69,7 @@ void SynchroDialog::on_runpreview_pressed()
 
 void SynchroDialog::on_runsynchro_pressed()
 {
+
     if (SynchroDialog::qprogressbar != 0)
     {
         QErrorMessage *qerror = new QErrorMessage();
@@ -88,6 +89,7 @@ void SynchroDialog::on_runsynchro_pressed()
                 runningsynchro->curves.append(c);
         }
 
+
         if (!this->preview){
             // Trick to set length - 2 as the reference curve is done synchronized
             SynchroDialog::qprogressbar = new QProgressBar(this);
@@ -97,6 +99,7 @@ void SynchroDialog::on_runsynchro_pressed()
             SynchroDialog::qprogressbar->show();
         }
 
+        Synchro::stop = false;
         // Get curve's offset
         runningsynchro->curve_offset.clear();
         for(int i = 0; i < runningsynchro->curves.length() ; i++)
@@ -294,4 +297,11 @@ void SynchroDialog::on_stepcombo_currentIndexChanged(int index)
         }
     }
 
+}
+
+void SynchroDialog::on_stopsynchro_pressed()
+{
+    Synchro::mutex.lock();
+    Synchro::stop = true;
+    Synchro::mutex.unlock();
 }
