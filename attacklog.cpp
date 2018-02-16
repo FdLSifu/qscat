@@ -14,6 +14,7 @@ AttackLog::AttackLog(QWidget *parent) :
     ui->setupUi(this);
     this->is_complete = 0;
     this->next_byte = 0;
+    this->idx = 0;
     ui->log_label->setText("Attack in progress ...");
 
     connect(ui->pushButton_1, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
@@ -32,6 +33,7 @@ AttackLog::AttackLog(QWidget *parent) :
     connect(ui->pushButton_14, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
     connect(ui->pushButton_15, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
     connect(ui->pushButton_16, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
+    connect(ui->pushButton_all, SIGNAL(pressed()), this, SLOT(on_pushButton_pressed()));
 }
 
 AttackLog::~AttackLog()
@@ -160,8 +162,9 @@ void AttackLog::updateLabelLog(QString txt)
     ui->log_label->setText(txt);
 }
 
-QList<QLineSeries*>* AttackLog::getCorrSerie(int byte_idx)
+/*QList<QLineSeries*>* AttackLog::getCorrSerie(int byte_idx)
 {
+    double rawdata;
     int i_point = 0;
     int i_guess = 0;
     QList<QLineSeries*> *ql = new QList<QLineSeries*>();
@@ -169,74 +172,139 @@ QList<QLineSeries*>* AttackLog::getCorrSerie(int byte_idx)
     data = fopen("./correlation.bin","rb");
 
     int nb_guess = 256;
+    int nb_bytes = 16;
 
     fseek(data,0,SEEK_END);
-    int nb_point = ftell(data)/(nb_guess*16*sizeof(double));
+    // Compute points number
+    int nb_point = ftell(data)/(nb_guess*nb_bytes*sizeof(double));
     fseek(data,0,SEEK_SET);
 
     i_guess = 0;
-
-    double (*rawdata)[256][nb_point] = (double(*)[256][nb_point])malloc(16*256*nb_point*sizeof(double));
-    fread(rawdata,16*256*nb_point,sizeof(double),data);
-
+    // Loop over all guesses
     while(i_guess < nb_guess)
     {
         QLineSeries * lineserie = new QLineSeries();
         lineserie->setUseOpenGL(true);
 
         i_point = 0;
-
+        // Compute offset manually
+        // correlation binary file is built as a 3D array [byte][guess][point]
+        int offset = byte_idx*nb_guess*nb_point;
+        offset += i_guess*nb_point;
+        offset *= sizeof(double);
+        fseek(data,offset,SEEK_SET);
         while(i_point < nb_point)
         {
-            lineserie->append(i_point,rawdata[byte_idx][i_guess][i_point]);
-            i_point ++;
+            fread(&rawdata,sizeof(double),1,data);
+            lineserie->append(i_point++,rawdata);
         }
         i_guess ++;
         ql->append(lineserie);
     }
-    free(rawdata);
+    return ql;
+}*/
+
+QList<QLineSeries*>* AttackLog::getCorrSerie(int byte_idx)
+{
+    QPointF pmin,pmax;
+    double rawdata;
+    int i_point = 0;
+    int i_guess = 0;
+    QList<QLineSeries*> *ql = new QList<QLineSeries*>();
+    QLineSeries * lineserieminmax = new QLineSeries();
+    lineserieminmax->setUseOpenGL(true);
+
+    FILE *data;
+    data = fopen("./correlation.bin","rb");
+
+    // File not found
+    if (data == 0)
+        return ql;
+
+    int nb_guess = 256;
+    int nb_bytes = 16;
+
+    fseek(data,0,SEEK_END);
+    // Compute points number
+    int nb_point = ftell(data)/(nb_guess*nb_bytes*sizeof(double));
+    fseek(data,0,SEEK_SET);
+
+    i_guess = 0;
+    // Loop over all guesses
+    while(i_guess < nb_guess)
+    {
+        i_point = 0;
+        // Compute offset manually
+        // correlation binary file is built as a 3D array [byte][guess][point]
+        int offset = byte_idx*nb_guess*nb_point;
+        offset += i_guess*nb_point;
+        offset *= sizeof(double);
+        fseek(data,offset,SEEK_SET);
+        while(i_point < nb_point)
+        {
+            fread(&rawdata,sizeof(double),1,data);
+            if (i_guess == 0)
+            {
+                lineserieminmax->append(i_point,rawdata);
+                lineserieminmax->append(i_point,rawdata);
+            }
+            else
+            {
+                pmin = lineserieminmax->at(2*i_point);
+                if (rawdata < pmin.y())
+                    lineserieminmax->replace(2*i_point,i_point,rawdata);
+                pmax = lineserieminmax->at((2*i_point)+1);
+                if (rawdata > pmax.y())
+                    lineserieminmax->replace((2*i_point)+1,i_point,rawdata);
+            }
+            i_point ++;
+        }
+        i_guess ++;
+    }
+    ql->append(lineserieminmax);
     return ql;
 }
 
 void AttackLog::on_pushButton_pressed()
 {
-    int idx = 0;
+
     if (QObject::sender() == ui->pushButton_1)
-        idx=0;
+        idx ^= 1UL << 0;
     else if (QObject::sender() == ui->pushButton_2)
-        idx=1;
+        idx ^= 1UL << 1;
     else if (QObject::sender() == ui->pushButton_3)
-        idx=2;
+        idx ^= 1UL << 2;
     else if (QObject::sender() == ui->pushButton_4)
-        idx=3;
+        idx ^= 1UL << 3;
     else if (QObject::sender() == ui->pushButton_5)
-        idx=4;
+        idx ^= 1UL << 4;
     else if (QObject::sender() == ui->pushButton_6)
-        idx=5;
+        idx ^= 1UL << 5;
     else if (QObject::sender() == ui->pushButton_7)
-        idx=6;
+        idx ^= 1UL << 6;
     else if (QObject::sender() == ui->pushButton_8)
-        idx=7;
+        idx ^= 1UL << 7;
     else if (QObject::sender() == ui->pushButton_9)
-        idx=8;
+        idx ^= 1UL << 8;
     else if (QObject::sender() == ui->pushButton_10)
-        idx=9;
+        idx ^= 1UL << 9;
     else if (QObject::sender() == ui->pushButton_11)
-        idx=10;
+        idx ^= 1UL << 10;
     else if (QObject::sender() == ui->pushButton_12)
-        idx=11;
+        idx ^= 1UL << 11;
     else if (QObject::sender() == ui->pushButton_13)
-        idx=12;
+        idx ^= 1UL << 12;
     else if (QObject::sender() == ui->pushButton_14)
-        idx=13;
+        idx ^= 1UL << 13;
     else if (QObject::sender() == ui->pushButton_15)
-        idx=14;
+        idx ^= 1UL << 14;
     else if (QObject::sender() == ui->pushButton_16)
-        idx=15;
+        idx ^= 1UL << 15;
+    else if (QObject::sender() == ui->pushButton_all)
+        idx = 0xFFFF;
     else
         assert(false);
 
-    QList<QLineSeries*> * ql = getCorrSerie(idx);
     if(!ui->corrchart->chart()->series().isEmpty())
     {
         ui->corrchart->chart()->removeAllSeries();
@@ -244,9 +312,18 @@ void AttackLog::on_pushButton_pressed()
         ui->corrchart->chart()->removeAxis(ui->corrchart->chart()->axisY());
     }
 
-    for (int i = 0; i < ql->length(); i++)
+    for (int i = 0; i < 16; i ++)
     {
-        ui->corrchart->chart()->addSeries(ql->at(i));
+        if ((idx >> i)&1)
+        {
+            QList<QLineSeries*> * ql = getCorrSerie(i);
+            for (int i = 0; i < ql->length(); i++)
+            {
+                ui->corrchart->chart()->addSeries(ql->at(i));
+            }
+        }
+        QCoreApplication::processEvents();
     }
     ui->corrchart->chart()->createDefaultAxes();
+
 }

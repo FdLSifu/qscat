@@ -29,6 +29,7 @@ private:
                        QStringList *list1, QStringList *list2);
     Ui::AttackLog *ui;
     int next_byte;
+    int idx;
     int is_complete;
 };
 
