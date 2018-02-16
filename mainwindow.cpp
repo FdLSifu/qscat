@@ -115,6 +115,7 @@ void MainWindow::dragLeaveEvent(QDragLeaveEvent *event)
 
 void MainWindow::load_files(QStringList files)
 {
+    ScaTool::dockcurves->hide();
     if (files.length() == 1)
     {
         QString fn = files.at(0);
@@ -244,14 +245,14 @@ void MainWindow::load_files(QStringList files)
                 // Add curve to synchro table display
                 ScaTool::synchrodialog->addRefItem(curve->cname);
             }
-            ScaTool::statusbar->showMessage("Loading curve ... "+QString::number(idx)+"/"+QString::number(files.length()),0);
+            ScaTool::statusbar->showMessage("Loading curve ... "+QString::number(idx),0);
         }
     }
     ScaTool::statusbar->showMessage("Loading curve done",1000);
     ScaTool::curve_table->setCurveRangeMax();
-    // Ui effect to show curve list
-    if (ScaTool::dockcurves->isHidden())
-        ScaTool::dockcurves->show();
+
+    ScaTool::dockcurves->show();
+
 }
 
 void MainWindow::on_open_pressed()
@@ -315,7 +316,10 @@ void MainWindow::updateStatusBar()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     event->accept();
-    on_refresh_pressed();
+    ScaTool::curve_table->hide();
+    ScaTool::main_plot->hide();
+    QCoreApplication::processEvents();
+    //on_refresh_pressed();
     QApplication::closeAllWindows();
     QApplication::quit();
 }
@@ -402,10 +406,24 @@ void MainWindow::on_fity_pressed()
             min = std::min(min,ScaTool::curves->at(i)->min);
         }
     }
-    ScaTool::main_plot->chart()->axisY()->setRange(min,max);
+    if (ScaTool::main_plot->chart()->axes().length() > 0)
+        ScaTool::main_plot->chart()->axisY()->setRange(min,max);
 }
 
 void MainWindow::on_color_pressed()
 {
+    int ct = static_cast<int>(ScaTool::main_plot->chart()->theme());
+    ScaTool::main_plot->chart()->setTheme(Chart::ChartTheme((ct+1)%8));
 
+    for(int i = 0; i < ScaTool::curves->length() ; i ++)
+    {
+        if (ScaTool::curves->at(i)->displayed)
+        {
+            Curve * curve = ScaTool::curves->at(i);
+            // Update color button from color curve
+            curve->color_btn->setPalette(QPalette(curve->getDisplaySeries()->color()));
+            // Dirty way to update
+            emit curve->shifted();
+        }
+    }
 }

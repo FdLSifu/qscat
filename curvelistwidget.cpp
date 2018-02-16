@@ -134,6 +134,7 @@ QList<Curve *> CurveListWidget::getSelectedCurves()
 void CurveListWidget::global_type_changed(int type)
 {
     Curve * curve;
+    ScaTool::dockcurves->hide();
     for(int rowidx = 0; rowidx < ui->table_curve->rowCount(); rowidx++)
     {
         QCoreApplication::processEvents();
@@ -145,7 +146,10 @@ void CurveListWidget::global_type_changed(int type)
         curve->type_cmbbox->setCurrentIndex(type);
 
         curve->updateDisplaySeries();
+        ScaTool::statusbar->showMessage("Modifying curve ... "+QString::number(rowidx)+"/"+QString::number(ui->table_curve->rowCount()),0);
     }
+    ScaTool::statusbar->showMessage("Done",1000);
+    ScaTool::dockcurves->show();
 }
 
 void CurveListWidget::on_clearall_pressed()
@@ -345,12 +349,16 @@ void CurveListWidget::on_openoffsets_pressed()
     if (trace.open(QIODevice::ReadOnly) == false)
             return;
 
+    ScaTool::dockcurves->hide();
     for (int i = 0; i < ScaTool::curves->length(); i++)
     {
         Curve* c = ScaTool::curves->at(i);
         trace.read(reinterpret_cast<char*>(&buf), sizeof(int));
         c->shift(buf-c->xoffset);
+        ScaTool::statusbar->showMessage("Loading offset ... "+QString::number(i)+"/"+QString::number(ScaTool::curves->length()),0);
     }
+    ScaTool::statusbar->showMessage("Load offset done",1000);
+    ScaTool::dockcurves->show();
 }
 
 void CurveListWidget::on_saveoffsets_pressed()
