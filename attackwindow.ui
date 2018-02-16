@@ -408,6 +408,13 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="0">
+       <widget class="QPushButton" name="showattack">
+        <property name="text">
+         <string>Show Attack</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

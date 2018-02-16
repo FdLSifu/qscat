@@ -37,10 +37,10 @@ Attackwindow::Attackwindow(QWidget *parent) :
 
     ui->functionBox->clear();
     ui->functionBox->addItems(QStringList()
-                              <<"1st round output SBOX"
-                              <<"1st round output Mult Inv"
-                              <<"1st XOR"
-                              <<"Input");
+                              <<"AES output SBOX"
+                              <<"AES output Mult Inv"
+                              <<"AES XOR (TextIn/TextOut)"
+                              <<"AES output SBOX Inv");
 
     ui->methodBox->clear();
     ui->methodBox->addItems(QStringList() << "CPA");
@@ -65,6 +65,8 @@ Attackwindow::Attackwindow(QWidget *parent) :
         /* exec from dev folder */
         this->daredevil_path.append(daredevil_local.toUtf8() + "/../qscat/daredevil/");
     this->daredevilLog = daredevil_local + "/last_daredevil.log";
+
+    ScaTool::attacklog = new AttackLog(this);
 }
 
 Attackwindow::~Attackwindow()
@@ -177,6 +179,8 @@ void Attackwindow::on_attackButton_pressed()
     }
     else
         ui->attackButton->setText(QString("Stop Attack"));
+    delete ScaTool::attacklog;
+    ScaTool::attacklog = new AttackLog(this);
     pr->setMovie(movie);
     pr->show();
     movie->start();
@@ -199,15 +203,28 @@ void Attackwindow::on_attackButton_pressed()
     }
 
     QFile::copy(this->input_dataset, this->tdir->path() + "/input.bin");
-    if (sel_fun == 0)
+
+    switch (sel_fun) {
+    case 0:
         QFile::copy(this->daredevil_path + "LUT/AES_AFTER_SBOX",
                 this->tdir->path() + "/lut");
-    else if (sel_fun == 1)
+        break;
+    case 1:
         QFile::copy(this->daredevil_path + "LUT/AES_AFTER_MULTINV",
                 this->tdir->path() + "/lut");
-    else
+        break;
+    case 2:
         QFile::copy(this->daredevil_path + "LUT/AES_BEFORE_SBOX",
                 this->tdir->path() + "/lut");
+        break;
+    case 3:
+        QFile::copy(this->daredevil_path + "LUT/AES_AFTER_SBOXINV",
+                this->tdir->path() + "/lut");
+        break;
+    default:
+        assert(false);
+        break;
+    }
 
     // Create config file
     QFile config(this->tdir->path() + "/CONFIG");
@@ -246,10 +263,6 @@ void Attackwindow::on_attackButton_pressed()
     config.close();
     trace.close();
 
-    if (ScaTool::attacklog)
-	delete ScaTool::attacklog;
-
-    ScaTool::attacklog = new AttackLog(this);
     ScaTool::attacklog->show();
 
     this->process = new QProcess(this);
@@ -274,4 +287,9 @@ void Attackwindow::setPtsNb(int p)
 {
     ui->spinpts_end->setMaximum(p);
     ui->spinpts_end->setValue(p);
+}
+
+void Attackwindow::on_showattack_pressed()
+{
+    ScaTool::attacklog->show();
 }

@@ -32,6 +32,8 @@ private slots:
     void on_spinpts_end_editingFinished();
     void on_attackButton_pressed();
 
+    void on_showattack_pressed();
+
 private:
     Ui::Attackwindow *ui;
     QMap<QString, int> algo_map;
