@@ -1,32 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>Attackwindow</class>
- <widget class="QDialog" name="Attackwindow">
+ <widget class="QWidget" name="Attackwindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>480</width>
-    <height>703</height>
+    <width>987</width>
+    <height>732</height>
    </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-    <horstretch>0</horstretch>
-    <verstretch>69</verstretch>
-   </sizepolicy>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>838</width>
-    <height>16777215</height>
-   </size>
   </property>
   <property name="acceptDrops">
    <bool>true</bool>
   </property>
   <property name="windowTitle">
    <string>Side Channel Attack</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="qscat_resource.qrc">
+    <normaloff>:/images/turkish-cat.png</normaloff>:/images/turkish-cat.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
@@ -36,6 +31,18 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>180</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
      </property>
      <layout class="QGridLayout" name="gridLayout_10">
       <item row="0" column="0">
@@ -392,8 +399,14 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
+   <item row="1" column="0">
     <widget class="QGroupBox" name="groupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="1" column="0">
        <widget class="QPushButton" name="attackButton">
@@ -418,8 +431,59 @@
      </layout>
     </widget>
    </item>
+   <item row="0" column="1" rowspan="2" colspan="2">
+    <layout class="QGridLayout" name="gridresults">
+     <item row="0" column="0">
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="tabcorrtable">
+        <attribute name="title">
+         <string>Results</string>
+        </attribute>
+        <widget class="QTableView" name="corrtable">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>811</width>
+           <height>681</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tabcorrview">
+        <attribute name="title">
+         <string>Visual</string>
+        </attribute>
+        <widget class="ChartView" name="corrchart" native="true">
+         <property name="geometry">
+          <rect>
+           <x>-1</x>
+           <y>-1</y>
+           <width>811</width>
+           <height>681</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </item>
   </layout>
  </widget>
- <resources/>
+ <customwidgets>
+  <customwidget>
+   <class>ChartView</class>
+   <extends>QWidget</extends>
+   <header location="global">chartview.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="qscat_resource.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -374,12 +374,7 @@ void MainWindow::on_curves_pressed()
 
 void MainWindow::on_attack_pressed()
 {
-    if (ScaTool::attackdialog->daredevil_path.length()) {
-        ScaTool::attackdialog->show();
-    } else {
-        QErrorMessage *error = new QErrorMessage(this);
-        error->showMessage("Daredevil binary not found in the project/global path");
-    }
+    ScaTool::attackdialog->show();
 }
 
 void MainWindow::on_save_pressed()

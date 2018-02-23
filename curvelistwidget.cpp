@@ -291,8 +291,7 @@ void CurveListWidget::load_dataSet(QString filepath_dataset)
     int input_len = 16; // HARDCODED FOR AES => BAD!
     QFile qf;
     QString input_dataset = filepath_dataset;
-    // Used for daredevil copy
-    ScaTool::attackdialog->input_dataset = filepath_dataset;
+
     qf.setFileName(input_dataset);
     if (!qf.open(QIODevice::ReadOnly))
         return;

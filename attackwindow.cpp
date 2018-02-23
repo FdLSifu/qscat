@@ -23,13 +23,12 @@
 #include "cpa.h"
 
 Attackwindow::Attackwindow(QWidget *parent) :
-    QDialog(parent),
+    QWidget(parent,Qt::Window),
     ui(new Ui::Attackwindow)
 {
-    QString daredevil_local = QDir::currentPath();
+
 
     ui->setupUi(this);
-
     int algo_idx = 0;
     algo_map["AES"] = algo_idx++;
 
@@ -59,32 +58,11 @@ Attackwindow::Attackwindow(QWidget *parent) :
     QHeaderView* headerw = ui->byteIdxTable->verticalHeader();
     headerw->setSectionResizeMode(QHeaderView::Stretch);
 
-    this->daredevil_path.clear();
-    if (QFileInfo(daredevil_local.toUtf8() + "/daredevil/daredevil").isExecutable())
-        /* exec from qscat folder */
-        this->daredevil_path.append(daredevil_local.toUtf8() + "/daredevil/");
-    else if (QFileInfo(daredevil_local.toUtf8() + "/../qscat/daredevil/daredevil").isExecutable())
-        /* exec from dev folder */
-        this->daredevil_path.append(daredevil_local.toUtf8() + "/../qscat/daredevil/");
-    this->daredevilLog = daredevil_local + "/last_daredevil.log";
-
-    ScaTool::attacklog = new AttackLog(this);
 }
 
 Attackwindow::~Attackwindow()
 {
     delete ui;
-}
-
-void Attackwindow::saveDaredevilLog(void)
-{
-    QFile log(this->daredevilLog);
-
-    log.open(QIODevice::ReadWrite);
-    log.write(this->stdout_log.toUtf8());
-    log.flush();
-    log.close();
-    this->stdout_log.clear();
 }
 
 void Attackwindow::dragEnterEvent(QDragEnterEvent *event)
@@ -140,25 +118,6 @@ void Attackwindow::on_spinpts_end_editingFinished()
         ui->spinpts_start->setValue(ui->spinpts_end->value());
 }
 
-void Attackwindow::processOutput()
-{
-    //qDebug() << this->process->readAllStandardError();
-    QString line = this->process->readAllStandardOutput();
-    this->stdout_log.append(line);
-    ScaTool::attacklog->fillSumMaxCorr(this->stdout_log);
-    ScaTool::attacklog->fillSumMaxKey(this->stdout_log);
-}
-
-void Attackwindow::finished(int exitCode, QProcess::ExitStatus exitStatus)
-{
-    int time = this->processTime.elapsed();
-
-    saveDaredevilLog();
-    this->tdir->remove();
-    ScaTool::attacklog->updateLabelLog("Computing time: " + QString::number(time) + " ms - daredevil log saved in " + this->daredevilLog);
-    ui->attackButton->setText(QString("Launch Attack"));
-}
-
 void Attackwindow::on_attackButton_pressed()
 {
     // Get values from UI
@@ -168,9 +127,7 @@ void Attackwindow::on_attackButton_pressed()
     int nb_pts = pts_max - pts_min;
     int nb_traces = ui->spinnb_traces->value();
     int length;
-    //ui->byteIdxTable->selectedItems()
-    QMovie *movie = new QMovie(":images/ajax-loader.gif");
-    QLabel *pr = new QLabel(this);
+
 
     if (ui->attackButton->text().compare(QString("Stop Attack")) == 0)
     {
@@ -179,100 +136,7 @@ void Attackwindow::on_attackButton_pressed()
     }
     else
         ui->attackButton->setText(QString("Stop Attack"));
-    delete ScaTool::attacklog;
-    ScaTool::attacklog = new AttackLog(this);
-    pr->setMovie(movie);
-    pr->show();
-    movie->start();
-    qApp->processEvents();
 
-  /*  // Create a working directory
-    this->tdir = new QTemporaryDir();
-    assert(this->tdir->isValid());
-    this->tdir->setAutoRemove(false);
-
-    // Create traces data file
-    QFile trace(this->tdir->path() + "/trace.bin");
-    assert(trace.open(QIODevice::ReadWrite));
-    for (int i = 0; i < nb_traces; i++)
-    {
-        Curve* c = ScaTool::curves->at(i);
-        float * buf = c->getrawdata(&length, c->xoffset);
-        trace.write(reinterpret_cast<const char*>(&buf[pts_min]), nb_pts<<2);
-        free(buf);
-    }
-
-    QFile::copy(this->input_dataset, this->tdir->path() + "/input.bin");
-
-    switch (sel_fun) {
-    case 0:
-        QFile::copy(this->daredevil_path + "LUT/AES_AFTER_SBOX",
-                this->tdir->path() + "/lut");
-        break;
-    case 1:
-        QFile::copy(this->daredevil_path + "LUT/AES_AFTER_MULTINV",
-                this->tdir->path() + "/lut");
-        break;
-    case 2:
-        QFile::copy(this->daredevil_path + "LUT/AES_BEFORE_SBOX",
-                this->tdir->path() + "/lut");
-        break;
-    case 3:
-        QFile::copy(this->daredevil_path + "LUT/AES_AFTER_SBOXINV",
-                this->tdir->path() + "/lut");
-        break;
-    default:
-        assert(false);
-        break;
-    }
-
-    // Create config file
-    QFile config(this->tdir->path() + "/CONFIG");
-    assert(config.open(QIODevice::ReadWrite | QIODevice::Text));
-    config.write("[Traces]\n");
-    config.write("files=1\n");
-    config.write("trace_type=f\n");
-    config.write("transpose=false\n");
-    config.write("index=0\n");
-    config.write("nsamples=" + QString::number(nb_pts).toUtf8() + "\n");
-    config.write("trace=" + this->tdir->path().toUtf8() + "/trace.bin "
-                 + QString::number(nb_traces).toUtf8() + " "
-                 + QString::number(nb_pts).toUtf8() + "\n");
-
-    config.write("[Guesses]\n");
-    config.write("files=1\n");
-    config.write("guess_type=u\n");
-    config.write("transpose=false\n");
-    config.write("guess=" + this->tdir->path().toUtf8() +"/input.bin" + " "
-                 + QString::number(nb_traces).toUtf8() + " 16\n");
-    config.write("[General]\n");
-    config.write("threads=8\n");
-    config.write("order=1\n");
-    config.write("return_type=double\n");
-    config.write("algorithm=AES\n");
-    config.write("position=" + this->tdir->path().toUtf8() + "/lut\n");
-    config.write("round=0\n");
-    config.write("bytenum=all\n");
-    config.write("bitnum=none\n");
-    config.write("memory=4G\n");
-    config.write("top=20\n");
-    config.write("corrout=t\n");
-
-    config.flush();
-    trace.flush();
-    config.close();
-    trace.close();
-*/
-    ScaTool::attacklog->show();
-
-    /*this->process = new QProcess(this);
-    connect(this->process, SIGNAL(readyReadStandardOutput()), this, SLOT(processOutput()));
-    connect(this->process, SIGNAL(readyReadStandardError()), this, SLOT(processOutput()));
-    connect(this->process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(finished(int,QProcess::ExitStatus)));
-
-    this->processTime.start();
-    this->process->start(this->daredevil_path + "daredevil -c " + config.fileName());
-    */  
     QTime qt = QTime();
     qt.start();
     CPA *cpa = new CPA(ScaTool::curves,0,pts_min,pts_max);
@@ -284,8 +148,6 @@ void Attackwindow::on_attackButton_pressed()
     }
     int el = qt.elapsed();
     qDebug("Time : %d ms\n",el);
-    movie->stop();
-    pr->hide();
 }
 
 void Attackwindow::setTraceNb(int t)
@@ -302,5 +164,5 @@ void Attackwindow::setPtsNb(int p)
 
 void Attackwindow::on_showattack_pressed()
 {
-    ScaTool::attacklog->show();
+
 }

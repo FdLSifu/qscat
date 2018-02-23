@@ -33,7 +33,6 @@ SOURCES += main.cpp\
     synchro.cpp \
     curvelistwidget.cpp \
     attackwindow.cpp \
-    attacklog.cpp \
     cpa.cpp
 
 HEADERS  += mainwindow.h \
@@ -45,15 +44,13 @@ HEADERS  += mainwindow.h \
     synchro.h \
     curvelistwidget.h \
     attackwindow.h \
-    attacklog.h \
     cpa.h \
     aes.h
 
 FORMS    += design.ui \
     synchrodialog.ui \
     curvelistwidget.ui \
-    attackwindow.ui \
-    attacklog.ui
+    attackwindow.ui
 
 RESOURCES += \
     qscat_resource.qrc

@@ -15,7 +15,6 @@
 #include "synchrodialog.h"
 #include "curvelistwidget.h"
 #include "attackwindow.h"
-#include "attacklog.h"
 
 class ScaTool
 {
@@ -27,7 +26,6 @@ public:
     static CurveListWidget *curve_table;
     static SynchroDialog *synchrodialog;
     static Attackwindow *attackdialog;
-    static AttackLog *attacklog;
     static QStatusBar * statusbar;
 
     static void sync_sod(QVector<Curve *> * lcurves, Curve *ref_curve, int lwin, int rwin, int lpattern, int rpattern, int precision);
