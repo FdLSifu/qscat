@@ -196,9 +196,9 @@ void SynchroDialog::pattern_value_changed()
     for(int i = 0; i < ScaTool::curves->length(); i++)
     {
         if(nbpoints == 0)
-            nbpoints = ScaTool::curves->at(i)->length();
+            nbpoints = ScaTool::curves->at(i)->getLength();
         else
-            nbpoints = std::min(nbpoints,ScaTool::curves->at(i)->length());
+            nbpoints = std::min(nbpoints,ScaTool::curves->at(i)->getLength());
     }
 
     // Set range

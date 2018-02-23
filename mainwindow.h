@@ -44,6 +44,8 @@ private slots:
 
     void on_color_pressed();
 
+    void on_menu_pressed();
+
 public slots:
     void updateStatusBar();
 

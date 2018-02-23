@@ -19,6 +19,8 @@
 #include <QHeaderView>
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include <QtConcurrent/QtConcurrent>
+#include "cpa.h"
 
 Attackwindow::Attackwindow(QWidget *parent) :
     QDialog(parent),
@@ -116,8 +118,8 @@ void Attackwindow::on_spinpts_start_editingFinished()
 {
     //Update value range
     if (ScaTool::curves->length() > 0) {
-        ui->spinpts_start->setRange(0,ScaTool::curves->first()->length());
-        ui->spinpts_end->setRange(0,ScaTool::curves->first()->length());
+        ui->spinpts_start->setRange(0,ScaTool::curves->first()->getLength());
+        ui->spinpts_end->setRange(0,ScaTool::curves->first()->getLength());
     }
 
     // Respect min and max
@@ -129,8 +131,8 @@ void Attackwindow::on_spinpts_end_editingFinished()
 {
     //Update value range
     if (ScaTool::curves->length() > 0) {
-        ui->spinpts_start->setRange(0,ScaTool::curves->first()->length());
-        ui->spinpts_end->setRange(0,ScaTool::curves->first()->length());
+        ui->spinpts_start->setRange(0,ScaTool::curves->first()->getLength());
+        ui->spinpts_end->setRange(0,ScaTool::curves->first()->getLength());
     }
 
     // Respect min and max
@@ -173,8 +175,6 @@ void Attackwindow::on_attackButton_pressed()
     if (ui->attackButton->text().compare(QString("Stop Attack")) == 0)
     {
         ui->attackButton->setText(QString("Launch Attack"));
-        this->process->terminate();
-        this->tdir->remove();
         return;
     }
     else
@@ -186,7 +186,7 @@ void Attackwindow::on_attackButton_pressed()
     movie->start();
     qApp->processEvents();
 
-    // Create a working directory
+  /*  // Create a working directory
     this->tdir = new QTemporaryDir();
     assert(this->tdir->isValid());
     this->tdir->setAutoRemove(false);
@@ -262,17 +262,28 @@ void Attackwindow::on_attackButton_pressed()
     trace.flush();
     config.close();
     trace.close();
-
+*/
     ScaTool::attacklog->show();
 
-    this->process = new QProcess(this);
+    /*this->process = new QProcess(this);
     connect(this->process, SIGNAL(readyReadStandardOutput()), this, SLOT(processOutput()));
     connect(this->process, SIGNAL(readyReadStandardError()), this, SLOT(processOutput()));
     connect(this->process, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(finished(int,QProcess::ExitStatus)));
 
     this->processTime.start();
     this->process->start(this->daredevil_path + "daredevil -c " + config.fileName());
+    */  
+    QTime qt = QTime();
+    qt.start();
+    CPA *cpa = new CPA(ScaTool::curves,0,pts_min,pts_max);
 
+    for (int i = 0; i < 16; i ++)
+    {
+        cpa->setbyteidx(i);
+        cpa->run();
+    }
+    int el = qt.elapsed();
+    qDebug("Time : %d ms\n",el);
     movie->stop();
     pr->hide();
 }

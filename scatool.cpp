@@ -8,7 +8,7 @@
 #include "mainwindow.h"
 #include "synchro.h"
 
-QList<Curve*> * ScaTool::curves = 0;
+QVector<Curve*> * ScaTool::curves = 0;
 QDockWidget *ScaTool::dockcurves = 0;
 CurveListWidget *ScaTool::curve_table = 0;
 SynchroDialog *ScaTool::synchrodialog = 0;
@@ -21,7 +21,7 @@ QStatusBar * ScaTool::statusbar = 0;
 Curve * ScaTool::getCurveByName(QString name)
 {
 
-    for (QList<Curve*>::iterator it = ScaTool::curves->begin();
+    for (QVector<Curve*>::iterator it = ScaTool::curves->begin();
          it != ScaTool::curves->end(); ++it) {
 
         Curve *curve = *it;
@@ -36,7 +36,7 @@ Curve * ScaTool::getCurveByName(QString name)
 }
 Curve* ScaTool::getCurveFromDisplaySerie(QLineSeries * serie)
 {
-    for (QList<Curve*>::iterator it = ScaTool::curves->begin();
+    for (QVector<Curve*>::iterator it = ScaTool::curves->begin();
          it != ScaTool::curves->end(); ++it) {
 
         Curve *curve = *it;

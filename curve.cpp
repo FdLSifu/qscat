@@ -7,10 +7,10 @@
 #include <QColorDialog>
 #include <stdint.h>
 
-Curve::Curve(int id) :
+Curve::Curve(int id,QString filename, int ncol, int row, bool onefile) :
     QObject()
 {
-    this->fn = "";
+    this->fn = filename;
     this->cname = "";
     this->type = Curve::CurveType(FLOAT32);
     this->displayed = false;
@@ -19,10 +19,29 @@ Curve::Curve(int id) :
     this->displayseries = 0;
     this->color = QColor(Qt::white);
     this->textin = "";
+    this->ncol = ncol;
+    this->row = row;
+    this->onefile = onefile;
+    if (onefile)
+    {
+        QFileInfo fileInfo(fn);
+        QString name(fileInfo.fileName());
+        cname = name+":"+QString::number(id );
+    }
+    else
+    {
+        QFileInfo fileInfo(fn);
+        QString name(fileInfo.fileName());
+        cname = name;
+    }
+
+    this->length = _length();
+    this->input = (uint8_t*)malloc(sizeof(uint8_t)*16);
 }
 
 Curve::~Curve()
 {
+    free(input);
     // Disable curve if displayed
     if (displayed)
     {
@@ -96,13 +115,15 @@ QtCharts::QLineSeries* Curve::getSubSeries(int xmin, int xmax)
     float *data = 0;
     int nbpoints = 0;
 
+    // TO DO READ ONLY xmin - xmax : conversion to be handled
     data = getrawdata(&nbpoints);
     assert(data);
 
     xmin = std::max(0,xmin);
     xmax = std::min(nbpoints,xmax);
 
-    assert(xmax >= xmin);
+    if (xmax >= xmin)
+        assert(xmax >= xmin);
 
     QtCharts::QLineSeries* subseries = new QtCharts::QLineSeries();
 
@@ -154,6 +175,7 @@ void Curve::updateDisplaySeries(int width, float zoomfactor)
     if (this->displayseries == 0)
         return;
 
+    // TO DO OPTIMIZE READ ONLY NECESSARY POINTS
     data = getrawdata(&nbpoints);
 
     assert(data);
@@ -186,7 +208,7 @@ void Curve::updateDisplaySeries()
     else
     {
         xmin = 0;
-        xmax = this->length();
+        xmax = this->getLength();
     }
 
     float zoomfactor = ScaTool::main_plot->chart()->xaxis_width/(xmax-xmin);
@@ -271,8 +293,11 @@ bool Curve::isLoaded()
     else
         return true;
 }
-
-int Curve::length()
+int Curve::getLength()
+{
+    return length;
+}
+int Curve::_length()
 {
     int nbpoints,shift;
 
@@ -591,6 +616,143 @@ float * Curve::getrawdata(int *length, int single_offset)
     return data;
 }
 
+float Curve::get_floatvalueat(int time)
+{
+    float data = 0;
+    int length;
+    bool is_file_open;
+    int tr_off = row*ncol;
+    int size = 0;
+    int single_offset = this->xoffset;
+    QFile file(fn);
+    is_file_open = file.open(QIODevice::ReadOnly);
+    assert(is_file_open == true);
+
+    if (ncol)
+        size = ncol;
+    else
+        size = file.size();
+
+    file.seek(tr_off);
+    switch (this->type)
+    {
+        case Curve::CurveType(FLOAT32):
+            length  = size/sizeof(float);
+            // out of bound => 0
+            if ( (time< single_offset ) || ( time> (length + single_offset) ))
+                data = 0;
+            else
+            {
+                file.seek(tr_off + (sizeof(float) * (time-single_offset)));
+                file.read(reinterpret_cast<char*>(&data),sizeof(float));
+            }
+            break;
+        case Curve::CurveType(UINT32):
+            length  = size/sizeof(uint32_t);
+            // out of bound => 0
+            if ( (time< single_offset ) || ( time> (length + single_offset) ))
+                data = 0;
+            else
+            {
+                uint32_t val = 0;
+                file.seek(tr_off + (sizeof(uint32_t) * (time-single_offset)));
+                file.read(reinterpret_cast<char*>(&val),sizeof(uint32_t));
+                data = reinterpret_cast<float &>( val );
+            }
+            break;
+        case Curve::CurveType(INT32):
+            length  = size/sizeof(int32_t);
+            // out of bound => 0
+            if ( (time< single_offset ) || ( time> (length + single_offset) ))
+                data = 0;
+            else
+            {
+                int32_t val = 0;
+                file.seek(tr_off + (sizeof(int32_t) * (time-single_offset)));
+                file.read(reinterpret_cast<char*>(&val),sizeof(int32_t));
+                data = reinterpret_cast<float &>( val );
+
+            }
+            break;
+        case Curve::CurveType(UINT16):
+            length  = size/sizeof(uint16_t);
+            // out of bound => 0
+            if ( (time< single_offset ) || ( time> (length + single_offset) ))
+                data = 0;
+            else
+            {
+                uint16_t val = 0;
+                file.seek(tr_off + (sizeof(uint16_t) * (time-single_offset)));
+                file.read(reinterpret_cast<char*>(&val),sizeof(uint16_t));
+                data = reinterpret_cast<float &>( val );
+
+            }
+            break;
+        case Curve::CurveType(INT16):
+            length  = size/sizeof(int16_t);
+            // out of bound => 0
+            if ( (time< single_offset ) || ( time> (length + single_offset) ))
+                data = 0;
+            else
+            {
+                int16_t val = 0;
+                file.seek(tr_off + (sizeof(int16_t) * (time-single_offset)));
+                file.read(reinterpret_cast<char*>(&val),sizeof(int16_t));
+                data = reinterpret_cast<float &>( val );
+
+            }
+            break;
+        case Curve::CurveType(UINT8):
+            length  = size/sizeof(uint8_t);
+            // out of bound => 0
+            if ( (time< single_offset ) || ( time> (length + single_offset) ))
+                data = 0;
+            else
+            {
+                uint8_t val = 0;
+                file.seek(tr_off + (sizeof(uint8_t) * (time-single_offset)));
+                file.read(reinterpret_cast<char*>(&val),sizeof(uint8_t));
+                data = reinterpret_cast<float &>( val );
+
+            }
+            break;
+        case Curve::CurveType(INT8):
+            length  = size/sizeof(int8_t);
+            // out of bound => 0
+            if ( (time< single_offset ) || ( time> (length + single_offset) ))
+                data = 0;
+            else
+            {
+                int8_t val = 0;
+                file.seek(tr_off + (sizeof(int8_t) * (time-single_offset)));
+                file.read(reinterpret_cast<char*>(&val),sizeof(int8_t));
+                data = reinterpret_cast<float &>( val );
+
+            }
+            break;
+        case Curve::CurveType(DOUBLE):
+            length  = size/sizeof(double);
+            // out of bound => 0
+            if ( (time< single_offset ) || ( time> (length + single_offset) ))
+                data = 0;
+            else
+            {
+                double val = 0;
+                file.seek(tr_off + (sizeof(double) * (time-single_offset)));
+                file.read(reinterpret_cast<char*>(&val),sizeof(double));
+                data = reinterpret_cast<float &>( val );
+
+            }
+            break;
+        default:
+            assert(0);
+            break;
+    }
+
+    file.close();
+
+    return data;
+}
 void Curve::curve_clicked(QPointF pt)
 {
     QString curve_name = "undef";
@@ -671,7 +833,7 @@ void Curve::chkbox_toggled(bool state)
                 // We create axis realted to added series
                 ScaTool::main_plot->chart()->createDefaultAxes();
                 // Set original width to ease zoom work
-                ScaTool::main_plot->chart()->xaxis_width = curve->length();
+                ScaTool::main_plot->chart()->xaxis_width = curve->getLength();
 
                 // handler
                 connect(qobject_cast<QValueAxis *>(ScaTool::main_plot->chart()->axisX()), &QValueAxis::rangeChanged,ScaTool::main_plot->chart(), &Chart::on_rangeChanged);
@@ -728,5 +890,7 @@ void Curve::colorbtn_pressed()
 void Curve::curve_type_changed(int type)
 {
     this->type = type;
-    this->updateDisplaySeries();
+    this->length = _length();
+    if (this->displayed)
+        this->updateDisplaySeries();
 }

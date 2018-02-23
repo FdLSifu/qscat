@@ -19,6 +19,7 @@
 #include <QInputDialog>
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include <QMenu>
 
 MainWindow * MainWindow::instance = 0;
 
@@ -35,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Dark gray
     //this->setPalette(QPalette(QColor(30,30,30)));
-    ScaTool::curves = new QList<Curve*>();
+    ScaTool::curves = new QVector<Curve*>();
     ScaTool::dockcurves = new QDockWidget(this);
     ScaTool::curve_table = new CurveListWidget(ScaTool::dockcurves);
     ScaTool::dockcurves->setWidget(ScaTool::curve_table);
@@ -50,7 +51,30 @@ MainWindow::MainWindow(QWidget *parent) :
     Chart *chart = new Chart();
     ui->mainplot->setChart(chart);
     ui->mainplot->setRenderHint(QPainter::Antialiasing);
-    //chart->setTheme(QChart::ChartThemeDark);
+
+    QMenu *menu = new QMenu(this);
+    QList<QAction*> qla = QList<QAction*>();
+
+    QAction *avg = new QAction("Average");
+    avg->setCheckable(true);
+    qla.append(avg);
+
+    QAction *mi = new QAction("Min");
+    mi->setCheckable(true);
+    qla.append(mi);
+
+    QAction *ma = new QAction("Max");
+    ma->setCheckable(true);
+    qla.append(ma);
+
+    QAction *mima = new QAction("MinMax");
+    mima->setCheckable(true);
+    qla.append(mima);
+
+    // Default is minmax
+    mima->setChecked(true);
+    menu->addActions(qla);
+    ui->menu->setMenu(menu);
 }
 
 MainWindow::~MainWindow()
@@ -191,17 +215,10 @@ void MainWindow::load_files(QStringList files)
             QCoreApplication::processEvents();
             int idx = ScaTool::curves->length();
 
-            Curve *curve = new Curve(idx);
-            curve->fn = fn;
-            curve->ncol = col*size;
-            curve->row = i;
-            curve->onefile = true;
-            QFileInfo fileInfo(fn);
-            QString cname(fileInfo.fileName());
-            curve->cname = cname+":"+QString::number(i);
+            Curve *curve = new Curve(idx,fn,col*size,i,true);
 
             // check if curves already inserted
-            if (ScaTool::getCurveByName(cname) == 0)
+            if (ScaTool::getCurveByName(curve->cname) == 0)
             {
                 // Append curve to set of all managed curves
                 ScaTool::curves->append(curve);
@@ -228,15 +245,10 @@ void MainWindow::load_files(QStringList files)
 
             int idx = ScaTool::curves->length();
 
-            Curve *curve = new Curve(idx);
-            curve->fn = fn;
-
-            QFileInfo fileInfo(fn);
-            QString cname(fileInfo.fileName());
-            curve->cname = cname;
+            Curve *curve = new Curve(idx,fn,0,0,false);
 
             // check if curves already inserted
-            if (ScaTool::getCurveByName(cname) == 0)
+            if (ScaTool::getCurveByName(curve->cname) == 0)
             {
                 // Append curve to set of all managed curves
                 ScaTool::curves->append(curve);
@@ -264,7 +276,7 @@ void MainWindow::on_open_pressed()
 
 void MainWindow::on_left_pressed()
 {
-    QList<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
+    QVector<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
 
     for (int i = 0; i < clist.length() ; i++)
         clist.at(i)->shift(-1);
@@ -272,7 +284,7 @@ void MainWindow::on_left_pressed()
 
 void MainWindow::on_lleft_pressed()
 {
-    QList<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
+    QVector<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
 
     for (int i = 0; i < clist.length() ; i++)
         clist.at(i)->shift(-10);
@@ -280,7 +292,7 @@ void MainWindow::on_lleft_pressed()
 
 void MainWindow::on_zero_pressed()
 {
-    QList<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
+    QVector<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
 
     for (int i = 0; i < clist.length() ; i++)
         clist.at(i)->shift(-clist.at(i)->xoffset);
@@ -288,7 +300,7 @@ void MainWindow::on_zero_pressed()
 
 void MainWindow::on_right_pressed()
 {
-    QList<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
+    QVector<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
 
     for (int i = 0; i < clist.length() ; i++)
         clist.at(i)->shift(1);
@@ -296,7 +308,7 @@ void MainWindow::on_right_pressed()
 
 void MainWindow::on_rright_pressed()
 {
-    QList<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
+    QVector<Curve *> clist = ScaTool::curve_table->getSelectedCurves();
 
     for (int i = 0; i < clist.length() ; i++)
         clist.at(i)->shift(10);
@@ -423,7 +435,14 @@ void MainWindow::on_color_pressed()
             // Update color button from color curve
             curve->color_btn->setPalette(QPalette(curve->getDisplaySeries()->color()));
             // Dirty way to update
-            emit curve->shifted();
+            curve->getDisplaySeries()->hide();
+            curve->getDisplaySeries()->show();
         }
     }
+}
+
+#include <QMenuBar>
+#include <QAction>
+void MainWindow::on_menu_pressed()
+{
 }

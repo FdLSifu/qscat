@@ -117,12 +117,12 @@ Curve * CurveListWidget::getSelectedCurve()
     }
 }
 
-QList<Curve *> CurveListWidget::getSelectedCurves()
+QVector<Curve *> CurveListWidget::getSelectedCurves()
 {
 
     QList<QTableWidgetItem *> itemlist = ui->table_curve->selectedItems();
 
-    QList<Curve*> clist = QList<Curve*>();
+    QVector<Curve*> clist = QVector<Curve*>();
     for (int i = 0 ; i < itemlist.length() ; i ++)
     {
         int rowidx = itemlist.at(i)->row();
@@ -215,11 +215,12 @@ void CurveListWidget::updateshiftvalue()
 
 void CurveListWidget::rowselected(int row, int column)
 {
-    /*
+
     Curve *c = ScaTool::getCurveByName(ui->table_curve->item(row,2)->text());
     if (c->displayed)
-        printf("TODO : to bring front");
-    */
+    {
+        c->displayseries->show();
+    }
 }
 
 void CurveListWidget::removeRow(Curve *c)
@@ -286,6 +287,7 @@ void CurveListWidget::clear_dataSet()
 void CurveListWidget::load_dataSet(QString filepath_dataset)
 {
     Curve *curve;
+    int N = ScaTool::curves->length();
     int input_len = 16; // HARDCODED FOR AES => BAD!
     QFile qf;
     QString input_dataset = filepath_dataset;
@@ -298,27 +300,28 @@ void CurveListWidget::load_dataSet(QString filepath_dataset)
     clear_dataSet();
 
     QByteArray bin = qf.readAll();
-    if ( (bin.length() % input_len) || ((bin.length()/input_len) > ui->table_curve->rowCount()) )
+    // Load data even longer
+    if ( ((bin.length() % input_len) != 0) || ((bin.length()/input_len) < N) )
         return;
 
-    int row_index = 0;
-    for (int i = 0; i < bin.length(); i+=input_len) {
+    for (int i = 0; i < N; i++) {
         QCoreApplication::processEvents();
         QString cl = "";
+        curve = (*ScaTool::curves)[i];
         for (int j = 0; j < input_len; j++)
-            cl.append(QString().sprintf("%02x",(unsigned char)bin[i+j]));
-
-        curve = ScaTool::getCurveByName(ui->table_curve->item(row_index,2)->text());
+        {
+            cl.append(QString().sprintf("%02x",(unsigned char)bin[(input_len*i)+j]));
+            curve->input[j] = (uint8_t)bin[(input_len*i)+j];
+        }
         curve->textin = cl;
-        ui->table_curve->item(row_index,6)->setText(curve->textin);
-        row_index++;
+        ui->table_curve->item(i,6)->setText(curve->textin);
     }
 
     int curve_pts = std::numeric_limits<int>::max();
     for (int i = 0; i < ScaTool::curves->length(); i++)
-        curve_pts = std::min(curve_pts,ScaTool::curves->at(i)->length());
+        curve_pts = std::min(curve_pts,ScaTool::curves->at(i)->getLength());
 
-    ScaTool::attackdialog->setTraceNb(row_index);
+    ScaTool::attackdialog->setTraceNb(ScaTool::curves->length());
     ScaTool::attackdialog->setPtsNb(curve_pts);
 
 
@@ -339,7 +342,6 @@ void CurveListWidget::on_cleardata_pressed()
 void CurveListWidget::on_openoffsets_pressed()
 {
     int buf = 0;
-    int curve_length = 0;
     if (ScaTool::curves->length() == 0)
         return;
 
@@ -363,7 +365,6 @@ void CurveListWidget::on_openoffsets_pressed()
 
 void CurveListWidget::on_saveoffsets_pressed()
 {
-    int curve_length = 0;
     if (ScaTool::curves->length() == 0)
         return;
 

@@ -46,11 +46,13 @@ public:
     bool onefile = false;
     int row = 0;
     int ncol = 0;
+    int length;
     float min;
     float max;
     QString textin;
+    uint8_t *input;
     // Constructor
-    Curve(int id);
+    Curve(int id,QString filename, int ncol, int row, bool onefile);
 
     // Destructor
     ~Curve();
@@ -67,7 +69,7 @@ public:
 
     void setColor(QColor c);
 
-    int length();
+    int getLength();
 
     void resetFullSeries();
     void resetDisplaySeries();
@@ -80,7 +82,10 @@ public:
     void settypecmbbox(QComboBox * typecmbbox);
 
     float *getrawdata(int *length, int single_offset = 0);
+    float get_floatvalueat(int time);
 
+private:
+    int _length();
 public slots:
     void curve_clicked(QPointF pt);
     void chkbox_toggled(bool state);

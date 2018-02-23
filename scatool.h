@@ -20,7 +20,7 @@
 class ScaTool
 {
 public:
-    static QList<Curve*> *curves;
+    static QVector<Curve*> *curves;
     static ChartView *main_plot;
     static QtCharts::QChartView *down_plot;
     static QDockWidget *dockcurves;
@@ -30,7 +30,7 @@ public:
     static AttackLog *attacklog;
     static QStatusBar * statusbar;
 
-    static void sync_sod(QList<Curve *> * lcurves, Curve *ref_curve, int lwin, int rwin, int lpattern, int rpattern, int precision);
+    static void sync_sod(QVector<Curve *> * lcurves, Curve *ref_curve, int lwin, int rwin, int lpattern, int rpattern, int precision);
     static Curve* getCurveFromDisplaySerie(QLineSeries * serie);
     static Curve * getCurveByName(QString name);
 };

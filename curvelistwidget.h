@@ -23,7 +23,7 @@ public:
     void    clear();
     void    addCurve(Curve *curve);
     Curve * getSelectedCurve();
-    QList<Curve *> getSelectedCurves();
+    QVector<Curve *> getSelectedCurves();
     void setCurveRangeMax(void);
     void removeRow(Curve *c);
     void load_dataSet(QString filepath_dataset);
