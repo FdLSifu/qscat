@@ -49,6 +49,7 @@ Attackwindow::Attackwindow(QWidget *parent) :
     ui->byteIdxTable->resizeColumnsToContents();
     ui->byteIdxTable->resizeRowsToContents();
     ui->byteIdxTable->hasAutoScroll();
+    ui->byteIdxTable->item(0,0)->setSelected(true); // byte 0 default
 
     ui->spinnb_traces->setMaximum(0);
 
@@ -57,7 +58,6 @@ Attackwindow::Attackwindow(QWidget *parent) :
 
     QHeaderView* headerw = ui->byteIdxTable->verticalHeader();
     headerw->setSectionResizeMode(QHeaderView::Stretch);
-
 }
 
 Attackwindow::~Attackwindow()
@@ -124,9 +124,7 @@ void Attackwindow::on_attackButton_pressed()
     int sel_fun = ui->functionBox->currentIndex();
     int pts_min = ui->spinpts_start->value();
     int pts_max = ui->spinpts_end->value();
-    int nb_pts = pts_max - pts_min;
     int nb_traces = ui->spinnb_traces->value();
-    int length;
 
 
     if (ui->attackButton->text().compare(QString("Stop Attack")) == 0)
@@ -139,13 +137,59 @@ void Attackwindow::on_attackButton_pressed()
 
     QTime qt = QTime();
     qt.start();
-    CPA *cpa = new CPA(ScaTool::curves,0,pts_min,pts_max);
+    if(cpa)
+        delete cpa;
 
-    for (int i = 0; i < 16; i ++)
+    // Work with sub set of curves
+    QVector<Curve*> *curves = new QVector<Curve*>(nb_traces);
+    for (int i = 0; i < nb_traces; i ++)
+        (*curves)[i] = (*ScaTool::curves)[i];
+    // Create CPA object
+    cpa = new CPA(curves,sel_fun,pts_min,pts_max);
+
+    // Run CPA for each selected byte
+    for (int i = 0; i < ui->byteIdxTable->selectedItems().length(); i ++)
     {
-        cpa->setbyteidx(i);
+        int byte = ui->byteIdxTable->selectedItems().at(i)->text().toInt();
+        cpa->byteidx.append(byte);
+        cpa->setbyteidx(byte);
         cpa->run();
     }
+
+    // Update correlation table
+    CorrTableModel *corrtableModel = new CorrTableModel(this->parent(),cpa);
+
+    ui->corrtable->setModel(corrtableModel);
+    ui->corrtable->verticalHeader()->setVisible(false);
+    ui->corrtable->setWordWrap(true);
+    ui->corrtable->setTextElideMode(Qt::ElideMiddle);
+    ui->corrtable->resizeRowsToContents();
+    // Update correlation chart
+    ui->corrchart->chart()->legend()->hide();
+    // Remove previous series
+    ui->corrchart->chart()->removeAllSeries();
+
+    // For each selected byte
+    for (int i = 0; i < ui->byteIdxTable->selectedItems().length(); i ++)
+    {
+        // Get byte from byte matrix
+        int byte = ui->byteIdxTable->selectedItems().at(i)->text().toInt();
+        // For each key guess we plot
+        for (int k = 0; k < 256; k ++)
+        {
+            // We build series from correlation results
+            QLineSeries *ql = new QLineSeries();
+            ql->setUseOpenGL(true);
+
+            for(int t = 0; t < cpa->samples_number; t++)
+            {
+                ql->append(t,cpa->correlation[byte][k][t]);
+            }
+            // Add serie to correlation chart
+            ui->corrchart->chart()->addSeries(ql);
+        }
+    }
+    ui->corrchart->chart()->createDefaultAxes();
     int el = qt.elapsed();
     qDebug("Time : %d ms\n",el);
 }

@@ -7,6 +7,7 @@
 #include <QProcess>
 #include <QTemporaryDir>
 #include <QTime>
+#include "corrtablemodel.h"
 
 namespace Ui {
 class Attackwindow;
@@ -16,6 +17,7 @@ class Attackwindow : public QWidget
 {
     Q_OBJECT
 
+    CPA * cpa;
 public:
     explicit Attackwindow(QWidget *parent = 0);
     ~Attackwindow();

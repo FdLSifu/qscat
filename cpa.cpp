@@ -4,9 +4,11 @@
 #include <QtConcurrent/QtConcurrent>
 
 #define INDEX(x,y,X) ((y*X) + x)
-CPA::CPA(QVector<Curve*> * vcurves, int keyidx_to_guess, int start, int end)
+CPA::CPA(QVector<Curve*> * vcurves, int sel_fun, int start, int end)
 {
-    this->keyidx_to_guess = keyidx_to_guess;
+    this->keyidx_to_guess = 0;
+    this->byteidx = QList<int>();
+    this->sel_fun = sel_fun;
     this->start = start;
     this->end = end;
     this->samples_number = end-start;
@@ -15,20 +17,33 @@ CPA::CPA(QVector<Curve*> * vcurves, int keyidx_to_guess, int start, int end)
     this->guessessum = (float*)malloc(sizeof(float)*256*2);
     this->curves = (Curve**)malloc(sizeof(Curve*)*curves_number);
     this->rawdata = (float**)malloc(sizeof(float*)*samples_number);
-    for (int pts = 0; pts < samples_number; pts++)
-        rawdata[pts] = (float*)malloc(sizeof(float)*curves_number);
-    // Load traces in RAM
-    for (int i = 0; i < curves_number; i++)
+    if (samples_number >= 0)
     {
-        Curve *c = vcurves->at(i);
-        this->curves[i] = c;
-
-        int length;
-        float *buffer = curves[i]->getrawdata(&length);
-        // Copy and transpose
         for (int pts = 0; pts < samples_number; pts++)
-            rawdata[pts][i] = buffer[pts];
-        free(buffer);
+            rawdata[pts] = (float*)malloc(sizeof(float)*curves_number);
+        // Load traces in RAM
+        for (int i = 0; i < curves_number; i++)
+        {
+            Curve *c = vcurves->at(i);
+            this->curves[i] = c;
+
+            int length;
+            float *buffer = curves[i]->getrawdata(&length);
+            // Copy and transpose
+            for (int pts = 0; pts < samples_number; pts++)
+                rawdata[pts][i] = buffer[pts+start];
+            free(buffer);
+        }
+    }
+
+    correlation = (float***)malloc(sizeof(float**)*16);
+    for (int bi = 0; bi < 16; bi ++)
+    {
+        correlation[bi] = (float**)malloc(sizeof(float*)*256);
+        for(int k = 0; k < 256; k++)
+        {
+            correlation[bi][k] = (float*)malloc(sizeof(float)*samples_number);
+        }
     }
 }
 
@@ -40,6 +55,14 @@ CPA::~CPA()
         free(rawdata[i]);
     free(curves);
     free(rawdata);
+
+    for (int bi = 0; bi < 16; bi ++)
+    {
+        for(int k = 0; k < 256; k++)
+            free(correlation[bi][k]);
+        free(correlation[bi]);
+    }
+    free(correlation);
 }
 
 void CPA::setbyteidx(int i)
@@ -50,6 +73,29 @@ void CPA::setbyteidx(int i)
 
 void CPA::construct_guess_hw()
 {
+    if(curves_number < 0)
+        return;
+
+    uint8_t (*func)(uint8_t,uint8_t);
+
+    switch(sel_fun)
+    {
+        case 0: // AES SBOX
+            func = &aes_sbox;
+            break;
+        case 1: // AES MULT_INV
+            func = &aes_multinv;
+            break;
+        case 2: // XOR
+            func = &generic_xor;
+            break;
+        case 3: // SBOX INV
+            func = &aes_sboxinv;
+            break;
+        default:
+            assert(false);
+
+    }
     int byte_idx = keyidx_to_guess;
     for(int kguess = 0; kguess < 256; kguess ++)
     {
@@ -60,7 +106,7 @@ void CPA::construct_guess_hw()
         {
             Curve *c = curves[i];
             uint8_t data = c->input[byte_idx];
-            uint8_t guess = HW[AES_SBOX[(uint8_t)(data^kguess)]];
+            uint8_t guess = (*func)(data,kguess);
             //uint8_t guess = HW[data^kguess];
             this->guesses[INDEX(kguess,i,256)] = guess;
 
@@ -78,6 +124,9 @@ void CPA::run()
 {
     int t = start;
     int n_threads = 4;
+
+    if(samples_number<=0)
+        return;
 
     int workload = samples_number/n_threads;
 
@@ -119,7 +168,7 @@ void *CPA::pearson_correlation(void * param)
     // Loop over curves to build traces over correlation will be computated
     for (int i = 0; i < cpa->curves_number; i++)
     {
-        float data = cpa->rawdata[time][i];
+        float data = cpa->rawdata[time-cpa->start][i];
         sumx += data; // Sum(xi)
         sumx2 += data*data; // Sum(xi^2)
     }
@@ -150,14 +199,14 @@ void *CPA::pearson_correlation(void * param)
        // Compute Sum(xi*yi)
        for(int i = 0; i < cpa->curves_number; i++)
        {
-           sumxy += cpa->rawdata[time][i]*cpa->guesses[INDEX(k,i,256)];
+           sumxy += cpa->rawdata[time-cpa->start][i]*cpa->guesses[INDEX(k,i,256)];
        }
        // Pearson correlation computation
        float r = ((cpa->curves_number*sumxy)-(sumx*sumy))/(sqrt_denumx*sqrt_denumy);
        // DEBUG PURPOSE
        if (r < -0.7)
            qDebug("DEBUG: Max correlation for byte %d time %d with key %d : %f\n",byte_idx,time,k,r);
-       //corr.append(r);
+       cpa->correlation[byte_idx][k][time-cpa->start] = r;
 
    }
    return NULL;

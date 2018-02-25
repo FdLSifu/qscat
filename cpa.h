@@ -12,16 +12,19 @@ public:
     Curve **curves;
     float **rawdata;
     int curves_number;
+    int sel_fun;
     int keyidx_to_guess;
     int start;
     int end;
     int samples_number;
     // Output
-    // Dimension : byteidx, keyguessidx, correlations
-    //QVector<QFuture<QVector<float>>> correlation_results;
+    // byte x key x corr
+    float ***correlation;
+
+    QList<int> byteidx;
 
     // Function
-    CPA(QVector<Curve*> * curves, int keyidx_to_guess, int start, int end);
+    CPA(QVector<Curve*> * curves, int sel_fun, int start, int end);
     ~CPA();
 
     void run();
