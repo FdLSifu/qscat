@@ -140,15 +140,17 @@ void CPA::run()
 
     while(t < end)
     {
-        for(int n = 0; n < n_threads ; n++)
+        int n = 0;
+        while( n < n_threads && t < end)
         {
             param[n].first = this;
             param[n].second = t;
             int rc = pthread_create(&threads[n], NULL, (CPA::pearson_correlation),(void*)&param[n]);
             assert(rc==0);
             t++;
+            n++;
         }
-        for(int n = 0; n < n_threads ; n++)
+        while ( n-- > 0)
         {
             int rc = pthread_join(threads[n], NULL);
             assert(rc==0);
