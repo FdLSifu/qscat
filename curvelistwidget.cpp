@@ -213,7 +213,7 @@ void CurveListWidget::updateshiftvalue()
 
 }
 
-void CurveListWidget::rowselected(int row, int column)
+void CurveListWidget::rowselected(int row, int /*column*/)
 {
 
     Curve *c = ScaTool::getCurveByName(ui->table_curve->item(row,2)->text());

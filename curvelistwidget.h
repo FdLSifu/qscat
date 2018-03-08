@@ -30,7 +30,7 @@ public:
     void clear_dataSet();
 private slots:
     void global_type_changed(int type);
-    void rowselected(int row, int column);
+    void rowselected(int row, int);
     void on_clearall_pressed();
     void on_displayall_pressed();
     void on_displayoff_pressed();

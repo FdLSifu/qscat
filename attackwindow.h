@@ -7,7 +7,7 @@
 #include <QProcess>
 #include <QTemporaryDir>
 #include <QTime>
-#include "corrtablemodel.h"
+#include "corrlistmodel.h"
 
 namespace Ui {
 class Attackwindow;
@@ -28,14 +28,17 @@ private slots:
     void on_spinpts_start_editingFinished();
     void on_spinpts_end_editingFinished();
     void on_attackButton_pressed();
-
     void on_showattack_pressed();
+    void cpa_finished(int byte);
+    void corrcchart_toggled(bool checked);
 
 private:
     Ui::Attackwindow *ui;
     QMap<QString, int> algo_map;
     QString stdout_log;
     QTime processTime;
+
+    void hideResult(int byte);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;

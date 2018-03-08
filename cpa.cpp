@@ -29,7 +29,7 @@ CPA::CPA(QVector<Curve*> * vcurves, int sel_fun, int start, int end)
 
             int length;
             float *buffer = curves[i]->getrawdata(&length);
-            // Copy and transpose
+            // Copy and transpose to gain A LOT OF TIME
             for (int pts = 0; pts < samples_number; pts++)
                 rawdata[pts][i] = buffer[pts+start];
             free(buffer);
@@ -65,7 +65,7 @@ CPA::~CPA()
     free(correlation);
 }
 
-void CPA::setbyteidx(int i)
+void CPA::setcurrentbyteidx(int i)
 {
     this->keyidx_to_guess = i;
     construct_guess_hw();
@@ -120,45 +120,56 @@ void CPA::construct_guess_hw()
     }
 }
 
-void CPA::run()
+void CPA::run(CPA *cpa)
 {
-    int t = start;
-    int n_threads = 4;
-
-    if(samples_number<=0)
-        return;
-
-    int workload = samples_number/n_threads;
-
-    while(workload < 1) {
-        n_threads -= 1;
-        workload = samples_number/n_threads;
-    }
-
-    pthread_t threads[n_threads];
-    std::pair<CPA*,int> *param = (std::pair<CPA*,int> *)malloc(sizeof(std::pair<CPA*,int>)*n_threads);
-
-    while(t < end)
+    bool allocdone = false;
+    std::pair<CPA*,int> *param;
+    for(int bidx = 0; bidx < cpa->byteidx.length(); bidx ++)
     {
-        int n = 0;
-        while( n < n_threads && t < end)
-        {
-            param[n].first = this;
-            param[n].second = t;
-            int rc = pthread_create(&threads[n], NULL, (CPA::pearson_correlation),(void*)&param[n]);
-            assert(rc==0);
-            t++;
-            n++;
-        }
-        while ( n-- > 0)
-        {
-            int rc = pthread_join(threads[n], NULL);
-            assert(rc==0);
-        }
-    }
-    free(param);
-}
+        int currentbyte = cpa->byteidx.at(bidx);
+        cpa->setcurrentbyteidx(currentbyte);
+        int t = cpa->start;
+        int n_threads = 4;
 
+        if(cpa->samples_number<=0)
+            return;
+
+        int workload = cpa->samples_number/n_threads;
+
+        while(workload < 1) {
+            n_threads -= 1;
+            workload = cpa->samples_number/n_threads;
+        }
+
+        pthread_t threads[n_threads];
+        if (allocdone == false)
+        {
+            param = (std::pair<CPA*,int> *)malloc(sizeof(std::pair<CPA*,int>)*n_threads);
+            allocdone = true;
+        }
+        while(t < cpa->end)
+        {
+            int n = 0;
+            while( n < n_threads && t < cpa->end)
+            {
+                param[n].first = cpa;
+                param[n].second = t;
+                int rc = pthread_create(&threads[n], NULL, (CPA::pearson_correlation),(void*)&param[n]);
+                assert(rc==0);
+                t++;
+                n++;
+            }
+            while ( n-- > 0)
+            {
+                int rc = pthread_join(threads[n], NULL);
+                assert(rc==0);
+            }
+        }
+        emit cpa->finished(currentbyte);
+    }
+    if(allocdone == true)
+        free(param);
+}
 
 void *CPA::pearson_correlation(void * param)
 {
@@ -205,9 +216,7 @@ void *CPA::pearson_correlation(void * param)
        }
        // Pearson correlation computation
        float r = ((cpa->curves_number*sumxy)-(sumx*sumy))/(sqrt_denumx*sqrt_denumy);
-       // DEBUG PURPOSE
-       if (r < -0.7)
-           qDebug("DEBUG: Max correlation for byte %d time %d with key %d : %f\n",byte_idx,time,k,r);
+
        cpa->correlation[byte_idx][k][time-cpa->start] = r;
 
    }

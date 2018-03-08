@@ -5,8 +5,9 @@
 #include <QPair>
 #include "curve.h"
 
-class CPA
+class CPA : public QWidget
 {
+    Q_OBJECT
 public:
     // Input
     Curve **curves;
@@ -27,17 +28,20 @@ public:
     CPA(QVector<Curve*> * curves, int sel_fun, int start, int end);
     ~CPA();
 
-    void run();
-    void setbyteidx(int i);
+    static void run(CPA *cpa);
 
+private:
     // Internal
     // Dimension : byteidx, keyguessidx, guessesidx
     uint8_t* guesses;
     // Dimension : byteidx, keyguessidx, [sumg,sqrt()]
     float* guessessum;
-    void construct_guess_hw();
 
+    void construct_guess_hw();
+    void setcurrentbyteidx(int i);
     static void *pearson_correlation(void *param);
+signals:
+    void finished(int byte);
 };
 
 #endif // CPA_H
