@@ -154,10 +154,11 @@ void CurveListWidget::global_type_changed(int type)
 
 void CurveListWidget::on_clearall_pressed()
 {
-    if (ScaTool::curves->length() > 0)
+    QVectorIterator<Curve*> i(*ScaTool::curves);
+    while(i.hasNext())
     {
-        qDeleteAll(ScaTool::curves->begin(),ScaTool::curves->end());
-        ScaTool::curves->clear();
+        Curve *c = i.next();
+        delete c;
     }
 
 }

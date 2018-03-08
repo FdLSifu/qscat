@@ -177,6 +177,7 @@ void *CPA::pearson_correlation(void * param)
     int time = ((std::pair<CPA*,int>*)param)->second;
     float sumx = 0;
     float sumx2 = 0;
+    float r = 0;
     // ### pre computation as it is independant to key guess
     // Loop over curves to build traces over correlation will be computated
     for (int i = 0; i < cpa->curves_number; i++)
@@ -215,7 +216,11 @@ void *CPA::pearson_correlation(void * param)
            sumxy += cpa->rawdata[time-cpa->start][i]*cpa->guesses[INDEX(k,i,256)];
        }
        // Pearson correlation computation
-       float r = ((cpa->curves_number*sumxy)-(sumx*sumy))/(sqrt_denumx*sqrt_denumy);
+       float denum = sqrt_denumx*sqrt_denumy;
+       if (denum == 0)
+           r = 0;
+       else
+           r = ((cpa->curves_number*sumxy)-(sumx*sumy))/denum;
 
        cpa->correlation[byte_idx][k][time-cpa->start] = r;
 

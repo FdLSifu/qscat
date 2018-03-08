@@ -148,7 +148,13 @@ void MainWindow::load_files(QStringList files)
         int col = 0;
         int size = 1;
 
-        assert(file.open(QIODevice::ReadOnly) == true);
+        if(file.open(QIODevice::ReadOnly) == false)
+        {
+            ScaTool::dockcurves->show();
+            ScaTool::statusbar->showMessage("Failed to open file(s)",2000);
+            ScaTool::curve_table->setCurveRangeMax();
+            return;
+        }
         int file_len = file.size();
         bool bok,rok,cok,sok;
         QString rowcol;
@@ -340,10 +346,14 @@ void MainWindow::on_refresh_pressed()
 {
 
     qDeleteAll(ScaTool::synchrodialog->synchropasses.begin(),ScaTool::synchrodialog->synchropasses.end());
-    if (ScaTool::curves->length() > 0)
+
+    QVectorIterator<Curve*> i(*ScaTool::curves);
+    while(i.hasNext())
     {
-        qDeleteAll(ScaTool::curves->begin(),ScaTool::curves->end());
+        Curve *c = i.next();
+        delete c;
     }
+
     ScaTool::curves->clear();
     ScaTool::curve_table->clear();
     ScaTool::synchrodialog->clearRefItem();
