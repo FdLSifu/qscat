@@ -157,6 +157,12 @@ void Attackwindow::on_attackButton_pressed()
     if(cpa)
         delete cpa;
 
+    // Clean series
+    ui->chart->chart()->removeAllSeries();
+    // Trick to redraw
+    ui->chart->resize(ui->chart->size() + QSize(1,1));
+    ui->chart->resize(ui->chart->size() - QSize(1,1));
+
     // Work with sub set of curves
     QVector<Curve*> *curves = new QVector<Curve*>(nb_traces);
     for (int i = 0; i < nb_traces; i ++)
@@ -280,6 +286,7 @@ void Attackwindow::hideResult(int byte)
     }
 
     pb->setCheckable(true);
+    pb->setChecked(false);
     if ((lv != 0) && (pe != 0))
     {
         lv->hide();
