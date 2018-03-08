@@ -28,7 +28,7 @@ CPA::CPA(QVector<Curve*> * vcurves, int sel_fun, int start, int end)
             this->curves[i] = c;
 
             int length;
-            float *buffer = curves[i]->getrawdata(&length);
+            float *buffer = curves[i]->getrawdata(&length,c->xoffset);
             // Copy and transpose to gain A LOT OF TIME
             for (int pts = 0; pts < samples_number; pts++)
                 rawdata[pts][i] = buffer[pts+start];
