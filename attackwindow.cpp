@@ -164,12 +164,12 @@ void Attackwindow::on_attackButton_pressed()
     ui->chart->resize(ui->chart->size() - QSize(1,1));
 
     // Work with sub set of curves
-    QVector<Curve*> *curves = new QVector<Curve*>(nb_traces);
+    QVector<Curve*> curves = QVector<Curve*>(nb_traces);
     for (int i = 0; i < nb_traces; i ++)
-        (*curves)[i] = (*ScaTool::curves)[i];
+        curves[i] = (*ScaTool::curves)[i];
 
     // Create CPA object
-    cpa = new CPA(curves,sel_fun,pts_min,pts_max);
+    cpa = new CPA(&curves,sel_fun,pts_min,pts_max);
 
     // Populate byteIdxTable with selected byte
     for(int i = 0; i < ui->byteIdxTable->selectedItems().length(); i++)

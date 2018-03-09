@@ -59,6 +59,8 @@ void SynchroDialog::removeRefItem(QString name)
 SynchroDialog::~SynchroDialog()
 {
     delete ui;
+    delete this->pattern_bar;
+    delete this->window_bar;
 }
 
 void SynchroDialog::on_runpreview_pressed()
