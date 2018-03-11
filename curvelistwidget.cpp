@@ -5,6 +5,7 @@
 #include <QValueAxis>
 #include <QColorDialog>
 #include <QFileDialog>
+#include "curvetablemodel.h"
 
 CurveListWidget::CurveListWidget(QWidget *parent) :
     QWidget(parent),
@@ -23,110 +24,43 @@ CurveListWidget::CurveListWidget(QWidget *parent) :
     ui->type_box->addItem("double");
     connect(ui->type_box,SIGNAL(currentIndexChanged(int)),this,SLOT(global_type_changed(int)));
 
+    ScaTool::curve_table_model = new CurveTableModel(ui->tableview_curve);
+    ui->tableview_curve->setModel(ScaTool::curve_table_model);
+    ui->tableview_curve->setEditTriggers(QAbstractItemView::AllEditTriggers);
+    connect(ui->tableview_curve,&QTableView::pressed,this,&CurveListWidget::colorbtn_pressed);
+
 }
 CurveListWidget::~CurveListWidget()
 {
     delete ui;
 }
 
-void CurveListWidget::clear()
-{
-    int rowCount = ui->table_curve->rowCount();
-    for(int i = 0; i < rowCount; i++)
-    {
-        ui->table_curve->removeRow(i);
-    }
-    ui->table_curve->setRowCount(0);
-}
-
-void CurveListWidget::addCurve(Curve *curve)
-{
-    int rowidx = ui->table_curve->rowCount();
-    int colidx = 0;
-    ui->table_curve->insertRow(rowidx);
-
-    //Nb
-    ui->table_curve->setItem(rowidx,colidx,new QTableWidgetItem(QString::number(rowidx)));
-    ui->table_curve->item(rowidx,colidx)->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
-
-    //Color
-    colidx ++;
-    QPushButton *colorbtn = new QPushButton(this);
-    curve->setcolorbtn(colorbtn);
-    ui->table_curve->setCellWidget(rowidx,colidx,colorbtn);
-
-
-    //Name
-    colidx ++;
-    ui->table_curve->setItem(rowidx,colidx,new QTableWidgetItem(curve->cname));
-    ui->table_curve->item(rowidx,colidx)->setToolTip(curve->fn);
-    ui->table_curve->item(rowidx,colidx)->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
-
-    //Type
-    colidx++;
-    QComboBox *cmbbox = new QComboBox(this);
-    cmbbox->addItem("float32");
-    cmbbox->addItem("uint32");
-    cmbbox->addItem("int32");
-    cmbbox->addItem("uint16");
-    cmbbox->addItem("int16");
-    cmbbox->addItem("uint8");
-    cmbbox->addItem("int8");
-    cmbbox->addItem("double");
-    curve->settypecmbbox(cmbbox);
-    ui->table_curve->setCellWidget(rowidx,colidx,cmbbox);
-
-    // Apply global type
-    cmbbox->setCurrentIndex(ui->type_box->currentIndex());
-    curve->curve_type_changed(ui->type_box->currentIndex());
-
-    //Offset
-    colidx++;
-    ui->table_curve->setItem(rowidx,colidx,new QTableWidgetItem(QString::number(curve-> xoffset)));
-    ui->table_curve->item(rowidx,colidx)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable|Qt::ItemIsSelectable);
-
-    //Displayed
-    colidx++;
-    QCheckBox *chkbox = new QCheckBox(this);
-    curve->setchkbox(chkbox);
-    ui->table_curve->setCellWidget(rowidx,colidx,chkbox);
-
-    //Textin
-    colidx ++;
-    ui->table_curve->setItem(rowidx,colidx,new QTableWidgetItem(QString("")));
-
-    // Handler
-    connect(colorbtn,&QPushButton::pressed,curve,&Curve::colorbtn_pressed);
-    connect(chkbox,&QCheckBox::toggled,curve,&Curve::chkbox_toggled);
-    connect(cmbbox,SIGNAL(currentIndexChanged(int)),curve,SLOT(curve_type_changed(int)));
-    connect(curve,&Curve::shifted,this,&CurveListWidget::updateshiftvalue);
-    connect(ui->table_curve,&QTableWidget::cellPressed,this,&CurveListWidget::rowselected);
-}
-
 Curve * CurveListWidget::getSelectedCurve()
 {
 
-    QList<QTableWidgetItem *> itemlist = ui->table_curve->selectedItems();
+    QItemSelectionModel *select = ui->tableview_curve->selectionModel();
 
-    if (itemlist.length() < 1)
+    if (!select->hasSelection())
         return 0;
     else
     {
-        int rowidx = itemlist.first()->row();
-        return ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text());
+        int rowidx = select->selectedIndexes().first().row();
+        return ScaTool::curves->at(rowidx);
     }
 }
 
 QVector<Curve *> CurveListWidget::getSelectedCurves()
 {
 
-    QList<QTableWidgetItem *> itemlist = ui->table_curve->selectedItems();
+    QItemSelectionModel *select = ui->tableview_curve->selectionModel();
 
     QVector<Curve*> clist = QVector<Curve*>();
-    for (int i = 0 ; i < itemlist.length() ; i ++)
+    for (int i = 0 ; i < select->selectedIndexes().length() ; i ++)
     {
-        int rowidx = itemlist.at(i)->row();
-        clist.append(ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text()));
+        int rowidx = select->selectedIndexes().at(i).row();
+        Curve * curve = ScaTool::curves->at(rowidx);
+        if(!clist.contains(curve))
+            clist.append(curve);
     }
     return clist;
 }
@@ -134,22 +68,18 @@ QVector<Curve *> CurveListWidget::getSelectedCurves()
 void CurveListWidget::global_type_changed(int type)
 {
     Curve * curve;
-    ScaTool::dockcurves->hide();
-    for(int rowidx = 0; rowidx < ui->table_curve->rowCount(); rowidx++)
+    ScaTool::global_type = type;
+    for(int rowidx = 0; rowidx < ScaTool::curves->length(); rowidx++)
     {
-        QCoreApplication::processEvents();
-        curve = ScaTool::getCurveByName(ui->table_curve->item(rowidx,2)->text());
+        curve = ScaTool::curves->at(rowidx);
         if (curve == 0)
-            return;
-        curve->type = type;
+            continue;
 
-        curve->type_cmbbox->setCurrentIndex(type);
-
-        curve->updateDisplaySeries();
-        ScaTool::statusbar->showMessage("Modifying curve ... "+QString::number(rowidx)+"/"+QString::number(ui->table_curve->rowCount()),0);
+        curve->setType(type);
+        ScaTool::statusbar->showMessage("Modifying curve ... "+QString::number(rowidx)+"/"+QString::number(ScaTool::curves->length()),0);
     }
     ScaTool::statusbar->showMessage("Done",1000);
-    ScaTool::dockcurves->show();
+    emit ScaTool::curve_table_model->layoutChanged();
 }
 
 void CurveListWidget::on_clearall_pressed()
@@ -160,85 +90,36 @@ void CurveListWidget::on_clearall_pressed()
         Curve *c = i.next();
         delete c;
     }
-
+    emit ScaTool::curve_table_model->layoutChanged();
 }
 
 void CurveListWidget::on_displayall_pressed()
 {
     Curve *curve;
-    for(int i = 0; i < ui->table_curve->rowCount() ; i++)
+    for(int i = 0; i < ScaTool::curves->length() ; i++)
     {
-        curve = ScaTool::getCurveByName(ui->table_curve->item(i,2)->text());
-        curve->chkbox->setChecked(true);
+        curve = ScaTool::curves->at(i);
+        curve->chkbox_toggled(true);
     }
 }
 
 void CurveListWidget::on_displayoff_pressed()
 {
     Curve *curve;
-    for(int i = 0; i < ui->table_curve->rowCount() ; i++)
+    for(int i = 0; i < ScaTool::curves->length() ; i++)
     {
-        curve = ScaTool::getCurveByName(ui->table_curve->item(i,2)->text());
-        curve->chkbox->setChecked(false);
+        curve = ScaTool::curves->at(i);
+        curve->chkbox_toggled(false);
     }
 }
 
 void CurveListWidget::on_deleteCurve_pressed()
 {
-    QList<QTableWidgetItem *> itemlist = ui->table_curve->selectedItems();
-    for (QList<QTableWidgetItem*>::iterator it = itemlist.begin();
-         it != itemlist.end(); ++it)
-    {
-        QTableWidgetItem *item = *it;
-        if (!item)
-            continue;
-        int rowidx = item->row();
-        if (rowidx == -1)
-            continue;
-        QString cname = ui->table_curve->item(rowidx,2)->text();
-        Curve *c = ScaTool::getCurveByName(cname);
-        delete c;
-    }
-}
-
-void CurveListWidget::updateshiftvalue()
-{
-    Curve *c = (Curve*)sender();
-    for (int i = 0; i < ui->table_curve->rowCount() ; i++)
-    {
-        if (ui->table_curve->item(i,2)->text() == c->cname)
-        {
-            ui->table_curve->item(i,4)->setText(QString::number(c->xoffset));
-        }
-    }
-
-}
-
-void CurveListWidget::rowselected(int row, int /*column*/)
-{
-
-    Curve *c = ScaTool::getCurveByName(ui->table_curve->item(row,2)->text());
-    if (c->displayed)
-    {
-        c->displayseries->show();
-    }
-}
-
-void CurveListWidget::removeRow(Curve *c)
-{
-    bool found = false;
-    int i = 0;
-    while( i < ui->table_curve->rowCount())
-    {
-        if(c->cname == ui->table_curve->item(i,2)->text())
-        {
-            found = true;
-            break;
-        }
-        i++;
-    }
-    if (found)
-        ui->table_curve->removeRow(i);
+    QVector<Curve*> clist = getSelectedCurves();
+    for (QVector<Curve*>::iterator it = clist.begin();
+         it != clist.end(); ++it)
+        delete *it;
+    emit ScaTool::curve_table_model->layoutChanged();
 }
 
 void CurveListWidget::on_redraw_pressed()
@@ -253,34 +134,34 @@ void CurveListWidget::on_redraw_pressed()
     if (!ScaTool::curves->length())
         return;
 
-    if ((end-1) >= ui->table_curve->rowCount())
-	end = ui->table_curve->rowCount();
+    if ((end-1) >= ScaTool::curves->length())
+    end = ScaTool::curves->length();
 
-    for(int i = 0; i < ui->table_curve->rowCount() ; i++) {
-        curve = ScaTool::getCurveByName(ui->table_curve->item(i,2)->text());
-        curve->chkbox->setChecked(false);
+    for(int i = 0; i < ScaTool::curves->length() ; i++) {
+        curve = ScaTool::curves->at(i);
+        curve->chkbox_toggled(false);
     }
 
     for(int i = start; i < end ; i++) {
-        curve = ScaTool::getCurveByName(ui->table_curve->item(i,2)->text());
-        curve->chkbox->setChecked(true);
+        curve = ScaTool::curves->at(i);
+        curve->chkbox_toggled(true);
     }
 }
 
 void CurveListWidget::setCurveRangeMax(void)
 {
-    ui->label_range->setText("[0 - " + QString::number(ui->table_curve->rowCount() - 1) + "]");
+    ui->label_range->setText("[0 - " + QString::number(ScaTool::curves->length() - 1) + "]");
 }
 
 void CurveListWidget::clear_dataSet()
 {
     Curve * curve;
-    for(int i = 0; i < ui->table_curve->rowCount() ; i++) {
-        curve = ScaTool::getCurveByName(ui->table_curve->item(i,2)->text());
+    for(int i = 0; i < ScaTool::curves->length() ; i++) {
+        curve = ScaTool::curves->at(i);
         curve->textin = "";
-        ui->table_curve->item(i,6)->setText(curve->textin);
     }
 
+    emit ScaTool::curve_table_model->layoutChanged();
     ScaTool::attackdialog->setTraceNb(0);
     ScaTool::attackdialog->setPtsNb(0);
 }
@@ -305,7 +186,6 @@ void CurveListWidget::load_dataSet(QString filepath_dataset)
         return;
 
     for (int i = 0; i < N; i++) {
-        QCoreApplication::processEvents();
         QString cl = "";
         curve = (*ScaTool::curves)[i];
         for (int j = 0; j < input_len; j++)
@@ -314,7 +194,6 @@ void CurveListWidget::load_dataSet(QString filepath_dataset)
             curve->input[j] = (uint8_t)bin[(input_len*i)+j];
         }
         curve->textin = cl;
-        ui->table_curve->item(i,6)->setText(curve->textin);
     }
 
     int curve_pts = std::numeric_limits<int>::max();
@@ -351,7 +230,6 @@ void CurveListWidget::on_openoffsets_pressed()
     if (trace.open(QIODevice::ReadOnly) == false)
             return;
 
-    ScaTool::dockcurves->hide();
     for (int i = 0; i < ScaTool::curves->length(); i++)
     {
         Curve* c = ScaTool::curves->at(i);
@@ -378,5 +256,38 @@ void CurveListWidget::on_saveoffsets_pressed()
     {
         Curve* c = ScaTool::curves->at(i);
         trace.write(reinterpret_cast<const char*>(&c->xoffset), sizeof(int));
+    }
+}
+
+void CurveListWidget::colorbtn_pressed(const QModelIndex &index)
+{
+    Curve * curve = ScaTool::curves->at(index.row());
+    if ( (index.column() == 1) && (curve->displayed) ) // Color
+    {
+        QColorDialog qcd(0);
+        qcd.setWindowTitle("Pick a color");
+        qcd.exec();
+        QColor color = qcd.selectedColor();
+
+        if (qcd.result())
+            // Update curve color
+            curve->setColor(color);
+        else
+            return;
+
+        // Update curve color on list
+        if (curve->displayed)
+        {
+            curve->displayseries->setColor(color);
+
+            // Trick to redraw
+            emit curve->displayseries->pointsReplaced();
+        }
+
+        // Update if curve is loaded but not displayed
+        if (curve->isLoaded())
+        {
+            curve->getDisplaySeries()->setColor(curve->color);
+        }
     }
 }

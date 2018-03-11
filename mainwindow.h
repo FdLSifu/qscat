@@ -42,9 +42,9 @@ private slots:
 
     void on_fity_pressed();
 
-    void on_color_pressed();
-
     void on_menu_pressed();
+
+    void on_color_pressed();
 
 public slots:
     void updateStatusBar();

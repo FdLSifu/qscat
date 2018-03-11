@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     curvelistwidget.cpp \
     attackwindow.cpp \
     cpa.cpp \
-    corrlistmodel.cpp
+    corrlistmodel.cpp \
+    curvetablemodel.cpp
 
 HEADERS  += mainwindow.h \
     scatool.h \
@@ -47,7 +48,8 @@ HEADERS  += mainwindow.h \
     attackwindow.h \
     cpa.h \
     aes.h \
-    corrlistmodel.h
+    corrlistmodel.h \
+    curvetablemodel.h
 
 FORMS    += design.ui \
     synchrodialog.ui \

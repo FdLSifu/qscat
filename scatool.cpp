@@ -16,23 +16,10 @@ Attackwindow *ScaTool::attackdialog = 0;
 ChartView *ScaTool::main_plot = 0;
 QtCharts::QChartView *ScaTool::down_plot = 0;
 QStatusBar * ScaTool::statusbar = 0;
+CurveTableModel * ScaTool::curve_table_model = 0;
+int ScaTool::global_type = 0;
 
-Curve * ScaTool::getCurveByName(QString name)
-{
 
-    for (QVector<Curve*>::iterator it = ScaTool::curves->begin();
-         it != ScaTool::curves->end(); ++it) {
-
-        Curve *curve = *it;
-
-        if (curve->cname == name)
-        {
-            return curve;
-
-        }
-    }
-    return 0;
-}
 Curve* ScaTool::getCurveFromDisplaySerie(QLineSeries * serie)
 {
     for (QVector<Curve*>::iterator it = ScaTool::curves->begin();

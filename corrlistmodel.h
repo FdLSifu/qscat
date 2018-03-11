@@ -7,6 +7,7 @@
 #include <QListView>
 #include "cpa.h"
 
+
 class CorrListModel : public QAbstractListModel
 {
     Q_OBJECT

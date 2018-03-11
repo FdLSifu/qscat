@@ -12,7 +12,6 @@
 #include <QStyledItemDelegate>
 #include <QMessageBox>
 #include <QTemporaryDir>
-#include <QProcess>
 #include <QStringList>
 #include <QMovie>
 #include <QLabel>

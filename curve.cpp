@@ -12,7 +12,7 @@ Curve::Curve(int id,QString filename, int ncol, int row, bool onefile) :
 {
     this->fn = filename;
     this->cname = "";
-    this->type = Curve::CurveType(FLOAT32);
+    this->type = ScaTool::global_type;
     this->displayed = false;
     this->idx = id;
     this->fullseries = 0;
@@ -37,6 +37,7 @@ Curve::Curve(int id,QString filename, int ncol, int row, bool onefile) :
 
     this->length = _length();
     this->input = (uint8_t*)malloc(sizeof(uint8_t)*16);
+
 }
 
 Curve::~Curve()
@@ -45,11 +46,8 @@ Curve::~Curve()
     // Disable curve if displayed
     if (displayed)
     {
-        chkbox->setChecked(false);
         ScaTool::main_plot->chart()->removeSeries(getDisplaySeries());
     }
-    // Remove from table list
-    ScaTool::curve_table->removeRow(this);
     // Remove from synchro list
     ScaTool::synchrodialog->removeRefItem(cname);
     // Remove from internal list
@@ -62,11 +60,6 @@ Curve::~Curve()
     if (this->displayseries != 0)
         resetDisplaySeries();
 
-    // Delete related objects
-    if (this->chkbox != 0)
-        delete this->chkbox;
-    if (this->color_btn != 0)
-        delete this->color_btn;
     if (this->type_cmbbox != 0)
         delete this->type_cmbbox;
 
@@ -96,6 +89,11 @@ void Curve::setColor(QColor c)
     }
 }
 
+void Curve::setType(int type)
+{
+    this->type = type;
+    this->updateDisplaySeries();
+}
 void Curve::resetFullSeries()
 {
     this->fullseries->clear();
@@ -772,56 +770,22 @@ void Curve::shift(int offset)
     {
         updateDisplaySeries();
     }
-    emit this->shifted();
-}
-
-void Curve::setcolorbtn(QPushButton *colorbtn)
-{
-    if (this->color_btn != 0)
-        delete this->color_btn;
-
-    this->color_btn = colorbtn;
-    colorbtn->setPalette(QPalette(this->getColor()));
-}
-
-void Curve::setchkbox(QCheckBox * chkbox)
-{
-    if (this->chkbox != 0)
-        delete this->chkbox;
-    this->chkbox = chkbox;
-}
-
-void Curve::settypecmbbox(QComboBox * typecmbbox)
-{
-    if (this->type_cmbbox != 0)
-        delete this->type_cmbbox;
-    this->type_cmbbox = typecmbbox;
+    emit ScaTool::curve_table_model->layoutChanged();
 }
 
 void Curve::chkbox_toggled(bool state)
 {
     Curve * curve = this;
 
-    // Check if curve already displayed
-    if (curve->displayed)
+    if (state) // Enable display
     {
-        // set ui color button to default color
-        curve->color_btn->setPalette(QPalette(Qt::white));
-        // Set displayed to false (state is false here)
-        curve->displayed = state;
-        // Hide the curve from display
-        curve->getDisplaySeries()->hide();
-    }
-    else
-    {
-        // set displayed to true (state is true here)
-        curve->displayed = state;
+        if (curve->displayed)
+            return;
+        curve->displayed = true;
 
-        // Check if series is already present
         if (curve->isLoaded())
         {
-            // Display it
-            curve->getDisplaySeries()->show();
+            curve->getDisplaySeries()->show(); // Display
         }
         else
         {
@@ -848,49 +812,14 @@ void Curve::chkbox_toggled(bool state)
                 curseries->attachAxis(ScaTool::main_plot->chart()->axisY());
             }
         }
-        // Update color button from color curve
-        curve->color_btn->setPalette(QPalette( curve->getDisplaySeries()->color()));
+        curve->setColor(curve->getDisplaySeries()->color());
     }
-}
-
-
-void Curve::colorbtn_pressed()
-{
-    QPushButton * colorbtn = (QPushButton*)sender();
-    Curve * curve = this;
-    QColorDialog qcd(0);
-    qcd.setWindowTitle("Pick a color");
-    qcd.exec();
-    QColor color = qcd.selectedColor();
-
-    if (qcd.result())
-        // Update curve color
-        curve->setColor(color);
-    else
-        return;
-
-    // Update curve color on list
-    if (curve->displayed)
+    else // Disable display
     {
-        colorbtn->setPalette(QPalette(color));
-        curve->displayseries->setColor(color);
-
-        // Trick to redraw
-        emit curve->displayseries->pointsReplaced();
+        if(!curve->displayed)
+            return;
+        curve->displayed = false;
+        curve->getDisplaySeries()->hide();
     }
-
-    // Update if curve is loaded but not displayed
-    if (curve->isLoaded())
-    {
-        curve->getDisplaySeries()->setColor(curve->color);
-    }
-
-}
-
-void Curve::curve_type_changed(int type)
-{
-    this->type = type;
-    this->length = _length();
-    if (this->displayed)
-        this->updateDisplaySeries();
+    emit ScaTool::curve_table_model->layoutChanged();
 }

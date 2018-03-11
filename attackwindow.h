@@ -4,7 +4,6 @@
 #include <QDialog>
 #include <QMap>
 #include <QFile>
-#include <QProcess>
 #include <QTemporaryDir>
 #include <QTime>
 #include "corrlistmodel.h"

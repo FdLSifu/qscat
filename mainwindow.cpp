@@ -83,6 +83,7 @@ MainWindow::~MainWindow()
     delete ScaTool::curve_table;
     delete ScaTool::synchrodialog;
     delete ScaTool::attackdialog;
+    delete ScaTool::curve_table_model;
 }
 
 MainWindow * MainWindow::getInstance()
@@ -139,7 +140,6 @@ void MainWindow::dragLeaveEvent(QDragLeaveEvent *event)
 
 void MainWindow::load_files(QStringList files)
 {
-    ScaTool::dockcurves->hide();
     if (files.length() == 1)
     {
         QString fn = files.at(0);
@@ -150,7 +150,6 @@ void MainWindow::load_files(QStringList files)
 
         if(file.open(QIODevice::ReadOnly) == false)
         {
-            ScaTool::dockcurves->show();
             ScaTool::statusbar->showMessage("Failed to open file(s)",2000);
             ScaTool::curve_table->setCurveRangeMax();
             return;
@@ -218,21 +217,18 @@ void MainWindow::load_files(QStringList files)
 
         for (int i = 0; i < row; i ++)
         {
-            QCoreApplication::processEvents();
+            if (i %1000 == 0)
+                QCoreApplication::processEvents();
             int idx = ScaTool::curves->length();
 
             Curve *curve = new Curve(idx,fn,col*size,i,true);
 
-            // check if curves already inserted
-            if (ScaTool::getCurveByName(curve->cname) == 0)
-            {
-                // Append curve to set of all managed curves
-                ScaTool::curves->append(curve);
-                // Add curve to curve table display
-                ScaTool::curve_table->addCurve(curve);
-                // Add curve to synchro table display
-                ScaTool::synchrodialog->addRefItem(curve->cname);
-            }
+            // Append curve to set of all managed curves
+            ScaTool::curves->append(curve);
+            // Add curve to synchro table display
+            ScaTool::synchrodialog->addRefItem(curve->cname);
+            emit ScaTool::curve_table_model->layoutChanged();
+
             ScaTool::statusbar->showMessage("Loading curve ... "+QString::number(i)+"/"+QString::number(row),0);
         }
     }
@@ -240,7 +236,6 @@ void MainWindow::load_files(QStringList files)
     {
         for (QStringList::iterator it = files.begin();
              it != files.end(); ++it) {
-            QCoreApplication::processEvents();
 
             QString fn = *it;
 
@@ -251,25 +246,22 @@ void MainWindow::load_files(QStringList files)
 
             int idx = ScaTool::curves->length();
 
+            if (idx %1000 == 0)
+                QCoreApplication::processEvents();
+
             Curve *curve = new Curve(idx,fn,0,0,false);
 
-            // check if curves already inserted
-            if (ScaTool::getCurveByName(curve->cname) == 0)
-            {
-                // Append curve to set of all managed curves
-                ScaTool::curves->append(curve);
-                // Add curve to curve table display
-                ScaTool::curve_table->addCurve(curve);
-                // Add curve to synchro table display
-                ScaTool::synchrodialog->addRefItem(curve->cname);
-            }
+            // Append curve to set of all managed curves
+            ScaTool::curves->append(curve);
+            // Add curve to synchro table display
+            ScaTool::synchrodialog->addRefItem(curve->cname);
+            emit ScaTool::curve_table_model->layoutChanged();
+
             ScaTool::statusbar->showMessage("Loading curve ... "+QString::number(idx),0);
         }
     }
     ScaTool::statusbar->showMessage("Loading curve done",1000);
     ScaTool::curve_table->setCurveRangeMax();
-
-    ScaTool::dockcurves->show();
 
 }
 
@@ -336,8 +328,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     event->accept();
     ScaTool::curve_table->hide();
     ScaTool::main_plot->hide();
-    QCoreApplication::processEvents();
-    //on_refresh_pressed();
+
     QApplication::closeAllWindows();
     QApplication::quit();
 }
@@ -355,7 +346,6 @@ void MainWindow::on_refresh_pressed()
     }
 
     ScaTool::curves->clear();
-    ScaTool::curve_table->clear();
     ScaTool::synchrodialog->clearRefItem();
     if (ScaTool::dockcurves->isHidden())
         ScaTool::dockcurves->show();
@@ -365,6 +355,7 @@ void MainWindow::on_refresh_pressed()
         ScaTool::main_plot->chart()->removeAxis(ScaTool::main_plot->chart()->axes().at(i));
     ScaTool::main_plot->chart()->removeAllSeries();
     ScaTool::curve_table->firstDisplayed = true;
+    emit ScaTool::curve_table_model->layoutChanged();
 }
 
 void MainWindow::on_curves_pressed()
@@ -427,8 +418,16 @@ void MainWindow::on_fity_pressed()
         ScaTool::main_plot->chart()->axisY()->setRange(min,max);
 }
 
+
+#include <QMenuBar>
+#include <QAction>
+void MainWindow::on_menu_pressed()
+{
+}
+
 void MainWindow::on_color_pressed()
 {
+
     int ct = static_cast<int>(ScaTool::main_plot->chart()->theme());
     ScaTool::main_plot->chart()->setTheme(Chart::ChartTheme((ct+1)%8));
 
@@ -437,17 +436,11 @@ void MainWindow::on_color_pressed()
         if (ScaTool::curves->at(i)->displayed)
         {
             Curve * curve = ScaTool::curves->at(i);
-            // Update color button from color curve
-            curve->color_btn->setPalette(QPalette(curve->getDisplaySeries()->color()));
             // Dirty way to update
             curve->getDisplaySeries()->hide();
             curve->getDisplaySeries()->show();
+            curve->setColor(curve->getDisplaySeries()->color());
         }
     }
-}
-
-#include <QMenuBar>
-#include <QAction>
-void MainWindow::on_menu_pressed()
-{
+    emit ScaTool::curve_table_model->layoutChanged();
 }

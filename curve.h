@@ -33,7 +33,6 @@ public:
     QString cname;
     int type;
     QColor color;
-    QPushButton* color_btn = 0;
     QCheckBox* chkbox = 0;
     QComboBox* type_cmbbox = 0;
     bool displayed;
@@ -68,7 +67,7 @@ public:
     bool isLoaded();
 
     void setColor(QColor c);
-
+    void setType(int type);
     int getLength();
 
     void resetFullSeries();
@@ -76,10 +75,6 @@ public:
     void updateDisplaySeries(int width, float zoomfactor);
     void updateDisplaySeries();
     void shift(int offset);
-
-    void setcolorbtn(QPushButton *colorbtn);
-    void setchkbox(QCheckBox * chkbox);
-    void settypecmbbox(QComboBox * typecmbbox);
 
     float *getrawdata(int *length, int single_offset = 0);
     float get_floatvalueat(int time);
@@ -89,10 +84,6 @@ private:
 public slots:
     void curve_clicked(QPointF pt);
     void chkbox_toggled(bool state);
-    void colorbtn_pressed();
-    void curve_type_changed(int type);
-signals:
-    void shifted();
 
 };
 
