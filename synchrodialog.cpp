@@ -174,10 +174,18 @@ void SynchroDialog::on_removestep_pressed()
 {
     if (!synchropasses.isEmpty())
     {
+        int idx = synchropasses.length() - 1;
         Synchro * sync = synchropasses.last();
         synchropasses.removeLast();
         ui->stepcombo->removeItem(synchropasses.length());
         delete sync;
+        // We have remove a pass, let's remove the offsets
+        for (int i = 0; i < ScaTool::curves->length(); i++)
+        {
+            Curve *c = ScaTool::curves->at(i);
+            if (c->offsets.length() -1 == idx)
+                c->offsets.removeLast();
+        }
     }
     if(synchropasses.isEmpty())
     {
