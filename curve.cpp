@@ -108,7 +108,7 @@ void Curve::resetDisplaySeries()
     this->displayseries = 0;
 }
 
-QtCharts::QLineSeries* Curve::getSubSeries(int xmin, int xmax)
+float* Curve::getSubSeries(int xmin, int xmax)
 {
     float *data = 0;
     int nbpoints = 0;
@@ -123,15 +123,13 @@ QtCharts::QLineSeries* Curve::getSubSeries(int xmin, int xmax)
     if (xmax >= xmin)
         assert(xmax >= xmin);
 
-    QtCharts::QLineSeries* subseries = new QtCharts::QLineSeries();
+    float* subseries = (float*)malloc((xmax-xmin)*sizeof(float));
 
     for (int i = xmin; i < xmax; i ++)
     {
-        subseries->append(i,data[i]);
+        subseries[i-xmin] = data[i];
     }
-
     free(data);
-
     return subseries;
 }
 

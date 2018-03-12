@@ -59,7 +59,7 @@ public:
     // Function
     QtCharts::QLineSeries*  getFullSeries();
     QtCharts::QLineSeries*  getDisplaySeries();
-    QtCharts::QLineSeries*  getSubSeries(int xmin, int xmax);
+    float *getSubSeries(int xmin, int xmax);
     QList<QPointF> downsample_minmax(float *data, int factor, int nbpoints);
 
     QColor getColor();
