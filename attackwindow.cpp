@@ -153,9 +153,6 @@ void Attackwindow::on_attackButton_pressed()
     int pts_max = ui->spinpts_end->value();
     int nb_traces = ui->spinnb_traces->value();
 
-    if(cpa)
-        delete cpa;
-
     // Clean series
     ui->chart->chart()->removeAllSeries();
     // Trick to redraw
@@ -168,8 +165,15 @@ void Attackwindow::on_attackButton_pressed()
         curves[i] = (*ScaTool::curves)[i];
 
     // Create CPA object
-    cpa = new CPA(&curves,sel_fun,pts_min,pts_max);
+    if((cpa == 0) ||
+      (!((cpa->start==pts_min) && (cpa->end==pts_max) && (cpa->curves_number == curves.length()))))
+    {
+        if (cpa)
+            delete cpa;
+        cpa = new CPA(&curves,sel_fun,pts_min,pts_max);
+    }
 
+    cpa->byteidx.clear();
     // Populate byteIdxTable with selected byte
     for(int i = 0; i < ui->byteIdxTable->selectedItems().length(); i++)
     {
@@ -462,9 +466,4 @@ void Attackwindow::setPtsNb(int p)
 {
     ui->spinpts_end->setMaximum(p);
     ui->spinpts_end->setValue(p);
-}
-
-void Attackwindow::on_showattack_pressed()
-{
-
 }

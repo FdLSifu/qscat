@@ -27,7 +27,6 @@ private slots:
     void on_spinpts_start_editingFinished();
     void on_spinpts_end_editingFinished();
     void on_attackButton_pressed();
-    void on_showattack_pressed();
     void cpa_finished(int byte);
     void corrcchart_toggled(bool checked);
 
