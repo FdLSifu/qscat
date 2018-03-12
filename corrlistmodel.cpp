@@ -27,6 +27,7 @@ QVariant CorrListModel::data(const QModelIndex &index, int role) const
         int rowidx = index.row();
 
         float max = std::numeric_limits<float>::min();
+        float corr = 0;
         int k = 0;
         for (int i = 0; i < cpa->samples_number; i ++)
         {
@@ -34,10 +35,14 @@ QVariant CorrListModel::data(const QModelIndex &index, int role) const
             {
                 max = std::abs(cpa->correlation[idx][rowidx][i]);
                 k = rowidx;
+                corr = cpa->correlation[idx][rowidx][i];
             }
         }
        //return QString("0x")+ QString::number( k, 16 )+"\n"+QString::number(max);
-        return QString::number(max) + "\n(0x" + QString::number( k, 16 )+")";
+        if (corr >= 0)
+            return QString::number(max) + "\n(0x" + QString::number( k, 16 )+") +";
+        else
+            return QString::number(max) + "\n(0x" + QString::number( k, 16 )+") -";
     }
     else if (role == Qt::BackgroundRole)
     {
