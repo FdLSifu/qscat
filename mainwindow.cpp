@@ -217,8 +217,7 @@ void MainWindow::load_files(QStringList files)
 
         for (int i = 0; i < row; i ++)
         {
-            if (i %1000 == 0)
-                QCoreApplication::processEvents();
+            QCoreApplication::processEvents();
             int idx = ScaTool::curves->length();
 
             Curve *curve = new Curve(idx,fn,col*size,i,true);
@@ -246,8 +245,7 @@ void MainWindow::load_files(QStringList files)
 
             int idx = ScaTool::curves->length();
 
-            if (idx %1000 == 0)
-                QCoreApplication::processEvents();
+            QCoreApplication::processEvents();
 
             Curve *curve = new Curve(idx,fn,0,0,false);
 

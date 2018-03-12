@@ -238,7 +238,6 @@ void CurveListWidget::on_openoffsets_pressed()
         ScaTool::statusbar->showMessage("Loading offset ... "+QString::number(i)+"/"+QString::number(ScaTool::curves->length()),0);
     }
     ScaTool::statusbar->showMessage("Load offset done",1000);
-    ScaTool::dockcurves->show();
 }
 
 void CurveListWidget::on_saveoffsets_pressed()
