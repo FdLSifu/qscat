@@ -60,9 +60,6 @@ Curve::~Curve()
     if (this->displayseries != 0)
         resetDisplaySeries();
 
-    if (this->type_cmbbox != 0)
-        delete this->type_cmbbox;
-
     if (ScaTool::curves->isEmpty())
     {
         qDeleteAll(ScaTool::synchrodialog->synchropasses.begin(),ScaTool::synchrodialog->synchropasses.end());

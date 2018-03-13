@@ -20,6 +20,8 @@
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include <QMenu>
+#include <QDialogButtonBox>
+#include <QFormLayout>
 
 MainWindow * MainWindow::instance = 0;
 
@@ -388,15 +390,66 @@ void MainWindow::on_save_pressed()
     if (trace.open(QIODevice::WriteOnly) == false)
             return;
 
-    for (int i = 0; i < ScaTool::curves->length(); i++)
+
+    QDialog dialog(this);
+    QFormLayout form(&dialog);
+    form.addRow(new QLabel("Enter curves number you want to save:"));
+
+    QLineEdit *samplesEdit = new QLineEdit(&dialog);
+    samplesEdit->setText(QString::number(ScaTool::curves->length()));
+    form.addRow(samplesEdit);
+
+    form.addRow(new QLabel("Enter points range you want to save:"));
+
+    QLineEdit *startEdit = new QLineEdit(&dialog);
+    startEdit->setText(QString::number(0));
+    form.addRow(startEdit);
+    QLineEdit *endEdit = new QLineEdit(&dialog);
+    endEdit->setText(QString::number(ScaTool::curves->at(0)->length));
+    form.addRow(endEdit);
+
+
+    // Add some standard buttons (Cancel/Ok) at the bottom of the dialog
+    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+                               Qt::Horizontal, &dialog);
+    form.addRow(&buttonBox);
+    QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
+    QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+
+    int start = 0;
+    int end = 0;
+    int samples = 0;
+    // Show the dialog as modal
+    if (dialog.exec() == QDialog::Accepted) {
+        start = startEdit->text().toInt();
+        end = endEdit->text().toInt();
+        samples = samplesEdit->text().toInt();
+        delete startEdit;
+        delete endEdit;
+        delete samplesEdit;
+    }
+    else
+    {
+        delete startEdit;
+        delete endEdit;
+        delete samplesEdit;
+        trace.close();
+        return;
+    }
+
+    if ((start > end) || (samples > ScaTool::curves->length()) || (samples < 0))
+        samples = 0;
+
+    for (int i = 0; i < samples; i++)
     {
         Curve* c = ScaTool::curves->at(i);
         float * buf = c->getrawdata(&curve_length, c->xoffset);
-        trace.write(reinterpret_cast<const char*>(buf), curve_length<<2);
+        trace.write(reinterpret_cast<const char*>(buf+start), (end-start)<<2);
         // free buf
         free(buf);
 
     }
+    trace.close();
 
 }
 

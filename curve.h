@@ -33,8 +33,6 @@ public:
     QString cname;
     int type;
     QColor color;
-    QCheckBox* chkbox = 0;
-    QComboBox* type_cmbbox = 0;
     bool displayed;
     QtCharts::QLineSeries* fullseries;
     QtCharts::QLineSeries* displayseries;
