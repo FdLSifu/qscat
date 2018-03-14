@@ -122,59 +122,30 @@ void CPA::construct_guess_hw()
 
 void CPA::run(CPA *cpa)
 {
-    bool allocdone = false;
-    std::pair<CPA*,int> *param;
+    QList<QFuture<void>> futures = QList<QFuture<void>>();
+    futures.reserve(cpa->end-cpa->start);
     for(int bidx = 0; bidx < cpa->byteidx.length(); bidx ++)
     {
         int currentbyte = cpa->byteidx.at(bidx);
         cpa->setcurrentbyteidx(currentbyte);
         int t = cpa->start;
-        int n_threads = 4;
 
         if(cpa->samples_number<=0)
             return;
 
-        int workload = cpa->samples_number/n_threads;
-
-        while(workload < 1) {
-            n_threads -= 1;
-            workload = cpa->samples_number/n_threads;
-        }
-
-        pthread_t threads[n_threads];
-        if (allocdone == false)
-        {
-            param = (std::pair<CPA*,int> *)malloc(sizeof(std::pair<CPA*,int>)*n_threads);
-            allocdone = true;
-        }
         while(t < cpa->end)
-        {
-            int n = 0;
-            while( n < n_threads && t < cpa->end)
-            {
-                param[n].first = cpa;
-                param[n].second = t;
-                int rc = pthread_create(&threads[n], NULL, (CPA::pearson_correlation),(void*)&param[n]);
-                assert(rc==0);
-                t++;
-                n++;
-            }
-            while ( n-- > 0)
-            {
-                int rc = pthread_join(threads[n], NULL);
-                assert(rc==0);
-            }
-        }
+            futures.append(QtConcurrent::run(CPA::pearson_correlation,cpa,t++));
+        for(int i = 0; i < futures.length(); i++)
+            futures[i].waitForFinished();
+
+        futures.clear();
         emit cpa->finished(currentbyte);
     }
-    if(allocdone == true)
-        free(param);
+
 }
 
-void *CPA::pearson_correlation(void * param)
+void CPA::pearson_correlation(CPA *cpa, int time)
 {
-    CPA *cpa = ((std::pair<CPA*,int>*)param)->first;
-    int time = ((std::pair<CPA*,int>*)param)->second;
     float sumx = 0;
     float sumx2 = 0;
     float r = 0;
@@ -225,5 +196,4 @@ void *CPA::pearson_correlation(void * param)
        cpa->correlation[byte_idx][k][time-cpa->start] = r;
 
    }
-   return NULL;
 }

@@ -39,7 +39,7 @@ private:
 
     void construct_guess_hw();
     void setcurrentbyteidx(int i);
-    static void *pearson_correlation(void *param);
+    static void pearson_correlation(CPA *cpa, int time);
 signals:
     void finished(int byte);
 };
