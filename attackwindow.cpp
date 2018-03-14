@@ -21,7 +21,6 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QPlainTextEdit>
 #include "cpa.h"
-#include <unistd.h>
 
 Attackwindow::Attackwindow(QWidget *parent) :
     QWidget(parent,Qt::Window),
