@@ -1,6 +1,7 @@
 #ifndef CURVE_H
 #define CURVE_H
 
+#include <stdint.h>
 #include "chartview.h"
 #include <QString>
 #include <QColor>
