@@ -145,21 +145,12 @@
    <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
-      <widget class="QTableWidget" name="table_curve">
+      <widget class="QTableView" name="tableview_curve">
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
        </property>
-       <property name="showDropIndicator" stdset="0">
-        <bool>true</bool>
-       </property>
        <property name="alternatingRowColors">
         <bool>true</bool>
-       </property>
-       <property name="rowCount">
-        <number>0</number>
-       </property>
-       <property name="columnCount">
-        <number>7</number>
        </property>
        <attribute name="horizontalHeaderCascadingSectionResizes">
         <bool>true</bool>
@@ -170,41 +161,6 @@
        <attribute name="verticalHeaderVisible">
         <bool>false</bool>
        </attribute>
-       <column>
-        <property name="text">
-         <string>Nb</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Color</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Name</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Type</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>x Offest</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Displayed</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>TextIn</string>
-        </property>
-       </column>
       </widget>
      </item>
     </layout>

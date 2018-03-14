@@ -20,25 +20,20 @@ public:
     explicit CurveListWidget(QWidget *parent = 0);
     ~CurveListWidget();
 
-    void    clear();
-    void    addCurve(Curve *curve);
     Curve * getSelectedCurve();
-    QList<Curve *> getSelectedCurves();
+    QVector<Curve *> getSelectedCurves();
     void setCurveRangeMax(void);
-    void removeRow(Curve *c);
     void load_dataSet(QString filepath_dataset);
     void clear_dataSet();
 private slots:
     void global_type_changed(int type);
-    void rowselected(int row, int column);
     void on_clearall_pressed();
     void on_displayall_pressed();
     void on_displayoff_pressed();
     void on_redraw_pressed();
-    void updateshiftvalue();
     void on_deleteCurve_pressed();
     void on_opendata_pressed();
-
+    void colorbtn_pressed(const QModelIndex &index);
     void on_cleardata_pressed();
 
     void on_openoffsets_pressed();

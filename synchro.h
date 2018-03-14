@@ -13,7 +13,7 @@ class Synchro : public QObject, public QRunnable
    Q_OBJECT
 public:
     // Fields
-    QList<Curve *> curves;
+    QVector<Curve *> curves;
     QList<int> curve_offset;
     QList<QFuture<qreal>> result;
     int curve_ref_idx;

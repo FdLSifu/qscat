@@ -59,6 +59,8 @@ void SynchroDialog::removeRefItem(QString name)
 SynchroDialog::~SynchroDialog()
 {
     delete ui;
+    delete this->pattern_bar;
+    delete this->window_bar;
 }
 
 void SynchroDialog::on_runpreview_pressed()
@@ -172,10 +174,18 @@ void SynchroDialog::on_removestep_pressed()
 {
     if (!synchropasses.isEmpty())
     {
+        int idx = synchropasses.length() - 1;
         Synchro * sync = synchropasses.last();
         synchropasses.removeLast();
         ui->stepcombo->removeItem(synchropasses.length());
         delete sync;
+        // We have remove a pass, let's remove the offsets
+        for (int i = 0; i < ScaTool::curves->length(); i++)
+        {
+            Curve *c = ScaTool::curves->at(i);
+            if (c->offsets.length() -1 == idx)
+                c->offsets.removeLast();
+        }
     }
     if(synchropasses.isEmpty())
     {
@@ -196,9 +206,9 @@ void SynchroDialog::pattern_value_changed()
     for(int i = 0; i < ScaTool::curves->length(); i++)
     {
         if(nbpoints == 0)
-            nbpoints = ScaTool::curves->at(i)->length();
+            nbpoints = ScaTool::curves->at(i)->getLength();
         else
-            nbpoints = std::min(nbpoints,ScaTool::curves->at(i)->length());
+            nbpoints = std::min(nbpoints,ScaTool::curves->at(i)->getLength());
     }
 
     // Set range

@@ -1,6 +1,7 @@
 #ifndef CURVE_H
 #define CURVE_H
 
+#include <stdint.h>
 #include "chartview.h"
 #include <QString>
 #include <QColor>
@@ -33,9 +34,6 @@ public:
     QString cname;
     int type;
     QColor color;
-    QPushButton* color_btn = 0;
-    QCheckBox* chkbox = 0;
-    QComboBox* type_cmbbox = 0;
     bool displayed;
     QtCharts::QLineSeries* fullseries;
     QtCharts::QLineSeries* displayseries;
@@ -46,11 +44,13 @@ public:
     bool onefile = false;
     int row = 0;
     int ncol = 0;
+    int length;
     float min;
     float max;
     QString textin;
+    uint8_t *input;
     // Constructor
-    Curve(int id);
+    Curve(int id,QString filename, int ncol, int row, bool onefile);
 
     // Destructor
     ~Curve();
@@ -58,7 +58,7 @@ public:
     // Function
     QtCharts::QLineSeries*  getFullSeries();
     QtCharts::QLineSeries*  getDisplaySeries();
-    QtCharts::QLineSeries*  getSubSeries(int xmin, int xmax);
+    float *getSubSeries(int xmin, int xmax);
     QList<QPointF> downsample_minmax(float *data, int factor, int nbpoints);
 
     QColor getColor();
@@ -66,8 +66,8 @@ public:
     bool isLoaded();
 
     void setColor(QColor c);
-
-    int length();
+    void setType(int type);
+    int getLength();
 
     void resetFullSeries();
     void resetDisplaySeries();
@@ -75,19 +75,14 @@ public:
     void updateDisplaySeries();
     void shift(int offset);
 
-    void setcolorbtn(QPushButton *colorbtn);
-    void setchkbox(QCheckBox * chkbox);
-    void settypecmbbox(QComboBox * typecmbbox);
-
     float *getrawdata(int *length, int single_offset = 0);
+    float get_floatvalueat(int time);
 
+private:
+    int _length();
 public slots:
     void curve_clicked(QPointF pt);
     void chkbox_toggled(bool state);
-    void colorbtn_pressed();
-    void curve_type_changed(int type);
-signals:
-    void shifted();
 
 };
 

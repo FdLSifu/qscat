@@ -42,8 +42,13 @@ qreal Synchro::min_dist_curve(Synchro *sync,int idx)
     int initial_ref_offset = sync->curve_offset.at(sync->curve_ref_idx);
     int initial_offset = sync->curve_offset.at(idx);
 
-    QLineSeries * ref_subseries = cur_ref->getSubSeries(sync->leftpattern-initial_ref_offset,sync->rightpattern-initial_ref_offset);
-    QLineSeries * work_subseries = curve->getSubSeries(sync->leftpattern+sync->leftwindow-initial_offset, sync->rightpattern+sync->rightwindow-initial_offset);
+    int xmin_ref = sync->leftpattern-initial_ref_offset;
+    int xmax_ref = sync->rightpattern-initial_ref_offset;
+    int xmin_work = sync->leftpattern+sync->leftwindow-initial_offset;
+    int xmax_work = sync->rightpattern+sync->rightwindow-initial_offset;
+
+    float * ref_subseries = cur_ref->getSubSeries(xmin_ref, xmax_ref);
+    float * work_subseries = curve->getSubSeries(xmin_work,xmax_work);
 
     if (cur_ref != curve)
     {
@@ -61,7 +66,7 @@ qreal Synchro::min_dist_curve(Synchro *sync,int idx)
             Synchro::mutex.unlock();
 
             for (int p = sync->leftpattern ; p < sync->rightpattern; p += sync->precision)
-                dist += qAbs(ref_subseries->at(p-sync->leftpattern).y() - work_subseries->at(p+s-sync->leftpattern-sync->leftwindow).y());
+                dist += qAbs(ref_subseries[p-sync->leftpattern] - work_subseries[p+s-sync->leftpattern-sync->leftwindow]);
 
             distmin = std::min(dist,distmin);
             if (distmin == dist)
@@ -75,21 +80,20 @@ qreal Synchro::min_dist_curve(Synchro *sync,int idx)
         offset = 0;
         distmin = 0;
     }
-    {        
+    {
         // apply shift
         curve->shift(offset - curve->xoffset + initial_offset);
 
         // Populate offsets
         if (curve->offsets.length() > sync->numpass)
             curve->offsets.replace(sync->numpass,offset + initial_offset);
-        else if (curve->offsets.length() == sync->numpass)
-            curve->offsets.append(offset + initial_offset);
         else
-            // Impossible but who knows
-            assert(false);
+            curve->offsets.append(offset + initial_offset);
 
-        delete ref_subseries;
-        delete work_subseries;
+        if (ref_subseries)
+            free(ref_subseries);
+        if (work_subseries)
+            free(work_subseries);
     }
     // emit signals for progressbar
     emit sync->finish();

@@ -33,7 +33,9 @@ SOURCES += main.cpp\
     synchro.cpp \
     curvelistwidget.cpp \
     attackwindow.cpp \
-    attacklog.cpp
+    cpa.cpp \
+    corrlistmodel.cpp \
+    curvetablemodel.cpp
 
 HEADERS  += mainwindow.h \
     scatool.h \
@@ -44,13 +46,15 @@ HEADERS  += mainwindow.h \
     synchro.h \
     curvelistwidget.h \
     attackwindow.h \
-    attacklog.h
+    cpa.h \
+    aes.h \
+    corrlistmodel.h \
+    curvetablemodel.h
 
 FORMS    += design.ui \
     synchrodialog.ui \
     curvelistwidget.ui \
-    attackwindow.ui \
-    attacklog.ui
+    attackwindow.ui
 
 RESOURCES += \
     qscat_resource.qrc

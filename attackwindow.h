@@ -4,45 +4,39 @@
 #include <QDialog>
 #include <QMap>
 #include <QFile>
-#include <QProcess>
 #include <QTemporaryDir>
 #include <QTime>
+#include "corrlistmodel.h"
 
 namespace Ui {
 class Attackwindow;
 }
 
-class Attackwindow : public QDialog
+class Attackwindow : public QWidget
 {
     Q_OBJECT
 
+    CPA * cpa;
 public:
     explicit Attackwindow(QWidget *parent = 0);
     ~Attackwindow();
-    QString daredevil_path;
-    QString input_dataset;
     void setTraceNb(int t);
     void setPtsNb(int p);
-public slots:
-    void processOutput();
-    void finished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private slots:
     void on_spinpts_start_editingFinished();
     void on_spinpts_end_editingFinished();
     void on_attackButton_pressed();
-
-    void on_showattack_pressed();
+    void cpa_finished(int byte);
+    void corrcchart_toggled(bool checked);
 
 private:
     Ui::Attackwindow *ui;
     QMap<QString, int> algo_map;
-    void saveDaredevilLog(void);
-    QProcess *process;
     QString stdout_log;
-    QTemporaryDir *tdir;
     QTime processTime;
-    QString daredevilLog;
+
+    void hideResult(int byte);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;

@@ -88,6 +88,20 @@
       </property>
      </widget>
     </item>
+    <item row="0" column="10">
+     <widget class="QToolButton" name="refresh">
+      <property name="toolTip">
+       <string>Clear curves</string>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset resource="qscat_resource.qrc">
+        <normaloff>:/images/remove.png</normaloff>:/images/remove.png</iconset>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="0">
      <widget class="QToolButton" name="open">
       <property name="toolTip">
@@ -102,17 +116,10 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="10">
-     <widget class="QToolButton" name="refresh">
-      <property name="toolTip">
-       <string>Clear curves</string>
-      </property>
+    <item row="0" column="4">
+     <widget class="QPushButton" name="synchro">
       <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset resource="qscat_resource.qrc">
-        <normaloff>:/images/remove.png</normaloff>:/images/remove.png</iconset>
+       <string>Synchronization</string>
       </property>
      </widget>
     </item>
@@ -139,13 +146,6 @@
        <iconset resource="qscat_resource.qrc">
         <normaloff>:/images/arrow-down.png</normaloff>
         <normalon>:/images/arrow-up.png</normalon>:/images/arrow-down.png</iconset>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="4">
-     <widget class="QPushButton" name="synchro">
-      <property name="text">
-       <string>Synchronization</string>
       </property>
      </widget>
     </item>
@@ -194,7 +194,19 @@
      </widget>
     </item>
     <item row="0" column="9">
-     <widget class="QToolButton" name="toolButton_2">
+     <widget class="QPushButton" name="menu">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>24</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="text">
        <string>...</string>
       </property>
