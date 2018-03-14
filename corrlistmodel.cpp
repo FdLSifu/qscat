@@ -1,8 +1,9 @@
 #include <QHeaderView>
 #include "corrlistmodel.h"
 
-CorrListModel::CorrListModel(QObject */*parent*/, CPA *cpa, QListView *lv, int idx)
+CorrListModel::CorrListModel(QObject *parent, CPA *cpa, QListView *lv, int idx)
 {
+    Q_UNUSED(parent);
     this->cpa = cpa;
     this->proxyModel = new QSortFilterProxyModel;
     this->proxyModel->setSourceModel(this);
