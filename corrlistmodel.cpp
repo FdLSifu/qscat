@@ -1,5 +1,6 @@
 #include <QHeaderView>
 #include "corrlistmodel.h"
+#include <cmath>
 
 CorrListModel::CorrListModel(QObject *parent, CPA *cpa, QListView *lv, int idx)
 {

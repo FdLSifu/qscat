@@ -76,20 +76,37 @@ void CurveListWidget::global_type_changed(int type)
             continue;
 
         curve->setType(type);
+
+// TODO: Fix resizing
+//        QtCharts::QLineSeries *curseries = curve->getDisplaySeries();
+//        curseries->attachAxis(ScaTool::main_plot->chart()->axisX());
+//        curseries->attachAxis(ScaTool::main_plot->chart()->axisY());
+
         ScaTool::statusbar->showMessage("Modifying curve ... "+QString::number(rowidx)+"/"+QString::number(ScaTool::curves->length()),0);
     }
     ScaTool::statusbar->showMessage("Done",1000);
+
+    // Finally, update maximum range in Attack Window
+    if (ScaTool::curves->length() > 0) {
+        int points = ScaTool::curves->first()->getLength();
+
+        ScaTool::attackdialog->setPtsNb(points);
+        ScaTool::main_plot->chart()->xaxis_width = points;
+    } else {
+        ScaTool::attackdialog->setPtsNb(0);
+    }
+
     emit ScaTool::curve_table_model->layoutChanged();
 }
 
 void CurveListWidget::on_clearall_pressed()
 {
-    QVectorIterator<Curve*> i(*ScaTool::curves);
-    while(i.hasNext())
-    {
-        Curve *c = i.next();
-        delete c;
-    }
+    if (ScaTool::curves->size() <= 0)
+        return;
+
+    // Because the curves delete themself, we need to do this...
+    qDeleteAll(QVector<Curve*>(*ScaTool::curves));
+    ScaTool::statusbar->showMessage("Deleted all curves", 1000);
     emit ScaTool::curve_table_model->layoutChanged();
 }
 
@@ -114,11 +131,16 @@ void CurveListWidget::on_displayoff_pressed()
 }
 
 void CurveListWidget::on_deleteCurve_pressed()
-{
-    QVector<Curve*> clist = getSelectedCurves();
-    for (QVector<Curve*>::iterator it = clist.begin();
-         it != clist.end(); ++it)
-        delete *it;
+{   
+    QVector<Curve *> curves = getSelectedCurves();
+    if (curves.length() <= 0)
+        return;
+
+    // Delete all selected curves (the curve destructer removes it from the curves)
+    qDeleteAll(curves);
+    ui->tableview_curve->selectionModel()->clearSelection();
+
+    ScaTool::statusbar->showMessage(QString("Deleted %1 selected curves").arg(curves.length()), 1000);
     emit ScaTool::curve_table_model->layoutChanged();
 }
 
@@ -197,13 +219,12 @@ void CurveListWidget::load_dataSet(QString filepath_dataset)
     }
 
     int curve_pts = std::numeric_limits<int>::max();
-    for (int i = 0; i < ScaTool::curves->length(); i++)
+    for (int i = 0; i < ScaTool::curves->length(); i++) {
         curve_pts = std::min(curve_pts,ScaTool::curves->at(i)->getLength());
+    }
 
     ScaTool::attackdialog->setTraceNb(ScaTool::curves->length());
     ScaTool::attackdialog->setPtsNb(curve_pts);
-
-
 }
 
 void CurveListWidget::on_opendata_pressed()
