@@ -1,0 +1,17 @@
+# Build artifacts
+debug/
+release/
+
+*.o
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+*_plugin_import.cpp
+
+Makefile
+Makefile.*
+*.stash
+
+# Project artifacts
+*.pro.user*
+qscat

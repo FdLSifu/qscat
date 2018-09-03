@@ -463,6 +463,9 @@ void Attackwindow::setTraceNb(int t)
 
 void Attackwindow::setPtsNb(int p)
 {
+    ui->spinpts_start->setMaximum(p);
+    ui->spinpts_start->setValue(0);
+
     ui->spinpts_end->setMaximum(p);
     ui->spinpts_end->setValue(p);
 }

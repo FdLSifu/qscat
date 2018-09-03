@@ -51,7 +51,7 @@ Curve::~Curve()
     // Remove from synchro list
     ScaTool::synchrodialog->removeRefItem(cname);
     // Remove from internal list
-    Q_ASSERT(ScaTool::curves->removeOne(this));
+    ScaTool::curves->removeOne(this);
 
     // Delete fullseries
     if (this->fullseries != 0)
@@ -89,6 +89,7 @@ void Curve::setColor(QColor c)
 void Curve::setType(int type)
 {
     this->type = type;
+    this->length = _length();
     this->updateDisplaySeries();
 }
 void Curve::resetFullSeries()
