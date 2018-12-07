@@ -280,7 +280,6 @@ void MainWindow::load_files(QStringList files)
 	ScaTool::curve_table->setCurveRangeMax();
 	ui->synchro->setEnabled(true);
 	ui->attack->setEnabled(true);
-	ScaTool::attackdialog;
 
 }
 
