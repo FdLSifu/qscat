@@ -81,8 +81,12 @@ void SynchroDialog::on_runsynchro_pressed()
     {
         int passnum = ui->stepcombo->currentIndex();
         runningsynchro = synchropasses.at(passnum);
-
+	//Clear selected curves for that passes
         runningsynchro->curves.clear();
+	// Clear previous synchro results for that passes
+	runningsynchro->curve_offset.clear();
+
+	// Select curves
         for (int i = 0; i < ScaTool::curves->length(); i++)
         {
             Curve * c = ScaTool::curves->at(i);
@@ -91,7 +95,7 @@ void SynchroDialog::on_runsynchro_pressed()
                 runningsynchro->curves.append(c);
         }
 
-
+	// Gui work
         if (!this->preview){
             // Trick to set length - 2 as the reference curve is done synchronized
             SynchroDialog::qprogressbar = new QProgressBar(this);
@@ -101,9 +105,10 @@ void SynchroDialog::on_runsynchro_pressed()
             SynchroDialog::qprogressbar->show();
         }
 
+	// Handle stop button
         Synchro::stop = false;
-        // Get curve's offset
-        runningsynchro->curve_offset.clear();
+
+	// Get curve's offset
         for(int i = 0; i < runningsynchro->curves.length() ; i++)
         {
             Curve *c = runningsynchro->curves.at(i);
@@ -111,7 +116,7 @@ void SynchroDialog::on_runsynchro_pressed()
             if(passnum > 0)
                 runningsynchro->curve_offset.append(runningsynchro->curves.at(i)->offsets.at(passnum-1));
             else
-                runningsynchro->curve_offset.append(c->xoffset);
+		runningsynchro->curve_offset.append(0);
         }
 
         runningsynchro->curve_ref_idx = 0;
