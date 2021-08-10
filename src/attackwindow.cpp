@@ -165,7 +165,7 @@ void Attackwindow::on_attackButton_pressed()
 
     // Create CPA object
     if((cpa == 0) ||
-      (!((cpa->start==pts_min) && (cpa->end==pts_max) && (cpa->curves_number == curves.length()))))
+      (!((cpa->start==pts_min) && (cpa->end==pts_max) && (cpa->sel_fun == sel_fun) && (cpa->curves_number == curves.length()))))
     {
         if (cpa)
             delete cpa;
