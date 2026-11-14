@@ -121,4 +121,12 @@ uint8_t generic_xor(uint8_t data, uint8_t key)
 {
     return HW[(uint8_t)(data^key)];
 }
+
+// Hamming distance between the S-box input and output:
+//   HD(v, SBOX[v]) = HW(v ^ SBOX[v]),  v = data ^ key
+uint8_t aes_sbox_hd(uint8_t data, uint8_t key)
+{
+    uint8_t v = (uint8_t)(data^key);
+    return HW[(uint8_t)(v ^ AES_SBOX[v])];
+}
 #endif // AES_H

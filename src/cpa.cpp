@@ -92,6 +92,9 @@ void CPA::construct_guess_hw()
         case 3: // SBOX INV
             func = &aes_sboxinv;
             break;
+        case 4: // Hamming distance S-box input <-> output
+            func = &aes_sbox_hd;
+            break;
         default:
             assert(false);
 

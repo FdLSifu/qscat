@@ -1,6 +1,7 @@
 # Build artifacts
 debug/
 release/
+build/
 
 *.o
 moc_*.cpp

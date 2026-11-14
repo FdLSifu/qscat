@@ -42,7 +42,8 @@ Attackwindow::Attackwindow(QWidget *parent) :
                               <<"AES output SBOX"
                               <<"AES output Mult Inv"
                               <<"AES XOR (TextIn/TextOut)"
-                              <<"AES output SBOX Inv");
+                              <<"AES output SBOX Inv"
+                              <<"AES SBOX Hamming distance (In/Out)");
 
     ui->methodBox->clear();
     ui->methodBox->addItems(QStringList() << "CPA");
